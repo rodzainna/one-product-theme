@@ -1,0 +1,27 @@
+{
+  "name": "one-product-theme",
+  "private": true,
+  "description": "Industry-agnostic single-product Shopify theme built on Skeleton",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "scripts": {
+    "dev": "shopify theme dev",
+    "check": "shopify theme check --fail-level suggestion",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{liquid,json,js,css,md,yml}": "prettier --write"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@shopify/prettier-plugin-liquid": "^1.11.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10"
+  }
+}

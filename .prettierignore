@@ -1,0 +1,4 @@
+# Written by the Shopify theme editor
+templates/*.json
+sections/*.json
+config/settings_data.json
