@@ -2,3 +2,6 @@
 templates/*.json
 sections/*.json
 config/settings_data.json
+
+# Written by pnpm
+pnpm-lock.yaml

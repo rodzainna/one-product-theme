@@ -11,10 +11,11 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{liquid,json,js,css,md,yml}": "prettier --write"
+    "*": "prettier --write --ignore-unknown"
   },
+  "packageManager": "pnpm@11.9.0",
   "engines": {
-    "node": ">=22.12"
+    "node": ">=22.22.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",

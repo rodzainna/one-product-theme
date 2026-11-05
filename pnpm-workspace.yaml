@@ -1,0 +1,2 @@
+# Scripts stop on stale dependencies until pnpm install is run, so a push never rewrites the lockfile
+verifyDepsBeforeRun: error

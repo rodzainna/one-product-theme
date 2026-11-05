@@ -10,13 +10,13 @@ An industry-agnostic Shopify theme for stores that sell one product. Every headi
 
 ## Development
 
-Requires Node 22.12+ and [Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli).
+Requires Node 22.22.1+, [pnpm](https://pnpm.io/) 11+ and [Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli).
 
 ```sh
-npm install
-npm run dev -- --store <your-store>   # local preview with hot reload
-npm run check                         # Theme Check
-npm run format                        # Prettier (Liquid, CSS, JS, JSON)
+pnpm install
+pnpm dev --store <your-store>   # local preview with hot reload
+pnpm check                      # Theme Check
+pnpm format                     # Prettier (Liquid, CSS, JS, JSON)
 ```
 
 Git hooks: commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (commitlint), staged files are formatted on commit, and Theme Check plus a format check run before each push.
