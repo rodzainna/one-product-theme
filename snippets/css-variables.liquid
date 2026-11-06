@@ -11,8 +11,51 @@
     --font-primary--weight: {{ settings.type_primary_font.weight }};
     --page-width: {{ settings.max_page_width }};
     --page-margin: {{ settings.min_page_margin }}px;
-    --color-background: {{ settings.background_color }};
-    --color-foreground: {{ settings.foreground_color }};
-    --style-border-radius-inputs: {{ settings.input_corner_radius }}px;
+  }
+
+  {% # The first scheme is also the page default; derived colours sit on each scheme so nested schemes mix their own %}
+  {%- for scheme in settings.color_schemes %}
+    {%- liquid
+      if forloop.first
+        echo ':root, '
+      endif
+      assign brightness = scheme.settings.background | color_brightness
+    %}
+    .color-{{ scheme.id }} {
+      --color-background: {{ scheme.settings.background }};
+      --color-foreground: {{ scheme.settings.text }};
+      --color-accent: {{ scheme.settings.accent }};
+      --color-button: {{ scheme.settings.button }};
+      --color-button-text: {{ scheme.settings.button_text }};
+      --gradient-background: {{ scheme.settings.background_gradient | default: 'none' }};
+      {% # color_brightness is 0-255; pick the error and success pair, and native controls, to match %}
+      {%- if brightness < 128 %}
+        --color-error: #ff9c8a;
+        --color-success: #8fd6a0;
+        color-scheme: dark;
+      {%- else %}
+        --color-error: #8f1f13;
+        --color-success: #1c5c32;
+        color-scheme: light;
+      {%- endif %}
+      --color-foreground-muted: color-mix(in srgb, var(--color-foreground) 75%, var(--color-background));
+      --color-control-border: color-mix(in srgb, var(--color-foreground) 55%, var(--color-background));
+      --color-border: color-mix(in srgb, var(--color-foreground) 15%, var(--color-background));
+      --color-hover: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+      --focus-ring: 3px solid var(--color-accent);
+    }
+
+    {% # :where() keeps specificity at zero so a component's own background wins %}
+    :where(.color-{{ scheme.id }}) {
+      background-color: var(--color-background);
+      background-image: var(--gradient-background);
+      color: var(--color-foreground);
+    }
+  {%- endfor %}
+
+  {% # The page gets the colour only, so a scheme 1 gradient isn't painted twice %}
+  :root {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
   }
 {% endstyle %}

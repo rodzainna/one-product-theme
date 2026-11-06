@@ -8,5 +8,35 @@
  * ------------------------------------------------------------
  */
 {
-  "current": {}
+  "current": {
+    "color_schemes": {
+      "scheme-1": {
+        "settings": {
+          "background": "#F6F0E6",
+          "text": "#2A1D15",
+          "accent": "#A8410F",
+          "button": "#A8410F",
+          "button_text": "#FFFFFF"
+        }
+      },
+      "scheme-2": {
+        "settings": {
+          "background": "#E9DCC5",
+          "text": "#2A1D15",
+          "accent": "#A8410F",
+          "button": "#A8410F",
+          "button_text": "#FFFFFF"
+        }
+      },
+      "scheme-3": {
+        "settings": {
+          "background": "#1C130E",
+          "text": "#F6F0E6",
+          "accent": "#E07A3F",
+          "button": "#E07A3F",
+          "button_text": "#1C130E"
+        }
+      }
+    }
+  }
 }
