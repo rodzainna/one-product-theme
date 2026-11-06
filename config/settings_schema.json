@@ -25,6 +25,16 @@
         "id": "type_body_font",
         "default": "inter_n4",
         "label": "t:labels.body"
+      },
+      {
+        "type": "range",
+        "id": "heading_scale",
+        "min": 90,
+        "max": 130,
+        "step": 5,
+        "unit": "%",
+        "default": 100,
+        "label": "t:labels.heading_scale"
       }
     ]
   },

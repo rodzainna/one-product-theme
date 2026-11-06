@@ -50,8 +50,26 @@
     --weight-body: {{ body.weight }};
     --weight-ui: {{ ui.weight }};
     --weight-heading: {{ heading.weight }};
+    --heading-scale: {{ settings.heading_scale | divided_by: 100.0 }};
     --page-width: {{ settings.max_page_width }};
     --page-margin: {{ settings.min_page_margin }}px;
+
+    --text-h1: calc(clamp(2.25rem, 1.6rem + 3vw, 4rem) * var(--heading-scale));
+    --text-h2: calc(clamp(1.75rem, 1.4rem + 1.8vw, 2.75rem) * var(--heading-scale));
+    --text-h3: calc(clamp(1.5rem, 1.35rem + 0.75vw, 1.875rem) * var(--heading-scale));
+    --text-h4: max(1.25rem, calc(clamp(1.25rem, 1.15rem + 0.4vw, 1.375rem) * var(--heading-scale)));
+    --text-h5: max(var(--text-lg), calc(1.125rem * var(--heading-scale)));
+    --text-lg: 1.125rem;
+    --text-body: 1rem;
+    --text-small: 0.875rem;
+    --text-caption: 0.8125rem;
+
+    --space-xs: clamp(0.5rem, 0.45rem + 0.25vw, 0.75rem);
+    --space-s: clamp(0.75rem, 0.65rem + 0.5vw, 1rem);
+    --space-m: clamp(1rem, 0.85rem + 0.75vw, 1.5rem);
+    --space-l: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);
+    --space-xl: clamp(2rem, 1.5rem + 2.5vw, 4rem);
+    --space-2xl: clamp(3rem, 2rem + 5vw, 6rem);
   }
 
   {% # The first scheme is also the page default %}
