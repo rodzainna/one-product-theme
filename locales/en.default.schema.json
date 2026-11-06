@@ -13,6 +13,7 @@
     "column": "Column",
     "content": "Content",
     "custom_section": "Custom section",
+    "favicon": "Favicon",
     "fonts": "Fonts",
     "footer": "Footer",
     "group": "Group",
@@ -33,7 +34,8 @@
     "typography": "Typography"
   },
   "info": {
-    "background_gradient": "Optional. Shows instead of the background color. Keep it close to that color so text stays readable."
+    "background_gradient": "Optional. Shows instead of the background color. Keep it close to that color so text stays readable.",
+    "favicon": "Use a square image at least 180 × 180px."
   },
   "labels": {
     "accent": "Accent",
