@@ -27,10 +27,15 @@ svg {
   height: auto;
 }
 
+button,
 input,
 textarea,
 select {
-  font: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 select {
@@ -72,7 +77,27 @@ p:empty {
 
 /** Theme styles below */
 body {
-  font-family: var(--font-primary--family);
+  font-family: var(--font-body);
+  font-style: var(--font-body-style);
+  font-weight: var(--weight-body);
+}
+
+button,
+label,
+legend {
+  font-weight: var(--weight-ui);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.text--title {
+  font-family: var(--font-heading);
+  font-style: var(--font-heading-style);
+  font-weight: var(--weight-heading);
 }
 
 /** Section layout utilities */

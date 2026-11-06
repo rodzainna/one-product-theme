@@ -16,9 +16,15 @@
       },
       {
         "type": "font_picker",
-        "id": "type_primary_font",
-        "default": "work_sans_n4",
-        "label": "t:general.primary"
+        "id": "type_heading_font",
+        "default": "fraunces_n7",
+        "label": "t:labels.headings"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_body_font",
+        "default": "inter_n4",
+        "label": "t:labels.body"
       }
     ]
   },
