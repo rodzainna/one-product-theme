@@ -45,6 +45,57 @@
       {% render 'select', id: variant_id, label: variant_label, name: 'id', options_html: variant_options %}
     {%- endif -%}
 
+    {%- if current_variant.selling_plan_allocations.size > 0 -%}
+      {%- liquid
+        assign plan_prefix = 'Product-plan-' | append: section.id
+        assign one_time_id = plan_prefix | append: '-once'
+        assign one_time_label = 'products.product.one_time_purchase' | t
+        assign one_time_price = current_variant.price | money | strip_html
+        assign selected_plan_id = current_variant.selected_selling_plan_allocation.selling_plan.id
+        if selected_plan_id == blank and product.requires_selling_plan
+          assign selected_plan_id = current_variant.selling_plan_allocations.first.selling_plan.id
+        endif
+        assign one_time_checked = false
+        if selected_plan_id == blank
+          assign one_time_checked = true
+        endif
+      -%}
+      <fieldset class="choice-group choice-group--cards">
+        <legend>{{ 'products.product.purchase_options' | t }}</legend>
+        {%- unless product.requires_selling_plan -%}
+          {% render 'radio',
+            id: one_time_id,
+            name: 'selling_plan',
+            value: '',
+            label: one_time_label,
+            hint: one_time_price,
+            checked: one_time_checked,
+            variant: 'card'
+          %}
+        {%- endunless -%}
+        {%- for allocation in current_variant.selling_plan_allocations -%}
+          {%- liquid
+            assign plan = allocation.selling_plan
+            assign plan_id = plan_prefix | append: '-' | append: plan.id
+            assign plan_price = allocation.price | money | strip_html
+            assign plan_checked = false
+            if plan.id == selected_plan_id
+              assign plan_checked = true
+            endif
+          -%}
+          {% render 'radio',
+            id: plan_id,
+            name: 'selling_plan',
+            value: plan.id,
+            label: plan.name,
+            hint: plan_price,
+            checked: plan_checked,
+            variant: 'card'
+          %}
+        {%- endfor -%}
+      </fieldset>
+    {%- endif -%}
+
     <input type="text" name="quantity" min="1" value="1">
 
     {%- assign add_label = 'products.product.add_to_cart' | t -%}

@@ -160,7 +160,7 @@ h6,
   font-size: var(--text-h5);
 }
 
-/** Form field and control, shared by the input and select snippets */
+/** Form field, control and choice, shared by the form snippets */
 .field {
   display: grid;
   gap: var(--field-gap);
@@ -200,6 +200,107 @@ h6,
 .control:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.choice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: center;
+  gap: var(--control-pad-xs);
+  min-height: var(--control-h);
+  padding: var(--control-pad-y) 0;
+  font-weight: var(--weight-body);
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.choice input {
+  display: grid;
+  place-items: center;
+  width: var(--choice-size);
+  height: var(--choice-size);
+  margin: 0.125rem 0 0;
+  border: 1px solid var(--color-control-border);
+  background: transparent;
+  appearance: none;
+  cursor: inherit;
+  transition: background-color var(--duration) var(--ease);
+}
+
+@media (hover: hover) {
+  .choice:hover input:not(:disabled, :checked) {
+    background: var(--color-hover);
+  }
+}
+
+.choice input:checked {
+  border-color: var(--color-foreground);
+  background: var(--color-foreground);
+}
+
+.choice input[aria-invalid="true"] {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 20%, transparent);
+}
+
+.choice input:checked::before {
+  content: "";
+  background: var(--color-background);
+}
+
+.choice:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.choice--sm {
+  min-height: var(--control-h-sm);
+  font-size: var(--text-small);
+}
+
+.choice--sm input {
+  margin-block-start: 0;
+}
+
+.choice__text {
+  display: grid;
+  gap: var(--field-gap);
+}
+
+.choice__title {
+  font-weight: var(--weight-ui);
+}
+
+.choice__hint {
+  color: var(--color-foreground-muted);
+  font-size: var(--text-small);
+}
+
+.choice-group {
+  display: grid;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choice-group legend {
+  margin-block-end: var(--field-gap);
+  padding: 0;
+}
+
+.choice-group--cards {
+  gap: var(--control-pad-xs);
+}
+
+@media (forced-colors: active) {
+  .choice input:checked {
+    border-color: Highlight;
+    background: Highlight;
+  }
+
+  .choice input:checked::before {
+    background: HighlightText;
+  }
 }
 
 /** Rich text from the admin editor, rendered by snippets/rte.liquid */

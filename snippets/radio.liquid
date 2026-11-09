@@ -1,0 +1,112 @@
+{% doc %}
+  Renders a branded radio on a real input, so it works without JS.
+  Wrap a set in <fieldset class="choice-group"> with a <legend>; add choice-group--cards for card radios.
+
+  @param {string} id - Unique id
+  @param {string} name - Form field name, shared by the set
+  @param {string} value - Submitted value; blank for a one-time purchase in a selling plan set
+  @param {string} label - Visible label, already translated
+  @param {string} [hint] - Description under the label, already translated
+  @param {boolean} [checked] - Starts selected
+  @param {boolean} [disabled] - Disables the option
+  @param {boolean} [required] - Marks the set as required
+  @param {string} [size] - sm, or blank for the default
+  @param {string} [variant] - card: the whole card is the target, e.g. selling plans
+  @param {boolean} [invalid] - Sets aria-invalid; put the error under the fieldset and link it with aria-describedby on the fieldset
+  @param {string} [attributes] - Extra HTML attributes
+
+  @example
+  {% render 'radio', id: plan_id, name: 'selling_plan', value: plan.id, label: plan.name, hint: plan_price, variant: 'card' %}
+{% enddoc %}
+
+{%- liquid
+  assign classes = 'choice radio'
+  if size == 'sm'
+    assign classes = classes | append: ' choice--sm'
+  endif
+  if variant == 'card'
+    assign classes = classes | append: ' radio--card'
+  endif
+-%}
+
+<label class="{{ classes }}">
+  <input
+    type="radio"
+    id="{{ id }}"
+    name="{{ name | escape }}"
+    value="{{ value | escape }}"
+    {% if checked %}
+      checked
+    {% endif %}
+    {% if disabled %}
+      disabled
+    {% endif %}
+    {% if required %}
+      required
+    {% endif %}
+    {% if invalid %}
+      aria-invalid="true"
+    {% endif %}
+    {{ attributes }}
+  >
+  {%- if hint != blank -%}
+    <span class="choice__text">
+      <span class="choice__title">{{ label | escape_once }}</span>
+      <span class="choice__hint">{{ hint | escape_once }}</span>
+    </span>
+  {%- else -%}
+    <span>{{ label | escape_once }}</span>
+  {%- endif -%}
+</label>
+
+{% stylesheet %}
+  .radio input {
+    border-radius: var(--radius-full);
+  }
+
+  .radio input:checked::before {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--radius-full);
+  }
+
+  .radio--card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: var(--control-pad-s) var(--control-pad-m);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-input);
+    transition: background-color var(--duration) var(--ease);
+  }
+
+  .radio--card input {
+    order: 1;
+  }
+
+  @supports selector(:has(*)) {
+    .radio--card input:focus-visible {
+      outline: none;
+    }
+
+    .radio--card:has(input:focus-visible) {
+      outline: var(--focus-ring);
+      outline-offset: var(--focus-offset);
+    }
+  }
+
+  @media (hover: hover) {
+    .radio--card:hover:not(:has(input:disabled)) {
+      background: var(--color-hover);
+    }
+  }
+
+  .radio--card:has(input:checked) {
+    border-color: var(--color-foreground);
+    background: var(--color-hover);
+  }
+
+  @media (forced-colors: active) {
+    .radio--card:has(input:checked) {
+      border-color: Highlight;
+    }
+  }
+{% endstylesheet %}

@@ -50,6 +50,8 @@
   "products": {
     "product": {
       "add_to_cart": "Add to cart",
+      "one_time_purchase": "One-time purchase",
+      "purchase_options": "Purchase options",
       "sold_out": "Sold out"
     }
   },
