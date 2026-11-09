@@ -8,6 +8,7 @@
 <h1>{{ 'cart.title' | t }}</h1>
 
 <form action="{{ routes.cart_url }}" method="post">
+  {%- assign update_label = 'cart.update' | t -%}
   <table>
     {% for item in cart.items %}
       <tr>
@@ -20,13 +21,14 @@
         </td>
         <td>
           <input type="text" name="updates[]" value="{{ item.quantity }}">
-          <input type="submit" value="{{ 'cart.update' | t }}">
+          {% render 'button', label: update_label, type: 'submit', variant: 'secondary', size: 'sm' %}
         </td>
       </tr>
     {% endfor %}
   </table>
 
-  <input type="submit" name="checkout" value="{{ 'cart.checkout' | t }}">
+  {%- assign checkout_label = 'cart.checkout' | t -%}
+  {% render 'button', label: checkout_label, type: 'submit', name: 'checkout' %}
 </form>
 
 {% schema %}

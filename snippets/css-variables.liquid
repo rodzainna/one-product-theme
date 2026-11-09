@@ -55,6 +55,20 @@
     --page-margin: {{ settings.min_page_margin }}px;
     --focus-offset: 2px;
 
+    --radius-button: {{ settings.button_radius }}px;
+    --radius-full: 999px;
+
+    --control-h: 44px;
+    --control-h-sm: 32px;
+    --control-pad-y: 0.25rem;
+    --control-pad-m: 1rem;
+    --control-pad-l: 1.5rem;
+
+    --duration: 0.2s;
+    --duration-spin: 0.8s;
+    --ease: ease;
+    --ease-linear: linear;
+
     --text-h1: calc(clamp(2.25rem, 1.6rem + 3vw, 4rem) * var(--heading-scale));
     --text-h2: calc(clamp(1.75rem, 1.4rem + 1.8vw, 2.75rem) * var(--heading-scale));
     --text-h3: calc(clamp(1.5rem, 1.35rem + 0.75vw, 1.875rem) * var(--heading-scale));
@@ -71,6 +85,12 @@
     --space-l: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);
     --space-xl: clamp(2rem, 1.5rem + 2.5vw, 4rem);
     --space-2xl: clamp(3rem, 2rem + 5vw, 6rem);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --duration: 0s;
+    }
   }
 
   {% # The first scheme is also the page default %}

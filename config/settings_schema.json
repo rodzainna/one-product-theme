@@ -141,5 +141,36 @@
         }
       }
     ]
+  },
+  {
+    "name": "t:general.buttons",
+    "settings": [
+      {
+        "type": "range",
+        "id": "button_radius",
+        "min": 0,
+        "max": 40,
+        "step": 2,
+        "unit": "px",
+        "default": 40,
+        "label": "t:labels.button_radius"
+      },
+      {
+        "type": "select",
+        "id": "secondary_button_style",
+        "label": "t:labels.secondary_button_style",
+        "options": [
+          {
+            "value": "outline",
+            "label": "t:options.button_style.outline"
+          },
+          {
+            "value": "solid",
+            "label": "t:options.button_style.solid"
+          }
+        ],
+        "default": "outline"
+      }
+    ]
   }
 ]

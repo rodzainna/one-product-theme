@@ -4,10 +4,11 @@
     "article": "Article",
     "block": "Block",
     "blog": "Blog",
+    "buttons": "Buttons",
     "cart": "Cart",
     "collection": "Collection",
-    "collections": "Collections",
     "collection_card": "Collection card",
+    "collections": "Collections",
     "collections_grid": "Collections grid",
     "colors": "Colors",
     "column": "Column",
@@ -45,6 +46,7 @@
     "background_image": "Background image",
     "body": "Body",
     "button": "Button",
+    "button_radius": "Corner radius",
     "button_text": "Button text",
     "color_scheme": "Color scheme",
     "grid_gap": "Grid spacing",
@@ -56,6 +58,7 @@
     "padding": "Padding",
     "page_margin": "Page margin",
     "page_width": "Page width",
+    "secondary_button_style": "Secondary button style",
     "show_payment_icons": "Show payment icons",
     "text_style": "Text style",
     "text": "Text"
@@ -65,6 +68,10 @@
       "left": "Left",
       "center": "Center",
       "right": "Right"
+    },
+    "button_style": {
+      "outline": "Outline",
+      "solid": "Solid"
     },
     "direction": {
       "horizontal": "Horizontal",

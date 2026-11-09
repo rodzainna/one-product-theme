@@ -1,0 +1,139 @@
+{% doc %}
+  Renders a button, or a link styled as one when given a url.
+  For loading, set aria-busy="true" and aria-disabled="true" from JS, not disabled, so focus stays on it.
+
+  @param {string} label - Visible text, already translated
+  @param {string} [url] - Renders an <a> instead of a <button>
+  @param {string} [type] - button (default), submit or reset
+  @param {string} [name] - Form field name
+  @param {string} [variant] - primary (default) or secondary
+  @param {string} [size] - sm, or blank for the default
+  @param {boolean} [disabled] - Buttons only; links can't be disabled
+  @param {string} [attributes] - Extra HTML attributes, e.g. 'data-add-to-cart'
+
+  @example
+  {% render 'button', label: add_label, type: 'submit', name: 'add', disabled: sold_out %}
+{% enddoc %}
+
+{%- liquid
+  assign classes = 'button'
+  if variant == 'secondary'
+    assign classes = classes | append: ' button--secondary'
+    if settings.secondary_button_style == 'solid'
+      assign classes = classes | append: ' button--solid'
+    endif
+  endif
+  if size == 'sm'
+    assign classes = classes | append: ' button--sm'
+  endif
+-%}
+
+{%- if url != blank -%}
+  <a class="{{ classes }}" href="{{ url | escape }}" {{ attributes }}>{{ label | escape_once }}</a>
+{%- else -%}
+  <button
+    class="{{ classes }}"
+    type="{{ type | default: 'button' }}"
+    {% if name != blank %}
+      name="{{ name | escape }}"
+    {% endif %}
+    {% if disabled %}
+      disabled
+    {% endif %}
+    {{ attributes }}
+  >
+    {{ label | escape_once }}
+  </button>
+{%- endif -%}
+
+{% stylesheet %}
+  .button {
+    --button-background: var(--color-button);
+    --button-border: var(--color-button);
+    --button-text: var(--color-button-text);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--control-h);
+    padding: var(--control-pad-y) var(--control-pad-l);
+    border: 2px solid var(--button-border);
+    border-radius: var(--radius-button);
+    background: var(--button-background);
+    color: var(--button-text);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-ui);
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--duration) var(--ease);
+  }
+
+  .button--secondary {
+    --button-background: transparent;
+    --button-border: var(--color-foreground);
+    --button-text: var(--color-foreground);
+  }
+
+  .button--solid {
+    --button-background: var(--color-foreground);
+    --button-text: var(--color-background);
+  }
+
+  .button--sm {
+    min-height: var(--control-h-sm);
+    padding: var(--control-pad-y) var(--control-pad-m);
+    font-size: var(--text-small);
+  }
+
+  @media (hover: hover) {
+    .button:hover:not(:disabled, [aria-disabled='true']) {
+      background-color: color-mix(in srgb, var(--button-background) 92%, var(--button-text));
+    }
+  }
+
+  .button:active:not(:disabled, [aria-disabled='true']) {
+    background-color: color-mix(in srgb, var(--button-background) 86%, var(--button-text));
+  }
+
+  .button:disabled,
+  .button[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .button[aria-busy='true'] {
+    color: transparent;
+    opacity: 1;
+    cursor: progress;
+  }
+
+  .button[aria-busy='true']::after {
+    content: '';
+    position: absolute;
+    width: 1.25em;
+    height: 1.25em;
+    border: 2px solid var(--button-text);
+    border-top-color: transparent;
+    border-radius: var(--radius-full);
+    animation: button-spin var(--duration-spin) var(--ease-linear) infinite;
+  }
+
+  @keyframes button-spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .button[aria-busy='true'] {
+      color: GrayText;
+    }
+
+    .button[aria-busy='true']::after {
+      display: none;
+    }
+  }
+{% endstylesheet %}
