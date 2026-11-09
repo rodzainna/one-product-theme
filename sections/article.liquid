@@ -15,7 +15,7 @@
 {% assign date = article.published_at | time_tag: format: 'date' %}
 <p>{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
 
-{{ article.content }}
+{% render 'rte', content: article.content %}
 
 {% if blog.comments_enabled? %}
   <h2>{{ 'blog.article_comments' | t }}</h2>
@@ -28,7 +28,7 @@
           <p>
             {{- comment.created_at | time_tag: format: 'date' -}}
           </p>
-          <p>{{ comment.content }}</p>
+          {% render 'rte', content: comment.content %}
         </div>
       {% endfor %}
 

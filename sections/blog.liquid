@@ -18,7 +18,9 @@
       </h2>
       {% assign date = article.published_at | time_tag: format: 'date' %}
       <p>{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
-      <p>{{ article.excerpt }}</p>
+      {% if article.excerpt != blank %}
+        {% render 'rte', content: article.excerpt %}
+      {% endif %}
     </div>
   {% endfor %}
 

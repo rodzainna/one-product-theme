@@ -90,6 +90,15 @@ legend {
   font-weight: var(--weight-ui);
 }
 
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
 h1,
 h2,
 h3,
@@ -133,6 +142,59 @@ h5,
 h6,
 .h5 {
   font-size: var(--text-h5);
+}
+
+/** Rich text from the admin editor, rendered by snippets/rte.liquid */
+.rte * + :not(li) {
+  margin-block-start: var(--space-s);
+}
+
+.rte * + :is(h1, h2, h3, h4, h5, h6) {
+  margin-block-start: var(--space-l);
+}
+
+.rte a {
+  color: var(--color-accent);
+}
+
+.rte :is(ul, ol) {
+  padding-inline-start: var(--space-l);
+}
+
+.rte blockquote {
+  border-inline-start: 3px solid var(--color-border);
+  padding-inline-start: var(--space-m);
+  font-style: italic;
+}
+
+.rte :is(iframe, embed, object) {
+  max-width: 100%;
+}
+
+.rte :is(iframe[src*="youtube"], iframe[src*="vimeo"]) {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+.rte pre {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.rte__table {
+  overflow-x: auto;
+}
+
+.rte table {
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.rte :is(th, td) {
+  border: 1px solid var(--color-border);
+  padding: var(--space-xs);
+  text-align: start;
 }
 
 /** Section layout utilities */

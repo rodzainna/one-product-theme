@@ -1,0 +1,17 @@
+{% doc %}
+  Renders rich text from the admin editor, with wide tables scrolling sideways.
+
+  @param {string} content - HTML from a rich text field
+
+  @example
+  {% render 'rte', content: page.content %}
+{% enddoc %}
+
+{%- liquid
+  assign table_label = 'accessibility.scrollable_table' | t | escape
+  assign table_open = '<div class="rte__table" tabindex="0" role="region" aria-label="' | append: table_label | append: '"><table'
+-%}
+
+<div class="rte">
+  {{- content | replace: '<table', table_open | replace: '</table>', '</table></div>' -}}
+</div>
