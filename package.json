@@ -5,7 +5,8 @@
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
     "dev": "shopify theme dev",
-    "check": "shopify theme check --fail-level suggestion",
+    "check": "shopify theme check --fail-level suggestion && pnpm lint:css",
+    "lint:css": "node scripts/lint-css.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
@@ -15,7 +16,7 @@
   },
   "packageManager": "pnpm@11.9.0",
   "engines": {
-    "node": ">=22.22.1"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
@@ -23,6 +24,7 @@
     "@shopify/prettier-plugin-liquid": "^1.11.3",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "prettier": "^3.9.10"
+    "prettier": "^3.9.10",
+    "stylelint": "^18.0.0"
   }
 }

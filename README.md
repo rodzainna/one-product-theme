@@ -10,16 +10,16 @@ An industry-agnostic Shopify theme for stores that sell one product. Every headi
 
 ## Development
 
-Requires Node 22.22.1+, [pnpm](https://pnpm.io/) 11+ and [Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli).
+Requires Node 22.22.2+ (or 24.15+), [pnpm](https://pnpm.io/) 11+ and [Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli).
 
 ```sh
 pnpm install
 pnpm dev --store <your-store>   # local preview with hot reload
-pnpm check                      # Theme Check
+pnpm check                      # Theme Check and the CSS token guard
 pnpm format                     # Prettier (Liquid, CSS, JS, JSON)
 ```
 
-Git hooks: commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (commitlint), staged files are formatted on commit, and Theme Check plus a format check run before each push.
+Git hooks: commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (commitlint), staged files are formatted on commit, and `pnpm check` plus a format check run before each push. The CSS guard (Stylelint, `stylelint.config.mjs`) checks `assets/*.css` and every `{% stylesheet %}` block, and fails on colours, font sizes, weights, radii, z-index, padding or timings that bypass the design tokens.
 
 JSON templates, section groups and `config/settings_data.json` are left unformatted because the theme editor rewrites them.
 

@@ -13,7 +13,6 @@
 {% stylesheet %}
   .custom-section {
     position: relative;
-    /* Keeps the z-index: -1 background image above the scheme colour */
     isolation: isolate;
     overflow: hidden;
     width: 100%;
@@ -22,7 +21,6 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    z-index: -1;
     overflow: hidden;
   }
   .custom-section__background img {
@@ -34,6 +32,7 @@
     transform: translate(-50%, -50%);
   }
   .custom-section__content {
+    position: relative;
     display: grid;
     grid-template-columns: var(--content-grid);
   }
