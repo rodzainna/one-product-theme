@@ -10,17 +10,18 @@
   </div>
 
   <div class="header__icons">
-    {% if shop.customer_accounts_enabled %}
-      {{ 'icon-account.svg' | inline_asset_content | link_to: routes.account_url }}
-    {% endif %}
+    {%- if shop.customer_accounts_enabled -%}
+      {%- assign account_label = 'header.account' | t -%}
+      {% render 'icon-button', icon: 'account', label: account_label, url: routes.account_url %}
+    {%- endif -%}
 
-    <a href="{{ routes.cart_url }}">
-      {% if cart.item_count > 0 %}
-        <sup>{{ cart.item_count }}</sup>
-      {% endif %}
-
-      {{ 'icon-cart.svg' | inline_asset_content }}
-    </a>
+    {%- liquid
+      assign cart_label = 'header.cart' | t
+      if cart.item_count > 0
+        assign cart_label = 'header.cart_count' | t: count: cart.item_count
+      endif
+    -%}
+    {% render 'icon-button', icon: 'cart', label: cart_label, url: routes.cart_url, badge: cart.item_count %}
   </div>
 </header>
 
@@ -32,18 +33,8 @@
     justify-content: space-between;
   }
   header a {
-    position: relative;
     text-decoration: none;
     color: var(--color-foreground);
-  }
-  header a sup {
-    position: absolute;
-    left: 100%;
-    overflow: hidden;
-    max-width: var(--page-margin);
-  }
-  header svg {
-    width: 2rem;
   }
   header .header__menu,
   header .header__icons {

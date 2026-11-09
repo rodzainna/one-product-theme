@@ -1,0 +1,116 @@
+{% doc %}
+  Renders a round button with only an icon, or a link when given a url.
+  The label is the accessible name, so it must say what the button does.
+
+  @param {string} icon - An icon name from the icon snippet
+  @param {string} label - Accessible name, already translated
+  @param {string} [url] - Renders an <a> instead of a <button>
+  @param {string} [type] - button (default), submit or reset
+  @param {string} [size] - sm, or blank for the default
+  @param {boolean} [disabled] - Buttons only; links can't be disabled
+  @param {number} [badge] - Visible count, hidden at 0 and capped at 99+; include the count in the label too
+  @param {string} [attributes] - Extra HTML attributes
+
+  @example
+  {% render 'icon-button', icon: 'cart', label: cart_count_label, url: routes.cart_url, badge: cart.item_count %}
+{% enddoc %}
+
+{%- liquid
+  assign classes = 'icon-button'
+  if size == 'sm'
+    assign classes = classes | append: ' icon-button--sm'
+  endif
+  assign badge_text = ''
+  assign badge = badge | plus: 0
+  if badge > 99
+    assign badge_text = '99+'
+  elsif badge > 0
+    assign badge_text = badge
+  endif
+-%}
+
+{%- capture content -%}
+  {%- render 'icon', name: icon, size: size -%}
+  {%- if badge_text != blank -%}
+    <span class="icon-button__badge" aria-hidden="true">{{ badge_text }}</span>
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if url != blank -%}
+  <a class="{{ classes }}" href="{{ url | escape }}" aria-label="{{ label | escape_once }}" {{ attributes }}>
+    {{- content -}}
+  </a>
+{%- else -%}
+  <button
+    class="{{ classes }}"
+    type="{{ type | default: 'button' }}"
+    aria-label="{{ label | escape_once }}"
+    {% if disabled %}
+      disabled
+    {% endif %}
+    {{ attributes }}
+  >
+    {{- content -}}
+  </button>
+{%- endif -%}
+
+{% stylesheet %}
+  .icon-button {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: var(--control-h);
+    height: var(--control-h);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color var(--duration) var(--ease);
+  }
+
+  @media (hover: hover) {
+    .icon-button:hover:not(:disabled, [aria-disabled='true']) {
+      background: var(--color-hover);
+    }
+  }
+
+  .icon-button:active:not(:disabled, [aria-disabled='true']) {
+    background: var(--color-active);
+  }
+
+  .icon-button:disabled,
+  button.icon-button[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .icon-button--sm {
+    width: var(--control-h-sm);
+    height: var(--control-h-sm);
+  }
+
+  .icon-button__badge {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 50%;
+    display: grid;
+    place-items: center;
+    min-width: var(--badge-size);
+    height: var(--badge-size);
+    padding-inline: var(--badge-pad);
+    border-radius: var(--radius-full);
+    background: var(--color-foreground);
+    color: var(--color-background);
+    font-size: var(--text-caption);
+    font-weight: var(--weight-ui);
+    line-height: 1;
+  }
+
+  @media (forced-colors: active) {
+    .icon-button__badge {
+      border: 1px solid CanvasText;
+    }
+  }
+{% endstylesheet %}
