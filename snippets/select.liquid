@@ -1,0 +1,128 @@
+{% doc %}
+  Renders a labelled native select with a chevron that follows the scheme colour.
+  Build the options first, since a snippet can't take a list of objects of different types.
+
+  @param {string} id - Unique id, also used for the hint and error ids
+  @param {string} label - Visible label, already translated
+  @param {string} options_html - The <option> elements
+  @param {string} [name] - Form field name
+  @param {string} [size] - sm, or blank for the default
+  @param {string} [variant] - quiet: no border, for header and footer selectors
+  @param {boolean} [disabled] - Disables the select
+  @param {string} [hint] - Help text under the field, already translated
+  @param {string} [error] - Error text; also sets aria-invalid
+  @param {boolean} [label_hidden] - Keeps the label for screen readers only
+  @param {string} [attributes] - Extra HTML attributes
+
+  @example
+  {% render 'select', id: 'Footer-country', label: country_label, name: 'country_code', options_html: country_options, size: 'sm', variant: 'quiet', label_hidden: true %}
+{% enddoc %}
+
+{%- liquid
+  assign classes = 'select'
+  if size == 'sm'
+    assign classes = classes | append: ' select--sm'
+  endif
+  if variant == 'quiet'
+    assign classes = classes | append: ' select--quiet'
+  endif
+
+  assign described_by = ''
+  if hint != blank
+    assign described_by = id | append: '-hint'
+  endif
+  if error != blank
+    assign described_by = described_by | append: ' ' | append: id | append: '-error' | strip
+  endif
+-%}
+
+<div class="field">
+  <label class="field__label{% if label_hidden %} visually-hidden{% endif %}" for="{{ id }}">
+    {{- label | escape_once -}}
+  </label>
+
+  <span class="{{ classes }}">
+    <select
+      class="control"
+      id="{{ id }}"
+      {% if name != blank %}
+        name="{{ name | escape }}"
+      {% endif %}
+      {% if disabled %}
+        disabled
+      {% endif %}
+      {% if error != blank %}
+        aria-invalid="true"
+      {% endif %}
+      {% if described_by != blank %}
+        aria-describedby="{{ described_by }}"
+      {% endif %}
+      {{ attributes }}
+    >
+      {{- options_html -}}
+    </select>
+    {%- render 'icon', name: 'chevron-down', size: 'sm' -%}
+  </span>
+
+  {%- if hint != blank -%}
+    <p class="field__hint" id="{{ id }}-hint">{{ hint | escape_once }}</p>
+  {%- endif -%}
+  {%- if error != blank -%}
+    <p class="field__error" id="{{ id }}-error">{{ error | escape_once }}</p>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .select {
+    position: relative;
+    display: inline-grid;
+    width: 100%;
+  }
+
+  .select select {
+    padding: var(--control-pad-y) var(--select-pad-end) var(--control-pad-y) var(--control-pad-s);
+    cursor: pointer;
+    transition: background-color var(--duration) var(--ease);
+  }
+
+  .select option {
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .select .icon {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: var(--control-pad-s);
+    translate: 0 -50%;
+    pointer-events: none;
+  }
+
+  .select--sm select {
+    min-height: var(--control-h-sm);
+    padding: var(--control-pad-y) var(--select-pad-end-sm) var(--control-pad-y) var(--control-pad-xs);
+  }
+
+  .select--sm .icon {
+    inset-inline-end: var(--control-pad-xs);
+  }
+
+  .select--quiet {
+    justify-self: start;
+    width: auto;
+  }
+
+  .select--quiet select {
+    border-color: transparent;
+  }
+
+  @media (hover: hover) {
+    .select--quiet select:hover:not(:disabled) {
+      background: var(--color-hover);
+    }
+  }
+
+  .select:has(select:disabled) .icon {
+    opacity: 0.5;
+  }
+{% endstylesheet %}

@@ -21,18 +21,29 @@
   {% form 'product', product %}
     {% assign current_variant = product.selected_or_first_available_variant %}
 
-    <select name="id">
-      {% for variant in product.variants %}
-        <option
-          value="{{ variant.id }}"
-          {% if variant == current_variant %}
-            selected="selected"
-          {% endif %}
-        >
-          {{ variant.title }} - {{ variant.price | money }}
-        </option>
-      {% endfor %}
-    </select>
+    {%- if product.has_only_default_variant -%}
+      <input type="hidden" name="id" value="{{ current_variant.id }}">
+    {%- else -%}
+      {%- liquid
+        assign sold_out_label = 'products.product.sold_out' | t
+        assign variant_label = product.options | join: ' / '
+        assign variant_id = 'Product-variant-' | append: section.id
+      -%}
+      {%- capture variant_options -%}
+        {%- for variant in product.variants -%}
+          <option
+            value="{{ variant.id }}"
+            {% if variant == current_variant %}
+              selected
+            {% endif %}
+          >
+            {{- variant.title | escape }} - {{ variant.price | money -}}
+            {%- unless variant.available %} ({{ sold_out_label }}){% endunless -%}
+          </option>
+        {%- endfor -%}
+      {%- endcapture -%}
+      {% render 'select', id: variant_id, label: variant_label, name: 'id', options_html: variant_options %}
+    {%- endif -%}
 
     <input type="text" name="quantity" min="1" value="1">
 

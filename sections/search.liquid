@@ -8,14 +8,22 @@
 <h1>{{ 'search.title' | t }}</h1>
 
 <form action="{{ routes.search_url }}" method="get" role="search">
-  <input
-    type="search"
-    size="50"
-    name="q"
-    value="{{ search.terms | escape }}"
-    placeholder="{{ 'search.placeholder' | t }}"
-  >
-  <button type="submit">{{ 'search.submit' | t }}</button>
+  {%- liquid
+    assign search_id = 'Search-' | append: section.id
+    assign search_label = 'search.title' | t
+    assign search_placeholder = 'search.placeholder' | t
+    assign submit_label = 'search.submit' | t
+  -%}
+  {% render 'input',
+    id: search_id,
+    label: search_label,
+    label_hidden: true,
+    type: 'search',
+    name: 'q',
+    value: search.terms,
+    placeholder: search_placeholder
+  %}
+  {% render 'button', label: submit_label, type: 'submit' %}
 </form>
 
 {% if search.performed %}

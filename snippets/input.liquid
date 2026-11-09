@@ -1,0 +1,116 @@
+{% doc %}
+  Renders a labelled text input or textarea, with an optional hint and error.
+  Text stays 16px at every size so iOS Safari doesn't zoom on focus.
+
+  @param {string} id - Unique id, also used for the hint and error ids
+  @param {string} label - Visible label, already translated
+  @param {string} [type] - text (default), email, tel, password, search, number or textarea
+  @param {string} [name] - Form field name
+  @param {string} [value] - Current value
+  @param {string} [placeholder] - Example text, never a replacement for the label
+  @param {string} [autocomplete] - Autocomplete token, e.g. 'email'
+  @param {boolean} [required] - Marks the field as required
+  @param {boolean} [disabled] - Disables the field
+  @param {string} [size] - sm, or blank for the default
+  @param {number} [rows] - Textarea rows, default 4
+  @param {string} [hint] - Help text under the field, already translated
+  @param {string} [error] - Error text; also sets aria-invalid and focuses the field on load
+  @param {object} [errors] - form.errors, with field, to show the server's error for this field
+  @param {string} [field] - The form.errors key for this field, e.g. 'email', or 'form' for a form-level error
+  @param {boolean} [label_hidden] - Keeps the label for screen readers only
+  @param {string} [attributes] - Extra HTML attributes
+
+  @example
+  {% render 'input', id: 'ContactForm-email', label: email_label, type: 'email', name: 'contact[email]', autocomplete: 'email', required: true, errors: form.errors, field: 'email' %}
+{% enddoc %}
+
+{%- liquid
+  assign classes = 'control input'
+  if size == 'sm'
+    assign classes = classes | append: ' input--sm'
+  endif
+  if type == 'textarea'
+    assign classes = classes | append: ' input--textarea'
+  endif
+
+  assign error_text = error
+  if errors and field != blank and errors.messages[field]
+    if field == 'form'
+      assign error_text = errors.messages[field]
+    else
+      assign field_name = errors.translated_fields[field]
+      assign first_letter = field_name | slice: 0 | upcase
+      assign rest = field_name | slice: 1, 999
+      assign error_text = first_letter | append: rest | append: ' ' | append: errors.messages[field]
+    endif
+  endif
+
+  assign described_by = ''
+  if hint != blank
+    assign described_by = id | append: '-hint'
+  endif
+  if error_text != blank
+    assign described_by = described_by | append: ' ' | append: id | append: '-error' | strip
+  endif
+-%}
+
+<div class="field">
+  <label class="field__label{% if label_hidden %} visually-hidden{% endif %}" for="{{ id }}">
+    {{- label | escape_once -}}
+  </label>
+
+  {%- capture shared -%}
+    class="{{ classes }}"
+    id="{{ id }}"
+    {% if name != blank %}name="{{ name | escape }}"{% endif %}
+    {% if placeholder != blank %}placeholder="{{ placeholder | escape_once }}"{% endif %}
+    {% if autocomplete != blank %}autocomplete="{{ autocomplete | escape }}"{% endif %}
+    {% if required %}required{% endif %}
+    {% if disabled %}disabled{% endif %}
+    {% if error_text != blank %}aria-invalid="true" autofocus{% endif %}
+    {% if described_by != blank %}aria-describedby="{{ described_by }}"{% endif %}
+    {{ attributes }}
+  {%- endcapture -%}
+
+  {%- if type == 'textarea' -%}
+    <textarea {{ shared }} rows="{{ rows | default: 4 | plus: 0 }}">{{ value | escape }}</textarea>
+  {%- else -%}
+    <input
+      type="{{ type | default: 'text' }}"
+      {{ shared }}
+      {% if value != blank %}
+        value="{{ value | escape }}"
+      {% endif %}
+    >
+  {%- endif -%}
+
+  {%- if hint != blank -%}
+    <p class="field__hint" id="{{ id }}-hint">{{ hint | escape_once }}</p>
+  {%- endif -%}
+  {%- if error_text != blank -%}
+    <p class="field__error" id="{{ id }}-error">{{ error_text | escape_once }}</p>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .input {
+    padding: var(--control-pad-y) var(--control-pad-s);
+  }
+
+  .input::placeholder {
+    color: var(--color-foreground-muted);
+    opacity: 1;
+  }
+
+  .input.input--sm {
+    min-height: var(--control-h-sm);
+    padding: var(--control-pad-y) var(--control-pad-xs);
+  }
+
+  .input--textarea {
+    display: block;
+    padding: var(--control-pad-xs) var(--control-pad-s);
+    line-height: 1.5;
+    resize: vertical;
+  }
+{% endstylesheet %}

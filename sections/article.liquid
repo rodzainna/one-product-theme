@@ -39,24 +39,60 @@
   {% form 'new_comment', article %}
     <h2>{{ 'blog.comment_form_title' | t }}</h2>
 
-    {{ form.errors | default_errors }}
+    {%- liquid
+      assign comment_prefix = 'CommentForm-' | append: section.id
+      if form.errors
+        render 'message', type: 'error', errors: form.errors, id_prefix: comment_prefix
+      elsif form.posted_successfully?
+        if blog.moderated?
+          assign posted_text = 'blog.comment_posted_moderated' | t
+        else
+          assign posted_text = 'blog.comment_posted' | t
+        endif
+        render 'message', type: 'success', text: posted_text, focus: true
+      endif
 
-    <div>
-      <label for="author">{{ 'blog.comment_form_name' | t }}</label>
-      <input type="text" name="comment[author]" id="author" value="{{ form.author }}" required>
-    </div>
+      assign name_label = 'blog.comment_form_name' | t
+      assign email_label = 'blog.comment_form_email' | t
+      assign body_label = 'blog.comment_form_body' | t
+      assign submit_label = 'blog.comment_form_submit' | t
+      assign author_id = comment_prefix | append: '-author'
+      assign email_id = comment_prefix | append: '-email'
+      assign body_id = comment_prefix | append: '-body'
+    -%}
 
-    <div>
-      <label for="email">{{ 'blog.comment_form_email' | t }}</label>
-      <input type="email" name="comment[email]" id="email" value="{{ form.email }}" required>
-    </div>
-
-    <div>
-      <label for="body">{{ 'blog.comment_form_body' | t }}</label>
-      <textarea name="comment[body]" id="body" required>{{ form.body }}</textarea>
-    </div>
-
-    <input type="submit" value="{{ 'blog.comment_form_submit' | t }}">
+    {% render 'input',
+      id: author_id,
+      label: name_label,
+      name: 'comment[author]',
+      value: form.author,
+      autocomplete: 'name',
+      required: true,
+      errors: form.errors,
+      field: 'author'
+    %}
+    {% render 'input',
+      id: email_id,
+      label: email_label,
+      type: 'email',
+      name: 'comment[email]',
+      value: form.email,
+      autocomplete: 'email',
+      required: true,
+      errors: form.errors,
+      field: 'email'
+    %}
+    {% render 'input',
+      id: body_id,
+      label: body_label,
+      type: 'textarea',
+      name: 'comment[body]',
+      value: form.body,
+      required: true,
+      errors: form.errors,
+      field: 'body'
+    %}
+    {% render 'button', label: submit_label, type: 'submit' %}
   {% endform %}
 {% endif %}
 

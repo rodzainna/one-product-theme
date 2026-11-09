@@ -10,6 +10,18 @@
   display: none !important;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 body {
   display: flex;
   flex-direction: column;
@@ -146,6 +158,48 @@ h5,
 h6,
 .h5 {
   font-size: var(--text-h5);
+}
+
+/** Form field and control, shared by the input and select snippets */
+.field {
+  display: grid;
+  gap: var(--field-gap);
+}
+
+.field__hint,
+.field__error {
+  font-size: var(--text-small);
+}
+
+.field__hint {
+  color: var(--color-foreground-muted);
+}
+
+.field__error {
+  color: var(--color-error);
+}
+
+.control {
+  width: 100%;
+  min-height: var(--control-h);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-input);
+  background: transparent;
+  color: var(--color-foreground);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-body);
+  line-height: 1.25;
+  appearance: none;
+}
+
+.control[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.control:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /** Rich text from the admin editor, rendered by snippets/rte.liquid */

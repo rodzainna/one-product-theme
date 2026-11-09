@@ -1,0 +1,91 @@
+{% doc %}
+  Renders form-level feedback with an icon, so it never relies on colour alone.
+  Errors use role="alert" and success uses role="status". A problem with one field stays next to that field too.
+
+  @param {string} type - error or success
+  @param {string} [text] - The message, already translated
+  @param {object} [errors] - form.errors; each error is listed, linking to its field
+  @param {string} [id_prefix] - Field ids are id_prefix-field, e.g. 'ContactForm' for #ContactForm-email
+  @param {boolean} [focus] - Moves focus to the message on load, for success after a page reload
+
+  @example
+  {% render 'message', type: 'error', errors: form.errors, id_prefix: 'ContactForm' %}
+{% enddoc %}
+
+<div
+  class="message message--{{ type }}"
+  {% if type == 'error' %}
+    role="alert"
+  {% else %}
+    role="status"
+  {% endif %}
+  {% if focus %}
+    tabindex="-1" autofocus
+  {% endif %}
+>
+  {%- if type == 'error' -%}
+    {%- render 'icon', name: 'alert' -%}
+  {%- else -%}
+    {%- render 'icon', name: 'check' -%}
+  {%- endif -%}
+  <div class="message__body">
+    {%- if text != blank -%}
+      <p>{{ text | escape_once }}</p>
+    {%- endif -%}
+    {%- if errors -%}
+      <ul>
+        {%- for field in errors -%}
+          <li>
+            {%- liquid
+              assign error_text = errors.messages[field]
+              unless field == 'form'
+                assign field_name = errors.translated_fields[field]
+                assign first_letter = field_name | slice: 0 | upcase
+                assign rest = field_name | slice: 1, 999
+                assign error_text = first_letter | append: rest | append: ' ' | append: error_text
+              endunless
+            -%}
+            {%- if field == 'form' or id_prefix == blank -%}
+              {{ error_text }}
+            {%- else -%}
+              <a href="#{{ id_prefix }}-{{ field }}">{{ error_text }}</a>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .message {
+    display: flex;
+    gap: var(--control-pad-xs);
+    padding: var(--control-pad-s);
+    border: 1px solid var(--message-color);
+    border-radius: var(--radius-input);
+    background: color-mix(in srgb, var(--message-color) 8%, transparent);
+    line-height: 1.5;
+  }
+
+  .message--error {
+    --message-color: var(--color-error);
+  }
+
+  .message--success {
+    --message-color: var(--color-success);
+  }
+
+  .message .icon {
+    margin-block-start: 0.125rem;
+    color: var(--message-color);
+  }
+
+  .message__body ul {
+    padding-inline-start: var(--control-pad-m);
+  }
+
+  .message__body > * + * {
+    margin-block-start: var(--field-gap);
+  }
+{% endstylesheet %}

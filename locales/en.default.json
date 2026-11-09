@@ -14,7 +14,9 @@
     "comment_form_email": "Email",
     "comment_form_name": "Name",
     "comment_form_submit": "Post",
-    "comment_form_title": "Add a comment"
+    "comment_form_title": "Add a comment",
+    "comment_posted": "Your comment was posted.",
+    "comment_posted_moderated": "Thanks. Your comment will show once it's approved."
   },
   "cart": {
     "checkout": "Checkout",
@@ -47,7 +49,8 @@
   },
   "products": {
     "product": {
-      "add_to_cart": "Add to cart"
+      "add_to_cart": "Add to cart",
+      "sold_out": "Sold out"
     }
   },
   "search": {

@@ -1,0 +1,44 @@
+{% doc %}
+  Renders a decorative Lucide-style icon in the current text colour.
+
+  @param {string} name - chevron-down, alert or check
+  @param {string} [size] - sm, or blank for the default
+
+  @example
+  {% render 'icon', name: 'chevron-down', size: 'sm' %}
+{% enddoc %}
+
+<svg
+  class="icon{% if size == 'sm' %} icon--sm{% endif %}"
+  viewBox="0 0 24 24"
+  aria-hidden="true"
+  focusable="false"
+>
+  {%- case name -%}
+    {%- when 'chevron-down' -%}
+      <path d="m6 9 6 6 6-6"/>
+    {%- when 'alert' -%}
+      <path d="M12 4 2.5 20h19L12 4Z"/><path d="M12 10v4M12 17h.01"/>
+    {%- when 'check' -%}
+      <path d="m5 12 5 5 9-10"/>
+  {%- endcase -%}
+</svg>
+
+{% stylesheet %}
+  .icon {
+    display: block;
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .icon--sm {
+    width: 1rem;
+    height: 1rem;
+  }
+{% endstylesheet %}
