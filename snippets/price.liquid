@@ -1,0 +1,83 @@
+{% doc %}
+  Renders a variant's price, with compare-at, sale or sold-out badge, and unit price.
+  Given a selling plan allocation, it shows that plan's prices instead.
+  <s> isn't announced by screen readers, so hidden "Sale price" and "Regular price" labels name each amount.
+
+  @param {variant} variant - The variant to price
+  @param {selling_plan_allocation} [allocation] - The selected selling plan allocation, if any
+  @param {string} [size] - lg for the buy box, or blank for the default
+
+  @example
+  {% render 'price', variant: product.selected_or_first_available_variant, size: 'lg' %}
+{% enddoc %}
+
+{%- liquid
+  assign source = allocation | default: variant
+  assign on_sale = false
+  if variant.available and source.compare_at_price > source.price
+    assign on_sale = true
+  endif
+-%}
+
+<div class="price{% if size == 'lg' %} price--lg{% endif %}">
+  {%- if on_sale -%}
+    <span class="visually-hidden">{{ 'products.product.sale_price' | t }}</span>
+    <span>{{ source.price | money }}</span>
+    <span class="visually-hidden">{{ 'products.product.regular_price' | t }}</span>
+    <s class="price__compare">{{ source.compare_at_price | money }}</s>
+  {%- else -%}
+    <span>{{ source.price | money }}</span>
+  {%- endif -%}
+
+  {%- if variant.available == false -%}
+    {%- assign sold_out_label = 'products.product.sold_out' | t -%}
+    {%- render 'badge', text: sold_out_label -%}
+  {%- elsif on_sale -%}
+    {%- assign sale_label = 'products.product.on_sale' | t -%}
+    {%- render 'badge', text: sale_label, variant: 'sale' -%}
+  {%- endif -%}
+
+  {%- if variant.unit_price_measurement -%}
+    {%- assign measurement = variant.unit_price_measurement -%}
+    <p class="price__note">
+      <span class="visually-hidden">{{ 'products.product.unit_price' | t }}</span>
+      {{ source.unit_price | money -}}
+      {%- capture separator -%}
+        <span aria-hidden="true">/</span><span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+      {%- endcapture -%}
+      {{- separator -}}
+      {%- if measurement.reference_value != 1 %}{{ measurement.reference_value }}{% endif -%}
+      {{- measurement.reference_unit -}}
+    </p>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--control-pad-y) var(--control-pad-xs);
+    font-weight: var(--weight-ui);
+  }
+
+  .price--lg {
+    font-size: var(--text-h4);
+  }
+
+  .price__compare {
+    color: var(--color-foreground-muted);
+    font-weight: var(--weight-body);
+  }
+
+  .price--lg .price__compare {
+    font-size: var(--text-body);
+  }
+
+  .price__note {
+    flex-basis: 100%;
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+    font-weight: var(--weight-body);
+  }
+{% endstylesheet %}

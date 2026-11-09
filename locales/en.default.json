@@ -5,7 +5,8 @@
     "back_to_shopping": "Back to shopping"
   },
   "accessibility": {
-    "scrollable_table": "Scrollable table"
+    "scrollable_table": "Scrollable table",
+    "unit_price_separator": "per"
   },
   "blog": {
     "article_comments": "Comments",
@@ -58,9 +59,13 @@
   "products": {
     "product": {
       "add_to_cart": "Add to cart",
+      "on_sale": "Sale",
       "one_time_purchase": "One-time purchase",
       "purchase_options": "Purchase options",
-      "sold_out": "Sold out"
+      "regular_price": "Regular price",
+      "sale_price": "Sale price",
+      "sold_out": "Sold out",
+      "unit_price": "Unit price"
     }
   },
   "search": {

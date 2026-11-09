@@ -1,0 +1,32 @@
+{% doc %}
+  Renders a small label with tight corners, so it doesn't read as a button.
+
+  @param {string} text - Label, already translated
+  @param {string} [variant] - sale, or blank for the default
+
+  @example
+  {% render 'badge', text: sale_label, variant: 'sale' %}
+{% enddoc %}
+
+<span class="badge{% if variant == 'sale' %} badge--sale{% endif %}">{{ text | escape_once }}</span>
+
+{% stylesheet %}
+  .badge {
+    display: inline-block;
+    padding: var(--badge-pad) var(--badge-pad-x);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-size: var(--text-caption);
+    font-weight: var(--weight-ui);
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+
+  .badge--sale {
+    border-color: var(--color-button);
+    background: var(--color-button);
+    color: var(--color-button-text);
+  }
+{% endstylesheet %}

@@ -5,6 +5,15 @@
   https://shopify.dev/docs/storefronts/themes/architecture/templates/product
 {% endcomment %}
 
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign selected_allocation = current_variant.selected_selling_plan_allocation
+  if selected_allocation == blank and product.requires_selling_plan
+    assign selected_allocation = current_variant.selling_plan_allocations.first
+  endif
+  assign selected_plan_id = selected_allocation.selling_plan.id
+-%}
+
 <div class="product-images">
   {% for image in product.images %}
     {% render 'image', class: 'product-image', image: image %}
@@ -13,14 +22,14 @@
 
 <div class="product-info">
   <h1>{{ product.title }}</h1>
-  <p>{{ product.price | money }}</p>
-  {% render 'rte', content: product.description %}
+  {% render 'price', variant: current_variant, allocation: selected_allocation, size: 'lg' %}
+  {%- if product.description != blank -%}
+    {% render 'rte', content: product.description %}
+  {%- endif -%}
 </div>
 
 <div class="product-form">
   {% form 'product', product %}
-    {% assign current_variant = product.selected_or_first_available_variant %}
-
     {%- if product.has_only_default_variant -%}
       <input type="hidden" name="id" value="{{ current_variant.id }}">
     {%- else -%}
@@ -51,10 +60,6 @@
         assign one_time_id = plan_prefix | append: '-once'
         assign one_time_label = 'products.product.one_time_purchase' | t
         assign one_time_price = current_variant.price | money | strip_html
-        assign selected_plan_id = current_variant.selected_selling_plan_allocation.selling_plan.id
-        if selected_plan_id == blank and product.requires_selling_plan
-          assign selected_plan_id = current_variant.selling_plan_allocations.first.selling_plan.id
-        endif
         assign one_time_checked = false
         if selected_plan_id == blank
           assign one_time_checked = true
