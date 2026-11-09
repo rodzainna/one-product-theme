@@ -1,1 +1,1 @@
-pnpm check && pnpm format:check
+pnpm check && pnpm test && pnpm format:check
