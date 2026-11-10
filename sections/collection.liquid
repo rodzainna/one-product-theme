@@ -11,14 +11,22 @@
   {% paginate collection.products by 20 %}
     {% for product in collection.products %}
       <div class="collection-product">
-        {% if product.featured_image %}
+        {%- liquid
+          assign card_media = product.media | where: 'media_type', 'image' | first
+          assign card_media = card_media | default: product.featured_media
+          assign card_loading = null
+          if forloop.index > 4
+            assign card_loading = 'lazy'
+          endif
+        -%}
+        {% if card_media %}
           {% render 'image',
             class: 'collection-product__image',
-            image: product.featured_image,
+            image: card_media,
             url: product.url,
-            width: 400,
-            height: 400,
-            crop: 'center'
+            aspect_ratio: '1',
+            sizes: '(min-width: 1100px) 50vw, 100vw',
+            loading: card_loading
           %}
         {% endif %}
         <div class="collection-product__content">

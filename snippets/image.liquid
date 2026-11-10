@@ -1,64 +1,93 @@
 {% doc %}
-  Renders a responsive image that might be wrapped in a link.
+  Renders a responsive image, optionally cropped to an aspect ratio and wrapped in a link.
+  Pass product media rather than product images where you can: only media carries the admin's
+  focal point, which decides what stays in view when the image is cropped.
+  Never wider than the original, so Shopify doesn't upscale it. Renders nothing for a blank image.
 
-  When `width`, `height` and `crop` are provided, the image will be rendered
-  with a fixed aspect ratio.
-
-  Serves as an example of how to use the `image_url` filter and `image_tag` filter
-  as well as how you can use LiquidDoc to document your code.
-
-  @param {image} image - The image to be rendered
-  @param {string} [url] - An optional destination URL for the image
-  @param {string} [class] - Optional class to be added to the image wrapper
-  @param {number} [width] - The highest resolution width of the image to be rendered
-  @param {number} [height] - The highest resolution height of the image to be rendered
-  @param {string} [crop] - The crop position of the image
+  @param {object} image - An image, or a media item such as product.featured_media
+  @param {string} [sizes] - The img sizes attribute, default 100vw
+  @param {string} [aspect_ratio] - A CSS ratio such as 1 or 4 / 5; blank keeps the image's own shape
+  @param {boolean} [preload] - For the main image above the fold: preloads it and loads it first
+  @param {string} [loading] - lazy for images below the fold in the first section; later sections are lazy already
+  @param {string} [alt] - Overrides the alt text; without it, the admin alt (for product images Shopify falls back to the product title). Pass '' for a decorative image
+  @param {string} [url] - Wraps the image in a link
+  @param {string} [class] - Extra class on the wrapper
 
   @example
-  {% render 'image', image: product.featured_image %}
-  {% render 'image', image: product.featured_image, url: product.url %}
-  {% render 'image',
-    class: 'product__image',
-    image: product.featured_image,
-    url: product.url,
-    width: 1200,
-    height: 800,
-    crop: 'center',
-  %}
+  {% render 'image', image: product.featured_media, sizes: '(min-width: 900px) 50vw, 100vw', preload: true %}
 {% enddoc %}
 
-{% liquid
-  unless height
-    assign width = width | default: image.width
-  endunless
-
-  if url
+{%- liquid
+  assign wrapper = 'div'
+  if url != blank
     assign wrapper = 'a'
-  else
-    assign wrapper = 'div'
   endif
-%}
 
-<{{ wrapper }}
-  class="image {{ class }}"
-  {% if url %}
-    href="{{ url }}"
-  {% endif %}
->
-  {{ image | image_url: width: width, height: height, crop: crop | image_tag }}
-</{{ wrapper }}>
+  assign classes = 'image'
+  if aspect_ratio != blank
+    assign classes = classes | append: ' image--cropped'
+  endif
+  if class != blank
+    assign classes = classes | append: ' ' | append: class
+  endif
+
+  assign original_width = image.width | default: image.preview_image.width
+  assign max_width = original_width | default: 3840 | at_most: 3840
+  assign image_sizes = sizes | default: '100vw'
+
+  assign alt_text = image.alt | default: ''
+  if alt != null
+    assign alt_text = alt
+  endif
+
+  assign image_loading = loading
+  assign fetchpriority = null
+  if preload
+    assign image_loading = 'eager'
+    assign fetchpriority = 'high'
+  endif
+-%}
+
+{%- if image != blank -%}
+  <{{ wrapper }}
+    class="{{ classes }}"
+    {% if url != blank %}
+      href="{{ url }}"
+    {% endif %}
+    {% if aspect_ratio != blank %}
+      style="--image-ratio: {{ aspect_ratio | escape }}"
+    {% endif %}
+  >
+    {{-
+      image
+      | image_url: width: max_width
+      | image_tag:
+        sizes: image_sizes,
+        alt: alt_text,
+        preload: preload,
+        loading: image_loading,
+        fetchpriority: fetchpriority
+    -}}
+  </{{ wrapper }}>
+{%- endif -%}
 
 {% stylesheet %}
   .image {
     display: block;
-    position: relative;
     overflow: hidden;
-    width: 100%;
-    height: auto;
   }
 
   .image > img {
     width: 100%;
     height: auto;
+  }
+
+  .image--cropped {
+    aspect-ratio: var(--image-ratio);
+  }
+
+  .image--cropped > img {
+    height: 100%;
+    object-fit: cover;
   }
 {% endstylesheet %}

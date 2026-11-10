@@ -37,9 +37,21 @@
         {% # Search result items may be an article, a page, or a product. %}
         {% for result in search.results %}
           <div class="search-result">
-            {% assign featured_image = result.featured_image | default: result.image %}
+            {%- liquid
+              assign featured_image = result.featured_image | default: result.image
+              assign result_loading = null
+              if forloop.index > 4
+                assign result_loading = 'lazy'
+              endif
+            -%}
             {% if featured_image %}
-              {% render 'image', class: 'search-result__image', image: featured_image, url: result.url, width: 400 %}
+              {% render 'image',
+                class: 'search-result__image',
+                image: featured_image,
+                url: result.url,
+                sizes: '(min-width: 900px) 25vw, 100vw',
+                loading: result_loading
+              %}
             {% endif %}
             <div class="search-result__content">
               <p>

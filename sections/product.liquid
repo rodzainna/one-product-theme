@@ -15,9 +15,10 @@
 -%}
 
 <div class="product-images">
-  {% for image in product.images %}
-    {% render 'image', class: 'product-image', image: image %}
-  {% endfor %}
+  {%- assign images = product.media | where: 'media_type', 'image' -%}
+  {%- for media in images -%}
+    {% render 'image', class: 'product-image', image: media, preload: forloop.first, loading: 'lazy' %}
+  {%- endfor -%}
 </div>
 
 <div class="product-info">

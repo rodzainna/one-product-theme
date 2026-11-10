@@ -17,9 +17,8 @@
         {% render 'image',
           class: 'collection-card__image',
           image: collection.featured_image,
-          width: 600,
-          height: 600,
-          crop: 'center'
+          aspect_ratio: '1',
+          sizes: '(min-width: 900px) 33vw, 100vw'
         %}
       {% endif %}
 

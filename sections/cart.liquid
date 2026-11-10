@@ -13,7 +13,10 @@
     {% for item in cart.items %}
       <tr>
         <td>
-          {% render 'image', image: item.image, url: item.url %}
+          {% if item.image %}
+            {%- assign item_alt = item.image.alt | default: item.product.title -%}
+            {% render 'image', image: item.image, url: item.url, alt: item_alt %}
+          {% endif %}
         </td>
         <td>
           <p>{{ item.product.title }}</p>
