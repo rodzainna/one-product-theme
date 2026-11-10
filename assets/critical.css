@@ -395,15 +395,76 @@ main > .shopify-section:first-child .section-full {
   }
 
   .snap .header-group,
-  .snap main > .shopify-section:not(:first-child):has(.section-full) {
+  .snap:not(.stack)
+    main
+    > .shopify-section:not(:first-child):has(.section-full) {
     scroll-snap-align: start;
   }
 
   /* Short sections and the footer settle at the bottom of the screen. */
-  .snap main > .shopify-section:not(:first-child):not(:has(.section-full)),
+  .snap:not(.stack)
+    main
+    > .shopify-section:not(:first-child):not(:has(.section-full)),
   .snap .footer-group {
     scroll-snap-align: end;
   }
+
+  /* Stacked: each section pins and the next slides over it. */
+  .stack main {
+    position: relative;
+  }
+
+  /* Only once stacked-sections.js has set each tall section's --stick-top. */
+  .stack-ready main > .shopify-section {
+    position: sticky;
+    top: var(--stick-top, 0);
+    background-color: var(--color-background);
+  }
+
+  /* Off until a section starts to slide in; before that it would show at the bottom of the screen above. */
+  @supports (animation-timeline: view()) {
+    .stack-ready main > .shopify-section + .shopify-section {
+      animation: stack-shadow var(--ease-linear) both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+  }
+
+  /* Sticky boxes can't be snap targets, so the markers from stacked-sections.js stand in. */
+  .snap.stack:not(.stack-ready) {
+    scroll-snap-type: none;
+  }
+
+  .snap.stack .snap-marker {
+    scroll-snap-align: start;
+  }
+
+  .snap.stack .snap-marker--end {
+    scroll-snap-align: end;
+  }
+
+  .snap.stack .snap-marker--first {
+    scroll-snap-align: none;
+  }
+}
+
+@keyframes stack-shadow {
+  from {
+    box-shadow: none;
+  }
+
+  5%,
+  to {
+    box-shadow: var(--shadow-stack);
+  }
+}
+
+.snap-marker {
+  position: absolute;
+  inset-inline-start: 0;
+  width: 1px;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 @media (min-width: 900px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {

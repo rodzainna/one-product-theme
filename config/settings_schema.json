@@ -89,6 +89,13 @@
         "label": "t:labels.scroll_snap",
         "info": "t:info.scroll_snap",
         "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "stack_sections",
+        "label": "t:labels.stack_sections",
+        "info": "t:info.stack_sections",
+        "default": true
       }
     ]
   },

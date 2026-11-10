@@ -4,16 +4,24 @@
   if template.suffix != blank
     assign template_name = template_name | append: '.' | append: template.suffix
   endif
-  assign snap_templates = 'index,page.about,page.reviews,page.compare' | split: ','
-  assign snap = false
-  if settings.scroll_snap and snap_templates contains template_name
-    assign snap = true
+  assign scroll_templates = 'index,page.about,page.reviews,page.compare' | split: ','
+  assign scroll_classes = ''
+  assign stack = false
+  if scroll_templates contains template_name
+    if settings.scroll_snap
+      assign scroll_classes = scroll_classes | append: ' snap'
+    endif
+    if settings.stack_sections
+      assign scroll_classes = scroll_classes | append: ' stack'
+      assign stack = true
+    endif
   endif
+  assign scroll_classes = scroll_classes | strip
 -%}
 <html
   lang="{{ request.locale.iso_code }}"
-  {% if snap %}
-    class="snap"
+  {% if scroll_classes != blank %}
+    class="{{ scroll_classes }}"
   {% endif %}
 >
   <head>
@@ -50,6 +58,12 @@
       import { trackHeaderHeight } from '{{ 'header-height.js' | asset_url }}';
       trackHeaderHeight();
     </script>
+    {%- if stack -%}
+      <script type="module">
+        import { stackSections } from '{{ 'stacked-sections.js' | asset_url }}';
+        stackSections();
+      </script>
+    {%- endif -%}
 
     <main id="MainContent">
       {{ content_for_layout }}

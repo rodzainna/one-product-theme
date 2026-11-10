@@ -39,7 +39,8 @@
     "background_gradient": "Optional. Shows instead of the background color. Keep it close to that color so text stays readable.",
     "favicon": "Use a square image at least 180 × 180px.",
     "full_screen": "Makes the section at least as tall as the screen.",
-    "scroll_snap": "Home and story pages scroll one section at a time on screens 900px and wider with a mouse or trackpad."
+    "scroll_snap": "Home and story pages scroll one section at a time on screens 900px and wider with a mouse or trackpad.",
+    "stack_sections": "On home and story pages, each section pins and the next slides over it. Screens 900px and wider with a mouse or trackpad."
   },
   "labels": {
     "accent": "Accent",
@@ -65,6 +66,7 @@
     "scroll_snap": "Snap to sections",
     "secondary_button_style": "Secondary button style",
     "show_payment_icons": "Show payment icons",
+    "stack_sections": "Stack sections",
     "text_style": "Text style",
     "text": "Text"
   },
