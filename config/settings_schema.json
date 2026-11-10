@@ -96,6 +96,14 @@
         "label": "t:labels.stack_sections",
         "info": "t:info.stack_sections",
         "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "section_dots",
+        "label": "t:labels.section_dots",
+        "info": "t:info.section_dots",
+        "default": true,
+        "visible_if": "{{ settings.stack_sections }}"
       }
     ]
   },

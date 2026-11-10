@@ -7,7 +7,9 @@
   "accessibility": {
     "decrease_quantity": "Decrease quantity",
     "increase_quantity": "Increase quantity",
+    "page_sections": "Page sections",
     "scrollable_table": "Scrollable table",
+    "section_number": "Section {{ number }}",
     "skip_to_content": "Skip to content",
     "unit_price_separator": "per"
   },

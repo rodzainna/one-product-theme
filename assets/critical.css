@@ -394,15 +394,16 @@ main > .shopify-section:first-child .section-full {
     scroll-snap-type: y mandatory;
   }
 
+  /* Also the fallback while stacking isn't ready, or if its script fails. */
   .snap .header-group,
-  .snap:not(.stack)
+  .snap:not(.stack-ready)
     main
     > .shopify-section:not(:first-child):has(.section-full) {
     scroll-snap-align: start;
   }
 
   /* Short sections and the footer settle at the bottom of the screen. */
-  .snap:not(.stack)
+  .snap:not(.stack-ready)
     main
     > .shopify-section:not(:first-child):not(:has(.section-full)),
   .snap .footer-group {
@@ -431,20 +432,21 @@ main > .shopify-section:first-child .section-full {
   }
 
   /* Sticky boxes can't be snap targets, so the markers from stacked-sections.js stand in. */
-  .snap.stack:not(.stack-ready) {
-    scroll-snap-type: none;
-  }
-
-  .snap.stack .snap-marker {
+  .snap.stack-ready .snap-marker {
     scroll-snap-align: start;
   }
 
-  .snap.stack .snap-marker--end {
+  .snap.stack-ready .snap-marker--end {
     scroll-snap-align: end;
   }
 
-  .snap.stack .snap-marker--first {
+  .snap.stack-ready .snap-marker--first {
     scroll-snap-align: none;
+  }
+
+  /* Narrow screens keep content clear of the dots: one hit area plus a gap either side. Not the header, so it doesn't shift between pages. */
+  .dots :is(main, .footer-group) {
+    --page-gutter: max(var(--page-margin), calc(24px + var(--space-xs) * 2));
   }
 }
 
@@ -456,6 +458,99 @@ main > .shopify-section:first-child .section-full {
   5%,
   to {
     box-shadow: var(--shadow-stack);
+  }
+}
+
+.section-dots {
+  display: none;
+}
+
+@media (min-width: 900px) and (pointer: fine) {
+  .stack-ready .section-dots {
+    display: block;
+    position: fixed;
+    inset-block-start: 50%;
+    inset-inline-end: var(--space-xs);
+    z-index: var(--layer-sticky);
+    translate: 0 -50%;
+  }
+}
+
+.section-dots ol {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A 24px hit area around a 10px dot. */
+.section-dots__dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: var(--radius-full);
+}
+
+.section-dots__dot::before {
+  content: "";
+  inline-size: 10px;
+  block-size: 10px;
+  border: 2px solid var(--color-foreground);
+  border-radius: var(--radius-full);
+  /* A ring in the background colour keeps the dot visible over images. */
+  box-shadow: 0 0 0 1px var(--color-background);
+  transition:
+    scale var(--duration) var(--ease),
+    background-color var(--duration) var(--ease);
+}
+
+.section-dots__dot[aria-current="true"]::before {
+  background-color: var(--color-foreground);
+  scale: 1.3;
+}
+
+.section-dots__label {
+  position: absolute;
+  inset-inline-end: calc(100% + var(--space-xs));
+  padding: var(--control-pad-y) var(--control-pad-xs);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+  max-inline-size: 20rem;
+  overflow: hidden;
+  font-size: var(--text-small);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration) var(--ease);
+}
+
+/* Bridges the gap to the label, so the pointer can move onto it without closing it. */
+.section-dots__dot:hover::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 100%;
+  inline-size: var(--space-xs);
+}
+
+.section-dots__dot:is(:hover, :focus-visible) .section-dots__label {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.section-dots--dismissed .section-dots__dot .section-dots__label {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  .section-dots__dot[aria-current="true"]::before {
+    background-color: CanvasText;
   }
 }
 
@@ -487,9 +582,9 @@ main > .shopify-section:first-child .section-full {
 .shopify-section {
   --content-width: min(
     calc(var(--page-width) - var(--page-margin) * 2),
-    calc(100% - var(--page-margin) * 2)
+    calc(100% - var(--page-gutter, var(--page-margin)) * 2)
   );
-  --content-margin: minmax(var(--page-margin), 1fr);
+  --content-margin: minmax(var(--page-gutter, var(--page-margin)), 1fr);
   --content-grid: var(--content-margin) var(--content-width)
     var(--content-margin);
 

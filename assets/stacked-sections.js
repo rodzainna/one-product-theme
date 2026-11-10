@@ -1,6 +1,8 @@
 /**
  * Each section pins and the next slides over it. Sticky boxes can't be snap targets,
  * so invisible markers sit at each section's natural place; anchors and reloads use them.
+ * Fires `stacked-sections:change` on main with `{ sections, index }` when the current section
+ * changes, and again on `stacked-sections:request`.
  */
 const DESKTOP = "(min-width: 900px) and (pointer: fine)";
 const EDITOR_CHANGES = [
@@ -44,6 +46,8 @@ export function stackSections({
   let sections = [];
   let markers = [];
   let focusing = false;
+  let current = -1;
+  let frame = 0;
 
   // offsetTop reports the pinned position of a sticky box, so add up heights instead.
   const place = () => {
@@ -60,6 +64,7 @@ export function stackSections({
       markers[index].style.height = `${heights[index]}px`;
       top += heights[index];
     });
+    announce();
   };
 
   const observer = new ResizeObserver(place);
@@ -85,6 +90,7 @@ export function stackSections({
       return marker;
     });
     sections.forEach((section) => observer.observe(section));
+    current = -1;
     place();
   };
 
@@ -102,13 +108,32 @@ export function stackSections({
     scrollTo({ top: top + offset + scrollY, behavior });
   };
 
+  // The last section past the middle of the screen, or a short one that has fully arrived.
   const currentIndex = () =>
     Math.max(
       0,
-      markers.findLastIndex(
-        (marker) => marker.getBoundingClientRect().top <= innerHeight / 2,
-      ),
+      markers.findLastIndex((marker) => {
+        const { top, bottom } = marker.getBoundingClientRect();
+        return top <= innerHeight / 2 || Math.round(bottom) <= innerHeight;
+      }),
     );
+
+  const announce = () => {
+    const index = currentIndex();
+    if (index === current) return;
+    current = index;
+    main.dispatchEvent(
+      new CustomEvent("stacked-sections:change", {
+        detail: { sections, index },
+      }),
+    );
+  };
+
+  const onScroll = () => {
+    if (!desktop.matches) return;
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(announce);
+  };
 
   // A pinned section looks already on screen, so the browser won't scroll to it.
   const onClick = (event) => {
@@ -187,11 +212,20 @@ export function stackSections({
   };
 
   build();
-  // Sticky and snapping wait for the markers; before they exist the browser can snap to the wrong place.
+  // Sticky and marker snapping wait until the markers are placed; until then sections snap as usual.
   const ready = requestAnimationFrame(() => root.classList.add("stack-ready"));
 
   addEventListener("resize", place, { signal });
   desktop.addEventListener("change", place, { signal });
+  addEventListener("scroll", onScroll, { passive: true, signal });
+  main.addEventListener(
+    "stacked-sections:request",
+    () => {
+      current = -1;
+      announce();
+    },
+    { signal },
+  );
   addEventListener("pagehide", onPageHide, { signal });
   addEventListener("popstate", onPopState, { signal });
   document.addEventListener("click", onClick, { signal });
@@ -217,6 +251,7 @@ export function stackSections({
 
   return () => {
     cancelAnimationFrame(ready);
+    cancelAnimationFrame(frame);
     controller.abort();
     observer.disconnect();
     markers.forEach((marker) => marker.remove());

@@ -7,6 +7,7 @@
   assign scroll_templates = 'index,page.about,page.reviews,page.compare' | split: ','
   assign scroll_classes = ''
   assign stack = false
+  assign dots = false
   if scroll_templates contains template_name
     if settings.scroll_snap
       assign scroll_classes = scroll_classes | append: ' snap'
@@ -14,6 +15,10 @@
     if settings.stack_sections
       assign scroll_classes = scroll_classes | append: ' stack'
       assign stack = true
+      if settings.section_dots
+        assign scroll_classes = scroll_classes | append: ' dots'
+        assign dots = true
+      endif
     endif
   endif
   assign scroll_classes = scroll_classes | strip
@@ -58,16 +63,32 @@
       import { trackHeaderHeight } from '{{ 'header-height.js' | asset_url }}';
       trackHeaderHeight();
     </script>
+
+    <main id="MainContent">
+      {{ content_for_layout }}
+    </main>
+
+    {%- if dots -%}
+      <nav
+        class="section-dots"
+        aria-label="{{ 'accessibility.page_sections' | t }}"
+        data-fallback-label="{{ 'accessibility.section_number' | t: number: '[number]' }}"
+      >
+        <ol></ol>
+      </nav>
+    {%- endif -%}
     {%- if stack -%}
       <script type="module">
         import { stackSections } from '{{ 'stacked-sections.js' | asset_url }}';
         stackSections();
       </script>
     {%- endif -%}
-
-    <main id="MainContent">
-      {{ content_for_layout }}
-    </main>
+    {%- if dots -%}
+      <script type="module">
+        import { sectionDots } from '{{ 'section-dots.js' | asset_url }}';
+        sectionDots();
+      </script>
+    {%- endif -%}
 
     <div class="footer-group">
       {% sections 'footer-group' %}

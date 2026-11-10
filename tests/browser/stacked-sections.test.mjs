@@ -261,3 +261,42 @@ test("works when the browser blocks session storage", () => {
   }
   expect(errors).toEqual([]);
 });
+
+test("announces the current section as it changes", async () => {
+  render([{ height: 800 }, { height: 800 }, { height: 800 }, { height: 800 }]);
+  const seen = [];
+  document
+    .querySelector("main")
+    .addEventListener("stacked-sections:change", ({ detail }) =>
+      seen.push(detail.index),
+    );
+  scrollTo({ top: 1600, behavior: "instant" });
+  await expect.poll(() => seen).toEqual([2]);
+  scrollTo({ top: 1700, behavior: "instant" });
+  await nextFrame();
+  await nextFrame();
+  expect(seen).toEqual([2]);
+});
+
+test("re-announces when section heights change without a scroll", async () => {
+  render([{ height: 800 }, { height: 800 }, { height: 800 }]);
+  const seen = [];
+  document
+    .querySelector("main")
+    .addEventListener("stacked-sections:change", ({ detail }) =>
+      seen.push(detail.index),
+    );
+  sections()[0].style.height = "300px";
+  await expect.poll(() => seen).toEqual([1]);
+});
+
+test("announces again on request", () => {
+  render([{ height: 800 }, { height: 800 }]);
+  const main = document.querySelector("main");
+  const seen = [];
+  main.addEventListener("stacked-sections:change", ({ detail }) =>
+    seen.push(detail.index),
+  );
+  main.dispatchEvent(new CustomEvent("stacked-sections:request"));
+  expect(seen).toEqual([0]);
+});
