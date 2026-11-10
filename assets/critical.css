@@ -110,6 +110,27 @@ a {
   color: inherit;
 }
 
+#MainContent {
+  flex: 1;
+}
+
+.skip-link {
+  position: absolute;
+  inset-block-start: var(--space-xs);
+  inset-inline-start: -99999px;
+  z-index: var(--layer-temporary);
+  max-inline-size: calc(100% - var(--space-xs) * 2);
+  padding: var(--control-pad-y) var(--control-pad-s);
+  border-radius: var(--radius-input);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-weight: var(--weight-ui);
+}
+
+.skip-link:focus {
+  inset-inline-start: var(--space-xs);
+}
+
 :focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-offset);
