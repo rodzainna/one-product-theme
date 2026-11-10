@@ -379,6 +379,39 @@ h6,
 
 /** Section layout utilities */
 
+.section-full {
+  min-height: 100svh;
+}
+
+/* The header and the first section share the first screen. */
+main > .shopify-section:first-child .section-full {
+  min-height: calc(100svh - var(--header-group-h, 0px));
+}
+
+/* Snapping is desktop only: phone sections are often taller than the screen. */
+@media (min-width: 900px) and (pointer: fine) {
+  html.snap {
+    scroll-snap-type: y mandatory;
+  }
+
+  .snap .header-group,
+  .snap main > .shopify-section:not(:first-child):has(.section-full) {
+    scroll-snap-align: start;
+  }
+
+  /* Short sections and the footer settle at the bottom of the screen. */
+  .snap main > .shopify-section:not(:first-child):not(:has(.section-full)),
+  .snap .footer-group {
+    scroll-snap-align: end;
+  }
+}
+
+@media (min-width: 900px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html.snap {
+    scroll-behavior: smooth;
+  }
+}
+
 /**
  * Setup a grid that enables both full-width and constrained layouts
  * depending on the class of the child elements.

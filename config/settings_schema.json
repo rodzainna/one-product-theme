@@ -81,6 +81,18 @@
     ]
   },
   {
+    "name": "t:general.scrolling",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "scroll_snap",
+        "label": "t:labels.scroll_snap",
+        "info": "t:info.scroll_snap",
+        "default": true
+      }
+    ]
+  },
+  {
     "name": "t:general.colors",
     "settings": [
       {

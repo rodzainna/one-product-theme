@@ -1,5 +1,21 @@
 <!doctype html>
-<html lang="{{ request.locale.iso_code }}">
+{%- liquid
+  assign template_name = template.name
+  if template.suffix != blank
+    assign template_name = template_name | append: '.' | append: template.suffix
+  endif
+  assign snap_templates = 'index,page.about,page.reviews,page.compare' | split: ','
+  assign snap = false
+  if settings.scroll_snap and snap_templates contains template_name
+    assign snap = true
+  endif
+-%}
+<html
+  lang="{{ request.locale.iso_code }}"
+  {% if snap %}
+    class="snap"
+  {% endif %}
+>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -20,12 +36,27 @@
   <body>
     <a class="skip-link" href="#MainContent">{{ 'accessibility.skip_to_content' | t }}</a>
 
-    {% sections 'header-group' %}
+    <div class="header-group">
+      {% sections 'header-group' %}
+    </div>
+    <script>
+      // Measured before first paint so the first section doesn't jump; header-height.js keeps it current.
+      document.documentElement.style.setProperty(
+        '--header-group-h',
+        document.querySelector('.header-group').offsetHeight + 'px',
+      );
+    </script>
+    <script type="module">
+      import { trackHeaderHeight } from '{{ 'header-height.js' | asset_url }}';
+      trackHeaderHeight();
+    </script>
 
     <main id="MainContent">
       {{ content_for_layout }}
     </main>
 
-    {% sections 'footer-group' %}
+    <div class="footer-group">
+      {% sections 'footer-group' %}
+    </div>
   </body>
 </html>

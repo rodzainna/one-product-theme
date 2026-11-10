@@ -25,6 +25,7 @@
     "password": "Password",
     "product": "Product",
     "row": "Row",
+    "scrolling": "Scrolling",
     "search": "Search",
     "secondary": "Secondary",
     "section": "Section",
@@ -36,7 +37,9 @@
   },
   "info": {
     "background_gradient": "Optional. Shows instead of the background color. Keep it close to that color so text stays readable.",
-    "favicon": "Use a square image at least 180 × 180px."
+    "favicon": "Use a square image at least 180 × 180px.",
+    "full_screen": "Makes the section at least as tall as the screen.",
+    "scroll_snap": "Home and story pages scroll one section at a time on screens 900px and wider with a mouse or trackpad."
   },
   "labels": {
     "accent": "Accent",
@@ -49,6 +52,7 @@
     "button_radius": "Corner radius",
     "button_text": "Button text",
     "color_scheme": "Color scheme",
+    "full_screen": "Full screen",
     "grid_gap": "Grid spacing",
     "grid_item_width": "Grid item width",
     "heading_scale": "Heading size",
@@ -58,6 +62,7 @@
     "padding": "Padding",
     "page_margin": "Page margin",
     "page_width": "Page width",
+    "scroll_snap": "Snap to sections",
     "secondary_button_style": "Secondary button style",
     "show_payment_icons": "Show payment icons",
     "text_style": "Text style",
