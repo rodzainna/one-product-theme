@@ -5,6 +5,8 @@
     "back_to_shopping": "Back to shopping"
   },
   "accessibility": {
+    "decrease_quantity": "Decrease quantity",
+    "increase_quantity": "Increase quantity",
     "scrollable_table": "Scrollable table",
     "unit_price_separator": "per"
   },
@@ -62,6 +64,7 @@
       "on_sale": "Sale",
       "one_time_purchase": "One-time purchase",
       "purchase_options": "Purchase options",
+      "quantity": "Quantity",
       "regular_price": "Regular price",
       "sale_price": "Sale price",
       "sold_out": "Sold out",

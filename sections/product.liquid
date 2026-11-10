@@ -101,7 +101,18 @@
       </fieldset>
     {%- endif -%}
 
-    <input type="text" name="quantity" min="1" value="1">
+    {%- liquid
+      assign quantity_rule = current_variant.quantity_rule
+      assign quantity_id = 'Product-quantity-' | append: section.id
+      assign quantity_label = 'products.product.quantity' | t
+    -%}
+    {% render 'quantity-input',
+      id: quantity_id,
+      label: quantity_label,
+      min: quantity_rule.min,
+      max: quantity_rule.max,
+      step: quantity_rule.increment
+    %}
 
     {%- assign add_label = 'products.product.add_to_cart' | t -%}
     {% render 'button', label: add_label, type: 'submit', name: 'add' %}

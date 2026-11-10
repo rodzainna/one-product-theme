@@ -14,9 +14,10 @@ Requires Node 22.22.2+ (or 24.15+), [pnpm](https://pnpm.io/) 11+ and [Shopify CL
 
 ```sh
 pnpm install
+pnpm exec playwright install chromium firefox webkit   # browsers for the browser tests
 pnpm dev --store <your-store>   # local preview with hot reload
 pnpm check                      # Theme Check and the CSS token guard
-pnpm test                       # Vitest (tests/)
+pnpm test                       # Vitest: tests/ in Node, tests/browser/ in Chromium, Firefox and WebKit
 pnpm format                     # Prettier (Liquid, CSS, JS, JSON)
 ```
 

@@ -9,6 +9,9 @@ ehthumbs.db
 Thumbs.db
 node_modules/
 
+# Vitest failure screenshots
+.vitest/
+
 # Shopify CLI files
 .shopify/
 

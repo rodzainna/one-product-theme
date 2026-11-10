@@ -1,7 +1,7 @@
 {% doc %}
   Renders a decorative Lucide-style icon in the current text colour.
 
-  @param {string} name - account, alert, cart, check or chevron-down
+  @param {string} name - account, alert, cart, check, chevron-down, minus or plus
   @param {string} [size] - sm, or blank for the default
 
   @example
@@ -25,6 +25,10 @@
       <circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>
     {%- when 'cart' -%}
       <path d="M6 8h12l1 13H5L6 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/>
+    {%- when 'minus' -%}
+      <path d="M5 12h14"/>
+    {%- when 'plus' -%}
+      <path d="M5 12h14M12 5v14"/>
   {%- endcase -%}
 </svg>
 

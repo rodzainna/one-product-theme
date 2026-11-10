@@ -1,0 +1,111 @@
+{% doc %}
+  Renders a labelled number input with minus and plus buttons.
+  The buttons need assets/quantity-input.js; until it loads they're hidden but keep their space, and the input works alone.
+  At the limits the buttons are aria-disabled rather than disabled, so keyboard focus stays on them.
+
+  @param {string} id - Unique id
+  @param {string} label - Visible label, already translated
+  @param {string} [name] - Form field name, default quantity
+  @param {number} [value] - Starting value, default min
+  @param {number} [min] - Lowest value, default 1
+  @param {number} [max] - Highest value, if any
+  @param {number} [step] - Increment, default 1
+  @param {boolean} [disabled] - Disables the input and both buttons
+
+  @example
+  {% render 'quantity-input', id: quantity_id, label: quantity_label, min: rule.min, max: rule.max, step: rule.increment %}
+{% enddoc %}
+
+{%- liquid
+  assign min = min | default: 1
+  assign value = value | default: min
+  assign decrease_label = 'accessibility.decrease_quantity' | t
+  assign increase_label = 'accessibility.increase_quantity' | t
+-%}
+
+<div class="field">
+  <label class="field__label" for="{{ id }}">{{ label | escape_once }}</label>
+  <quantity-input class="quantity">
+    {%- render 'icon-button',
+      icon: 'minus',
+      label: decrease_label,
+      size: 'sm',
+      attributes: 'data-quantity-step="-1"'
+    -%}
+    <input
+      class="quantity__input"
+      id="{{ id }}"
+      type="number"
+      inputmode="numeric"
+      name="{{ name | default: 'quantity' | escape }}"
+      value="{{ value }}"
+      min="{{ min }}"
+      {% if max != blank %}
+        max="{{ max }}"
+      {% endif %}
+      step="{{ step | default: 1 }}"
+      required
+      {% if disabled %}
+        disabled
+      {% endif %}
+    >
+    {%- render 'icon-button', icon: 'plus', label: increase_label, size: 'sm', attributes: 'data-quantity-step="1"' -%}
+    <span class="visually-hidden" aria-live="polite"></span>
+  </quantity-input>
+</div>
+
+<script src="{{ 'quantity-input.js' | asset_url }}" type="module"></script>
+
+{% stylesheet %}
+  .quantity {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    height: var(--control-h);
+    padding-inline: var(--control-pad-y);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-input);
+  }
+
+  @supports selector(:has(*)) {
+    .quantity:has(.quantity__input:focus-visible) {
+      outline: var(--focus-ring);
+      outline-offset: var(--focus-offset);
+    }
+
+    .quantity__input:focus-visible {
+      outline: none;
+    }
+  }
+
+  .quantity:has(.quantity__input:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* The whole box is already dimmed, so the buttons don't dim again. */
+  .quantity:has(.quantity__input:disabled) .icon-button {
+    opacity: 1;
+  }
+
+  quantity-input:not(:defined) [data-quantity-step] {
+    visibility: hidden;
+  }
+
+  .quantity__input {
+    align-self: stretch;
+    width: 6ch;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-foreground);
+    font-size: var(--text-body);
+    text-align: center;
+    appearance: textfield;
+  }
+
+  .quantity__input::-webkit-inner-spin-button,
+  .quantity__input::-webkit-outer-spin-button {
+    appearance: none;
+  }
+{% endstylesheet %}
