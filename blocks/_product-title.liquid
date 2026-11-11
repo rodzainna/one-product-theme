@@ -1,0 +1,59 @@
+{% doc %}
+  Renders the product's vendor and title. The title is the page's h1 on the product
+  template, and an h2 elsewhere, where the hero owns the h1.
+
+  @example
+  {% content_for 'block', type: '_product-title', id: 'title' %}
+{% enddoc %}
+
+{%- assign current_product = closest.product -%}
+
+<div class="product-title" {{ block.shopify_attributes }}>
+  {%- if block.settings.show_vendor and current_product.vendor != blank -%}
+    <p class="product-title__vendor">{{ current_product.vendor | escape }}</p>
+  {%- endif -%}
+  {%- if template.name == 'product' -%}
+    <h1 class="product-title__heading">{{ current_product.title | escape }}</h1>
+  {%- else -%}
+    <h2 class="product-title__heading">{{ current_product.title | escape }}</h2>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .product-title__vendor {
+    margin-block-end: var(--space-2xs);
+    color: var(--color-accent);
+    font-size: var(--text-caption);
+    font-weight: var(--weight-ui);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .product-title__heading {
+    margin: 0;
+    font-size: var(--text-product-title);
+  }
+
+  /* Short desktop windows: the buy box stays on one screen, and the header carries the brand. */
+  @media (min-width: 900px) and (max-height: 800px) {
+    .product-title__vendor {
+      display: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.product_title",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "t:labels.show_vendor",
+      "info": "t:info.show_vendor",
+      "default": true
+    }
+  ],
+  "presets": [{ "name": "t:general.product_title" }]
+}
+{% endschema %}

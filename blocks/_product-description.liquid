@@ -1,0 +1,25 @@
+{% doc %}
+  Renders the product description as rich text. Renders nothing when it's empty, except in
+  the theme editor, so the block can still be selected.
+
+  @example
+  {% content_for 'block', type: '_product-description', id: 'description' %}
+{% enddoc %}
+
+{%- assign current_product = closest.product -%}
+
+{%- if current_product.description != blank or request.design_mode -%}
+  <div class="product-description" {{ block.shopify_attributes }}>
+    {%- if current_product.description != blank -%}
+      {% render 'rte', content: current_product.description %}
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:general.description",
+  "settings": [],
+  "presets": [{ "name": "t:general.description" }]
+}
+{% endschema %}

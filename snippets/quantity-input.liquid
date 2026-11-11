@@ -4,7 +4,8 @@
   At the limits the buttons are aria-disabled rather than disabled, so keyboard focus stays on them.
 
   @param {string} id - Unique id
-  @param {string} label - Visible label, already translated
+  @param {string} label - Label, already translated
+  @param {boolean} [label_hidden] - Keeps the label for screen readers only, as in the buy box
   @param {string} [name] - Form field name, default quantity
   @param {number} [value] - Starting value, default min
   @param {number} [min] - Lowest value, default 1
@@ -24,7 +25,9 @@
 -%}
 
 <div class="field">
-  <label class="field__label" for="{{ id }}">{{ label | escape_once }}</label>
+  <label class="field__label{% if label_hidden %} visually-hidden{% endif %}" for="{{ id }}">
+    {{- label | escape_once -}}
+  </label>
   <quantity-input class="quantity">
     {%- render 'icon-button',
       icon: 'minus',

@@ -5,6 +5,7 @@
     "block": "Block",
     "blog": "Blog",
     "buttons": "Buttons",
+    "buy_buttons": "Buy buttons",
     "cart": "Cart",
     "collection": "Collection",
     "collection_card": "Collection card",
@@ -14,6 +15,7 @@
     "column": "Column",
     "content": "Content",
     "custom_section": "Custom section",
+    "description": "Description",
     "favicon": "Favicon",
     "fonts": "Fonts",
     "footer": "Footer",
@@ -23,7 +25,9 @@
     "main": "Main",
     "page": "Page",
     "password": "Password",
+    "price": "Price",
     "product": "Product",
+    "product_title": "Product title",
     "row": "Row",
     "scrolling": "Scrolling",
     "search": "Search",
@@ -43,6 +47,7 @@
     "parallax_strength": "Higher values move background images further.",
     "scroll_snap": "Home and story pages scroll one section at a time on screens 900px and wider with a mouse or trackpad.",
     "section_dots": "A dot per section on the right of the screen, named after its heading.",
+    "show_vendor": "Hidden on short desktop windows, so the buy box fits on one screen.",
     "stack_sections": "On home and story pages, each section pins and the next slides over it. Screens 900px and wider with a mouse or trackpad."
   },
   "labels": {
@@ -72,9 +77,10 @@
     "secondary_button_style": "Secondary button style",
     "section_dots": "Show section dots",
     "show_payment_icons": "Show payment icons",
+    "show_vendor": "Show vendor",
     "stack_sections": "Stack sections",
-    "text_style": "Text style",
-    "text": "Text"
+    "text": "Text",
+    "text_style": "Text style"
   },
   "options": {
     "alignment": {

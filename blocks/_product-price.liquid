@@ -1,0 +1,27 @@
+{% doc %}
+  Renders the price of the selected variant, or of its selected selling plan.
+
+  @example
+  {% content_for 'block', type: '_product-price', id: 'price' %}
+{% enddoc %}
+
+{%- liquid
+  assign current_product = closest.product
+  assign current_variant = current_product.selected_or_first_available_variant
+  assign allocation = current_variant.selected_selling_plan_allocation
+  if allocation == blank and current_product.requires_selling_plan
+    assign allocation = current_variant.selling_plan_allocations.first
+  endif
+-%}
+
+<div class="product-price" {{ block.shopify_attributes }}>
+  {% render 'price', variant: current_variant, allocation: allocation, size: 'lg' %}
+</div>
+
+{% schema %}
+{
+  "name": "t:general.price",
+  "settings": [],
+  "presets": [{ "name": "t:general.price" }]
+}
+{% endschema %}

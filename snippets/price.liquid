@@ -43,7 +43,7 @@
       <span class="visually-hidden">{{ 'products.product.unit_price' | t }}</span>
       {{ source.unit_price | money -}}
       {%- capture separator -%}
-        <span aria-hidden="true">/</span><span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+        <span aria-hidden="true"> / </span><span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
       {%- endcapture -%}
       {{- separator -}}
       {%- if measurement.reference_value != 1 %}{{ measurement.reference_value }}{% endif -%}

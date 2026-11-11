@@ -11,10 +11,15 @@
   "sections": {
     "main": {
       "type": "product",
+      "blocks": {
+        "title": { "type": "_product-title", "settings": { "show_vendor": true } },
+        "price": { "type": "_product-price", "settings": {} },
+        "description": { "type": "_product-description", "settings": {} },
+        "buy_buttons": { "type": "_buy-buttons", "settings": {} }
+      },
+      "block_order": ["title", "price", "description", "buy_buttons"],
       "settings": {}
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main"]
 }

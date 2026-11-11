@@ -1,129 +1,59 @@
 {% comment %}
-  This section is used in the product template to render product page with
-  media, content, and add-to-cart form.
+  The product page's buy box: images on the left and blocks on the right from 900px,
+  stacked on phones. The blocks read the product through closest.product.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/product
 {% endcomment %}
 
-{%- liquid
-  assign current_variant = product.selected_or_first_available_variant
-  assign selected_allocation = current_variant.selected_selling_plan_allocation
-  if selected_allocation == blank and product.requires_selling_plan
-    assign selected_allocation = current_variant.selling_plan_allocations.first
-  endif
-  assign selected_plan_id = selected_allocation.selling_plan.id
--%}
+<div class="buy-box">
+  <div class="buy-box__media">
+    {%- assign images = product.media | where: 'media_type', 'image' -%}
+    {%- for media in images -%}
+      {% render 'image',
+        class: 'product-image',
+        image: media,
+        sizes: '(min-width: 900px) 52vw, 100vw',
+        preload: forloop.first,
+        loading: 'lazy'
+      %}
+    {%- endfor -%}
+  </div>
 
-<div class="product-images">
-  {%- assign images = product.media | where: 'media_type', 'image' -%}
-  {%- for media in images -%}
-    {% render 'image', class: 'product-image', image: media, preload: forloop.first, loading: 'lazy' %}
-  {%- endfor -%}
+  <div class="buy-box__info">
+    {% content_for 'blocks' %}
+  </div>
 </div>
 
-<div class="product-info">
-  <h1>{{ product.title }}</h1>
-  {% render 'price', variant: current_variant, allocation: selected_allocation, size: 'lg' %}
-  {%- if product.description != blank -%}
-    {% render 'rte', content: product.description %}
-  {%- endif -%}
-</div>
+{% stylesheet %}
+  .buy-box {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: start;
+    padding-block: var(--space-xl);
+  }
 
-<div class="product-form">
-  {% form 'product', product %}
-    {%- if product.has_only_default_variant -%}
-      <input type="hidden" name="id" value="{{ current_variant.id }}">
-    {%- else -%}
-      {%- liquid
-        assign sold_out_label = 'products.product.sold_out' | t
-        assign variant_label = product.options | join: ' / '
-        assign variant_id = 'Product-variant-' | append: section.id
-      -%}
-      {%- capture variant_options -%}
-        {%- for variant in product.variants -%}
-          <option
-            value="{{ variant.id }}"
-            {% if variant == current_variant %}
-              selected
-            {% endif %}
-          >
-            {{- variant.title | escape }} - {{ variant.price | money -}}
-            {%- unless variant.available %} ({{ sold_out_label }}){% endunless -%}
-          </option>
-        {%- endfor -%}
-      {%- endcapture -%}
-      {% render 'select', id: variant_id, label: variant_label, name: 'id', options_html: variant_options %}
-    {%- endif -%}
+  .buy-box__info {
+    display: grid;
+    gap: var(--space-s);
+  }
 
-    {%- if current_variant.selling_plan_allocations.size > 0 -%}
-      {%- liquid
-        assign plan_prefix = 'Product-plan-' | append: section.id
-        assign one_time_id = plan_prefix | append: '-once'
-        assign one_time_label = 'products.product.one_time_purchase' | t
-        assign one_time_price = current_variant.price | money | strip_html
-        assign one_time_checked = false
-        if selected_plan_id == blank
-          assign one_time_checked = true
-        endif
-      -%}
-      <fieldset class="choice-group choice-group--cards">
-        <legend>{{ 'products.product.purchase_options' | t }}</legend>
-        {%- unless product.requires_selling_plan -%}
-          {% render 'radio',
-            id: one_time_id,
-            name: 'selling_plan',
-            value: '',
-            label: one_time_label,
-            hint: one_time_price,
-            checked: one_time_checked,
-            variant: 'card'
-          %}
-        {%- endunless -%}
-        {%- for allocation in current_variant.selling_plan_allocations -%}
-          {%- liquid
-            assign plan = allocation.selling_plan
-            assign plan_id = plan_prefix | append: '-' | append: plan.id
-            assign plan_price = allocation.price | money | strip_html
-            assign plan_checked = false
-            if plan.id == selected_plan_id
-              assign plan_checked = true
-            endif
-          -%}
-          {% render 'radio',
-            id: plan_id,
-            name: 'selling_plan',
-            value: plan.id,
-            label: plan.name,
-            hint: plan_price,
-            checked: plan_checked,
-            variant: 'card'
-          %}
-        {%- endfor -%}
-      </fieldset>
-    {%- endif -%}
-
-    {%- liquid
-      assign quantity_rule = current_variant.quantity_rule
-      assign quantity_id = 'Product-quantity-' | append: section.id
-      assign quantity_label = 'products.product.quantity' | t
-    -%}
-    {% render 'quantity-input',
-      id: quantity_id,
-      label: quantity_label,
-      min: quantity_rule.min,
-      max: quantity_rule.max,
-      step: quantity_rule.increment
-    %}
-
-    {%- assign add_label = 'products.product.add_to_cart' | t -%}
-    {% render 'button', label: add_label, type: 'submit', name: 'add' %}
-    {{ form | payment_button }}
-  {% endform %}
-</div>
+  @media (min-width: 900px) {
+    .buy-box {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.product",
+  "blocks": [
+    { "type": "_product-title" },
+    { "type": "_product-price" },
+    { "type": "_product-description" },
+    { "type": "_buy-buttons" }
+  ],
   "settings": [],
   "disabled_on": {
     "groups": ["header", "footer"]
