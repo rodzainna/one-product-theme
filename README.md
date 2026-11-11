@@ -17,8 +17,16 @@ pnpm install
 pnpm exec playwright install chromium firefox webkit   # browsers for the browser tests
 pnpm dev --store <your-store>   # local preview with hot reload
 pnpm check                      # Theme Check and the CSS token guard
-pnpm test                       # Vitest: tests/ in Node, tests/browser/ in Chromium, Firefox and WebKit
+pnpm test                       # Vitest: tests/ in Node (except tests/store/), tests/browser/ in Chromium, Firefox and WebKit
+pnpm test:store                 # Vitest: tests/store/ against a running preview (see below)
 pnpm format                     # Prettier (Liquid, CSS, JS, JSON)
+```
+
+`pnpm test:store` fetches rendered sections from the preview of a test store, because Liquid only renders on Shopify. It expects the products named in `tests/store/` (for example `test-size-sold-out`, with size S out of stock) and a preview started with the storefront password, at `http://127.0.0.1:9293` unless `STORE_URL` says otherwise. `read -s` keeps the password out of your shell history:
+
+```sh
+read -s SHOPIFY_FLAG_STORE_PASSWORD && export SHOPIFY_FLAG_STORE_PASSWORD
+pnpm dev --store <test-store> --port 9293
 ```
 
 Git hooks: commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (commitlint), staged files are formatted on commit, and `pnpm check`, `pnpm test` and a format check run before each push. The CSS guard (Stylelint, `stylelint.config.mjs`) checks `assets/*.css` and every `{% stylesheet %}` block, and fails on colours, font sizes, weights, radii, z-index, padding or timings that bypass the design tokens.

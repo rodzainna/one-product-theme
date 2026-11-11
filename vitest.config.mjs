@@ -10,7 +10,7 @@ export default defineConfig({
         test: {
           name: "node",
           include: ["tests/**/*.test.mjs"],
-          exclude: [browserTests, ...defaultExclude],
+          exclude: [browserTests, "tests/store/**", ...defaultExclude],
           environment: "node",
         },
       },
