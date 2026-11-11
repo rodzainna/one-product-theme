@@ -1,5 +1,6 @@
 {% doc %}
   Renders rich text from the admin editor, with wide tables scrolling sideways.
+  Each table's scroll region is named by its caption; tables without one are numbered when there's more than one.
 
   @param {string} content - HTML from a rich text field
 
@@ -8,10 +9,44 @@
 {% enddoc %}
 
 {%- liquid
-  assign table_label = 'accessibility.scrollable_table' | t | escape
-  assign table_open = '<div class="rte__table" tabindex="0" role="region" aria-label="' | append: table_label | append: '"><table'
+  assign parts = content | split: '<table'
+  assign captions = ''
+  assign unnamed_total = 0
+  for part in parts offset: 1
+    assign caption = ''
+    assign table_html = part | split: '</table>' | first
+    if table_html contains '<caption'
+      assign caption = table_html | split: '</caption>' | first | split: '<caption' | last
+      assign caption = '<caption' | append: caption | replace: '<br', ' <br' | replace: '&nbsp;', ' ' | strip_html | split: ' ' | join: ' '
+    endif
+    if caption == blank
+      assign unnamed_total = unnamed_total | plus: 1
+    endif
+    # <|> can't survive strip_html, so it can't appear inside a caption.
+    assign captions = captions | append: caption | append: '<|>'
+  endfor
+  assign captions = captions | split: '<|>'
+  assign unnamed_number = 0
 -%}
 
 <div class="rte">
-  {{- content | replace: '<table', table_open | replace: '</table>', '</table></div>' -}}
+  {{- parts.first -}}
+  {%- for part in parts offset: 1 -%}
+    {%- liquid
+      assign table_label = captions[forloop.index0]
+      if table_label == blank
+        assign unnamed_number = unnamed_number | plus: 1
+        if unnamed_total > 1
+          assign table_label = 'accessibility.scrollable_table_numbered' | t: number: unnamed_number, total: unnamed_total
+        else
+          assign table_label = 'accessibility.scrollable_table' | t
+        endif
+      endif
+
+      assign table_label = table_label | escape_once
+      assign table_open = '<div class="rte__table" tabindex="0" role="region" aria-label="' | append: table_label | append: '"><table'
+      echo table_open
+      echo part | replace: '</table>', '</table></div>'
+    -%}
+  {%- endfor -%}
 </div>

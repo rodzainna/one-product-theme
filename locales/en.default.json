@@ -9,6 +9,7 @@
     "increase_quantity": "Increase quantity",
     "page_sections": "Page sections",
     "scrollable_table": "Scrollable table",
+    "scrollable_table_numbered": "Scrollable table {{ number }} of {{ total }}",
     "section_number": "Section {{ number }}",
     "skip_to_content": "Skip to content",
     "unit_price_separator": "per"
