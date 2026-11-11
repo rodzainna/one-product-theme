@@ -1,6 +1,13 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { page, userEvent } from "vitest/browser";
 import "../../assets/quantity-input.js";
+import iconButtonLiquid from "../../snippets/icon-button.liquid?raw";
+import quantityLiquid from "../../snippets/quantity-input.liquid?raw";
+
+const stylesheet = (liquid) =>
+  liquid.match(
+    /{%-?\s*stylesheet\s*-?%}([\s\S]*?){%-?\s*endstylesheet\s*-?%}/,
+  )?.[1] ?? "";
 
 const render = ({
   value = 1,
@@ -160,5 +167,38 @@ describe("typed values", () => {
     await userEvent.fill(input(), "3");
     await expect.element(input()).toHaveFocus();
     await expect.element(plus()).toHaveAttribute("aria-disabled", "true");
+  });
+});
+
+describe("shape", () => {
+  test("follows the button radius, with 44px-wide steps the full height inside the border", () => {
+    // Tokens come from snippets/css-variables.liquid, which the test page doesn't load.
+    document.body.innerHTML = `
+      <style>
+        *, ::before, ::after { box-sizing: border-box; }
+        :root { --control-h: 44px; --control-h-sm: 32px; --radius-button: 6px; --color-control-border: #000; }
+        ${stylesheet(iconButtonLiquid)}
+        ${stylesheet(quantityLiquid)}
+      </style>
+      <quantity-input class="quantity">
+        <button class="icon-button icon-button--sm" type="button" aria-label="Decrease quantity" data-quantity-step="-1"></button>
+        <input class="quantity__input" type="number" value="1" min="1">
+        <button class="icon-button icon-button--sm" type="button" aria-label="Increase quantity" data-quantity-step="1"></button>
+      </quantity-input>
+    `;
+    const box = document.querySelector(".quantity");
+    const steps = [...box.querySelectorAll(".icon-button")];
+    expect(getComputedStyle(box).borderTopLeftRadius).toBe("6px");
+    expect(box.offsetHeight).toBe(44);
+    expect(
+      steps.map((step) => [
+        step.offsetWidth,
+        step.offsetHeight,
+        getComputedStyle(step).borderTopLeftRadius,
+      ]),
+    ).toEqual([
+      [44, 42, "6px"],
+      [44, 42, "6px"],
+    ]);
   });
 });

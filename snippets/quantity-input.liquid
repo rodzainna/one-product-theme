@@ -59,12 +59,17 @@
 {% stylesheet %}
   .quantity {
     display: inline-flex;
-    align-items: center;
     justify-self: start;
     height: var(--control-h);
-    padding-inline: var(--control-pad-y);
     border: 1px solid var(--color-control-border);
-    border-radius: var(--radius-input);
+    border-radius: var(--radius-button);
+  }
+
+  .quantity .icon-button {
+    align-self: stretch;
+    width: var(--control-h);
+    height: auto;
+    border-radius: var(--radius-button);
   }
 
   @supports selector(:has(*)) {
