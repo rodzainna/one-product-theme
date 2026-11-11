@@ -39,6 +39,8 @@
     "background_gradient": "Optional. Shows instead of the background color. Keep it close to that color so text stays readable.",
     "favicon": "Use a square image at least 180 × 180px.",
     "full_screen": "Makes the section at least as tall as the screen.",
+    "parallax": "The background image moves slower than the page as it scrolls. Visitors who reduce motion see a still image.",
+    "parallax_strength": "Higher values move background images further.",
     "scroll_snap": "Home and story pages scroll one section at a time on screens 900px and wider with a mouse or trackpad.",
     "section_dots": "A dot per section on the right of the screen, named after its heading.",
     "stack_sections": "On home and story pages, each section pins and the next slides over it. Screens 900px and wider with a mouse or trackpad."
@@ -64,6 +66,8 @@
     "padding": "Padding",
     "page_margin": "Page margin",
     "page_width": "Page width",
+    "parallax": "Parallax",
+    "parallax_strength": "Parallax strength",
     "scroll_snap": "Snap to sections",
     "secondary_button_style": "Secondary button style",
     "section_dots": "Show section dots",

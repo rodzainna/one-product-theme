@@ -1,8 +1,8 @@
 /**
  * Each section pins and the next slides over it. Sticky boxes can't be snap targets,
  * so invisible markers sit at each section's natural place; anchors and reloads use them.
- * Fires `stacked-sections:change` on main with `{ sections, index }` when the current section
- * changes, and again on `stacked-sections:request`.
+ * Marks the current section with `data-current` and fires `stacked-sections:change` on main
+ * with `{ sections, index }` when it changes, and again on `stacked-sections:request`.
  */
 const DESKTOP = "(min-width: 900px) and (pointer: fine)";
 const EDITOR_CHANGES = [
@@ -75,6 +75,7 @@ export function stackSections({
       event?.type === "shopify:section:unload" ? event.target : null;
     observer.disconnect();
     markers.forEach((marker) => marker.remove());
+    leaving?.removeAttribute("data-current");
     sections = [...main.children].filter(
       (el) => el.classList.contains("shopify-section") && el !== leaving,
     );
@@ -122,6 +123,9 @@ export function stackSections({
     const index = currentIndex();
     if (index === current) return;
     current = index;
+    sections.forEach((section, n) =>
+      section.toggleAttribute("data-current", n === index),
+    );
     main.dispatchEvent(
       new CustomEvent("stacked-sections:change", {
         detail: { sections, index },
@@ -255,6 +259,7 @@ export function stackSections({
     controller.abort();
     observer.disconnect();
     markers.forEach((marker) => marker.remove());
+    sections.forEach((section) => section.removeAttribute("data-current"));
     root.classList.remove("stack-ready");
     history.scrollRestoration = "auto";
   };

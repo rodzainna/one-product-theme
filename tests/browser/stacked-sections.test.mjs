@@ -178,6 +178,17 @@ test("drops a section the theme editor is deleting", () => {
   expect(markers().map((m) => m.style.top)).toEqual(["0px", "800px"]);
 });
 
+test("a deleted current section stops being marked current", () => {
+  render([{ height: 800 }, { height: 800 }]);
+  sections()[0].dispatchEvent(
+    new CustomEvent("shopify:section:unload", { bubbles: true }),
+  );
+  expect(sections().map((s) => s.hasAttribute("data-current"))).toEqual([
+    false,
+    true,
+  ]);
+});
+
 test("remembers the current section when the page is hidden", () => {
   render([{ height: 800 }, { height: 800 }, { height: 800 }]);
   scrollTo({ top: 1600, behavior: "instant" });
@@ -288,6 +299,17 @@ test("re-announces when section heights change without a scroll", async () => {
     );
   sections()[0].style.height = "300px";
   await expect.poll(() => seen).toEqual([1]);
+});
+
+test("marks only the current section, and cleanup clears it", async () => {
+  render([{ height: 800 }, { height: 800 }, { height: 800 }]);
+  const marked = () => sections().map((s) => s.hasAttribute("data-current"));
+  expect(marked()).toEqual([true, false, false]);
+  scrollTo({ top: 1600, behavior: "instant" });
+  await expect.poll(marked).toEqual([false, false, true]);
+  cleanup();
+  cleanup = null;
+  expect(marked()).toEqual([false, false, false]);
 });
 
 test("announces again on request", () => {

@@ -1,4 +1,10 @@
-<div class="custom-section full-width color-{{ section.settings.color_scheme }}{% if section.settings.full_screen %} section-full{% endif %}">
+{%- liquid
+  assign parallax = false
+  if section.settings.parallax and section.settings.full_screen and section.settings.background_image
+    assign parallax = true
+  endif
+-%}
+<div class="custom-section full-width color-{{ section.settings.color_scheme }}{% if section.settings.full_screen %} section-full{% endif %}{% if parallax %} parallax{% endif %}">
   {% if section.settings.background_image %}
     {%- liquid
       assign preload_background = false
@@ -6,7 +12,7 @@
         assign preload_background = true
       endif
     -%}
-    <div class="custom-section__background">
+    <div class="custom-section__background{% if parallax %} parallax__media{% endif %}">
       {% render 'image',
         image: section.settings.background_image,
         alt: '',
@@ -30,8 +36,7 @@
   }
   .custom-section__background {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     overflow: hidden;
   }
   .custom-section__image,
@@ -71,6 +76,14 @@
       "label": "t:labels.full_screen",
       "info": "t:info.full_screen",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "parallax",
+      "label": "t:labels.parallax",
+      "info": "t:info.parallax",
+      "default": false,
+      "visible_if": "{{ section.settings.full_screen and section.settings.background_image != blank }}"
     }
   ],
   "presets": [

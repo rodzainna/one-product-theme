@@ -461,6 +461,86 @@ main > .shopify-section:first-child .section-full {
   }
 }
 
+/* Parallax: a section's background moves slower than the page. Scroll-driven, so browsers without support show a still image. */
+.parallax {
+  view-timeline: --parallax block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .parallax .parallax__media {
+      inset: calc(var(--parallax-shift) * -1) 0;
+      animation: parallax var(--ease-linear) both;
+      animation-timeline: --parallax;
+      animation-range: cover;
+    }
+  }
+}
+
+/* Stacked: a pinned section sits still, so its image moves while it slides in, then rests. */
+@media (min-width: 900px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .stack-ready .parallax .parallax__media {
+      animation-name: parallax-in;
+      animation-range: entry 0% entry 100%;
+    }
+
+    /* The first section never slides in, so its image sinks as the next one covers it. */
+    .stack-ready
+      main
+      > .shopify-section:first-child
+      .parallax
+      .parallax__media {
+      animation-timeline: scroll(root block);
+      animation-range: 0 100svh;
+    }
+  }
+
+  /* A snap crosses a whole screen too fast to see scroll-linked motion, so the image glides into place once its section is current. */
+  .snap.stack-ready .parallax .parallax__media {
+    inset: calc(var(--parallax-shift) * -1) 0;
+    transition: translate var(--duration-settle) var(--ease-settle);
+    animation: none;
+  }
+
+  /* Only sections still to come wait offset; earlier ones can show above a short current section. A section left behind holds its image until it has slid out of view, then resets. */
+  .snap.stack-ready
+    main
+    > .shopify-section[data-current]
+    ~ .shopify-section
+    .parallax
+    .parallax__media {
+    translate: 0 calc(var(--parallax-shift) * -1);
+    transition-timing-function: var(--ease-step-end);
+  }
+
+  /* Nothing comes before the first section, so its image settles once on load, without waiting for the script. */
+  .snap.stack main > .shopify-section:first-child .parallax .parallax__media {
+    inset: calc(var(--parallax-shift) * -1) 0;
+    animation: parallax-in var(--duration-settle) var(--ease-settle) both;
+  }
+}
+
+@keyframes parallax {
+  from {
+    translate: 0 calc(var(--parallax-shift) * -1);
+  }
+
+  to {
+    translate: 0 var(--parallax-shift);
+  }
+}
+
+@keyframes parallax-in {
+  from {
+    translate: 0 calc(var(--parallax-shift) * -1);
+  }
+
+  to {
+    translate: 0 0;
+  }
+}
+
 .section-dots {
   display: none;
 }
