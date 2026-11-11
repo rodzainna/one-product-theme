@@ -1,8 +1,9 @@
 /**
  * Each section pins and the next slides over it. Sticky boxes can't be snap targets,
  * so invisible markers sit at each section's natural place; anchors and reloads use them.
- * Marks the current section with `data-current` and fires `stacked-sections:change` on main
- * with `{ sections, index }` when it changes, and again on `stacked-sections:request`.
+ * On desktop, marks the current section with `data-current` and fires `stacked-sections:change`
+ * on main with `{ sections, index }` when it changes, and again on `stacked-sections:request`.
+ * Empty sections are never current and are left out of `sections`.
  */
 const DESKTOP = "(min-width: 900px) and (pointer: fine)";
 const EDITOR_CHANGES = [
@@ -20,6 +21,9 @@ const sessionStore = () => {
     return null;
   }
 };
+
+const sameList = (a, b) =>
+  a.length === b.length && a.every((item, n) => item === b[n]);
 
 const withoutHash = (url) => url.split("#")[0];
 
@@ -45,14 +49,21 @@ export function stackSections({
   const { signal } = controller;
   let sections = [];
   let markers = [];
+  let full = [];
+  let filled = [];
   let focusing = false;
-  let current = -1;
+  let current = null;
+  let stale = true;
   let frame = 0;
+
+  const shown = () => sections.filter((_, index) => filled[index]);
 
   // offsetTop reports the pinned position of a sticky box, so add up heights instead.
   const place = () => {
     if (!desktop.matches) return;
     const heights = sections.map((section) => section.offsetHeight);
+    const before = filled;
+    filled = heights.map((height) => height > 0);
     let top = 0;
     sections.forEach((section, index) => {
       // A tall section scrolls to its bottom before it pins.
@@ -60,10 +71,17 @@ export function stackSections({
         "--stick-top",
         `${Math.min(0, innerHeight - heights[index])}px`,
       );
-      markers[index].style.top = `${top}px`;
-      markers[index].style.height = `${heights[index]}px`;
+      const marker = markers[index];
+      marker.style.top = `${top}px`;
+      marker.style.height = `${heights[index]}px`;
+      marker.classList.toggle("snap-marker--empty", !filled[index]);
+      marker.classList.toggle(
+        "snap-marker--end",
+        index > 0 && filled[index] && !full[index],
+      );
       top += heights[index];
     });
+    if (!sameList(before, filled)) stale = true;
     announce();
   };
 
@@ -79,19 +97,18 @@ export function stackSections({
     sections = [...main.children].filter(
       (el) => el.classList.contains("shopify-section") && el !== leaving,
     );
+    full = sections.map((section) => !!section.querySelector(".section-full"));
+    filled = [];
+    stale = true;
     markers = sections.map((section, index) => {
       const marker = document.createElement("div");
       marker.className = "snap-marker";
       marker.setAttribute("aria-hidden", "true");
       if (index === 0) marker.classList.add("snap-marker--first");
-      else if (!section.querySelector(".section-full")) {
-        marker.classList.add("snap-marker--end");
-      }
       main.append(marker);
       return marker;
     });
     sections.forEach((section) => observer.observe(section));
-    current = -1;
     place();
   };
 
@@ -100,7 +117,9 @@ export function stackSections({
 
   const scrollToSection = (index, behavior) => {
     place();
-    const marker = markers[index];
+    // An empty section has no place of its own, so go to the next one that does.
+    const next = filled.findIndex((isFilled, n) => n >= index && isFilled);
+    const marker = markers[next >= 0 ? next : index];
     const { top, height } = marker.getBoundingClientRect();
     // A short section rests with its bottom at the bottom of the screen, as it snaps.
     const offset = marker.classList.contains("snap-marker--end")
@@ -110,25 +129,26 @@ export function stackSections({
   };
 
   // The last section past the middle of the screen, or a short one that has fully arrived.
-  const currentIndex = () =>
-    Math.max(
-      0,
-      markers.findLastIndex((marker) => {
-        const { top, bottom } = marker.getBoundingClientRect();
-        return top <= innerHeight / 2 || Math.round(bottom) <= innerHeight;
-      }),
-    );
+  const currentIndex = () => {
+    const index = markers.findLastIndex((marker, n) => {
+      if (!filled[n]) return false;
+      const { top, bottom } = marker.getBoundingClientRect();
+      return top <= innerHeight / 2 || Math.round(bottom) <= innerHeight;
+    });
+    return index >= 0 ? index : filled.indexOf(true);
+  };
 
   const announce = () => {
-    const index = currentIndex();
-    if (index === current) return;
-    current = index;
-    sections.forEach((section, n) =>
-      section.toggleAttribute("data-current", n === index),
-    );
+    if (!desktop.matches) return;
+    const section = sections[currentIndex()] ?? null;
+    if (!stale && section === current) return;
+    stale = false;
+    current = section;
+    sections.forEach((s) => s.toggleAttribute("data-current", s === section));
+    const list = shown();
     main.dispatchEvent(
       new CustomEvent("stacked-sections:change", {
-        detail: { sections, index },
+        detail: { sections: list, index: list.indexOf(section) },
       }),
     );
   };
@@ -225,7 +245,7 @@ export function stackSections({
   main.addEventListener(
     "stacked-sections:request",
     () => {
-      current = -1;
+      stale = true;
       announce();
     },
     { signal },

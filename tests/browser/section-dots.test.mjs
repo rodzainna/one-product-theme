@@ -51,6 +51,15 @@ test("links each dot to its section, named after its heading", () => {
   ]);
 });
 
+test("gives an empty section no dot", () => {
+  render([{ id: "one" }, { id: "empty", height: 0 }, { id: "two" }]);
+  expect(dots().map((dot) => [dot.hash, dot.textContent])).toEqual([
+    ["#one", "Section 1"],
+    ["#two", "Section 2"],
+  ]);
+  expect(current()).toBe(0);
+});
+
 test("marks the section crossing the middle of the screen", async () => {
   render([{ id: "one" }, { id: "two" }, { id: "three" }]);
   await expect.poll(current).toBe(0);

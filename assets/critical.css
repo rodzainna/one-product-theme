@@ -440,7 +440,7 @@ main > .shopify-section:first-child .section-full {
     scroll-snap-align: end;
   }
 
-  .snap.stack-ready .snap-marker--first {
+  .snap.stack-ready :is(.snap-marker--first, .snap-marker--empty) {
     scroll-snap-align: none;
   }
 

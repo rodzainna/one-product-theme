@@ -312,6 +312,128 @@ test("marks only the current section, and cleanup clears it", async () => {
   expect(marked()).toEqual([false, false, false]);
 });
 
+test("an empty section is never current and is left out of the announcement", async () => {
+  render([{ height: 800 }, { height: 0, full: false }, { height: 800 }]);
+  const main = document.querySelector("main");
+  const seen = [];
+  main.addEventListener("stacked-sections:change", ({ detail }) =>
+    seen.push([detail.sections.length, detail.index]),
+  );
+  main.dispatchEvent(new CustomEvent("stacked-sections:request"));
+  expect(seen).toEqual([[2, 0]]);
+  scrollTo({ top: 300, behavior: "instant" });
+  await nextFrame();
+  await nextFrame();
+  expect(sections().map((s) => s.hasAttribute("data-current"))).toEqual([
+    true,
+    false,
+    false,
+  ]);
+});
+
+test("announces when an empty section gains content", async () => {
+  render([{ height: 800 }, { height: 0, full: false }, { height: 800 }]);
+  const seen = [];
+  document
+    .querySelector("main")
+    .addEventListener("stacked-sections:change", ({ detail }) =>
+      seen.push(detail.sections.length),
+    );
+  sections()[1].style.height = "300px";
+  await expect.poll(() => seen).toEqual([3]);
+});
+
+test("a section that empties out stops being current", async () => {
+  render([{ height: 800 }, { height: 800 }, { height: 800 }]);
+  scrollTo({ top: 1600, behavior: "instant" });
+  await expect
+    .poll(() => sections()[2].hasAttribute("data-current"))
+    .toBe(true);
+  sections()[2].style.height = "0px";
+  await expect
+    .poll(() => sections()[1].hasAttribute("data-current"))
+    .toBe(true);
+});
+
+test("an empty first section takes no snap and is never current", () => {
+  render([{ height: 0, full: false }, { height: 800 }, { height: 800 }]);
+  const has = (name) => markers().map((m) => m.classList.contains(name));
+  expect(has("snap-marker--empty")).toEqual([true, false, false]);
+  expect(has("snap-marker--first")).toEqual([true, false, false]);
+  expect(sections().map((s) => s.hasAttribute("data-current"))).toEqual([
+    false,
+    true,
+    false,
+  ]);
+});
+
+test("an empty short section is not marked to snap by its end", () => {
+  render([
+    { height: 800 },
+    { height: 0, full: false },
+    { height: 300, full: false },
+  ]);
+  const has = (name) => markers().map((m) => m.classList.contains(name));
+  expect(has("snap-marker--end")).toEqual([false, false, true]);
+});
+
+test("a page of empty sections marks none current", () => {
+  render([
+    { height: 0, full: false },
+    { height: 0, full: false },
+  ]);
+  expect(sections().some((s) => s.hasAttribute("data-current"))).toBe(false);
+});
+
+test("an anchor to an empty section lands where the next section rests", async () => {
+  render([
+    { height: 800 },
+    { height: 800 },
+    { height: 0, full: false, id: "two" },
+    { height: 300, full: false },
+    { height: 800 },
+  ]);
+  await userEvent.click(page.getByRole("link", { name: "jump" }));
+  await expect.poll(() => Math.round(scrollY)).toBe(1100);
+});
+
+test("a page of empty sections announces once, with no current section", () => {
+  render([
+    { height: 0, full: false },
+    { height: 0, full: false },
+  ]);
+  const main = document.querySelector("main");
+  const seen = [];
+  main.addEventListener("stacked-sections:change", ({ detail }) =>
+    seen.push([detail.sections.length, detail.index]),
+  );
+  main.dispatchEvent(new CustomEvent("stacked-sections:request"));
+  expect(seen).toEqual([[0, -1]]);
+});
+
+test("a section left empty clears its dot", async () => {
+  render([{ height: 800 }, { height: 800 }]);
+  const seen = [];
+  document
+    .querySelector("main")
+    .addEventListener("stacked-sections:change", ({ detail }) =>
+      seen.push(detail.sections.length),
+    );
+  sections().forEach((s) => (s.style.height = "0px"));
+  await expect.poll(() => seen).toEqual([0]);
+});
+
+test("an anchor to an empty section lands on the section after it", async () => {
+  render([
+    { height: 800 },
+    { height: 0, full: false, id: "two" },
+    { height: 800 },
+  ]);
+  scrollTo({ top: 0, behavior: "instant" });
+  await userEvent.click(page.getByRole("link", { name: "jump" }));
+  await expect.poll(() => Math.round(scrollY)).toBe(800);
+});
+
 test("announces again on request", () => {
   render([{ height: 800 }, { height: 800 }]);
   const main = document.querySelector("main");
