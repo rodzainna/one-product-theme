@@ -50,6 +50,7 @@ export function stackSections({
   let sections = [];
   let markers = [];
   let full = [];
+  let first = 0;
   let filled = [];
   let focusing = false;
   let current = null;
@@ -77,7 +78,7 @@ export function stackSections({
       marker.classList.toggle("snap-marker--empty", !filled[index]);
       marker.classList.toggle(
         "snap-marker--end",
-        index > 0 && filled[index] && !full[index],
+        index !== first && filled[index] && !full[index],
       );
       top += heights[index];
     });
@@ -98,13 +99,17 @@ export function stackSections({
       (el) => el.classList.contains("shopify-section") && el !== leaving,
     );
     full = sections.map((section) => !!section.querySelector(".section-full"));
+    // Same "first section" rule as critical.css, so the CSS and markers agree.
+    first = sections.findIndex(
+      (section) => !section.querySelector(":scope > [data-empty]"),
+    );
     filled = [];
     stale = true;
     markers = sections.map((section, index) => {
       const marker = document.createElement("div");
       marker.className = "snap-marker";
       marker.setAttribute("aria-hidden", "true");
-      if (index === 0) marker.classList.add("snap-marker--first");
+      if (index === first) marker.classList.add("snap-marker--first");
       main.append(marker);
       return marker;
     });

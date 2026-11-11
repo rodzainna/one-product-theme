@@ -383,8 +383,10 @@ h6,
   min-height: 100svh;
 }
 
-/* The header and the first section share the first screen. */
-main > .shopify-section:first-child .section-full {
+/* The header and the first section with content share the first screen. */
+main
+  > .shopify-section:nth-child(1 of .shopify-section:not(:has(> [data-empty])))
+  .section-full {
   min-height: calc(100svh - var(--header-group-h, 0px));
 }
 
@@ -394,19 +396,29 @@ main > .shopify-section:first-child .section-full {
     scroll-snap-type: y mandatory;
   }
 
-  /* Also the fallback while stacking isn't ready, or if its script fails. */
-  .snap .header-group,
-  .snap:not(.stack-ready)
-    main
-    > .shopify-section:not(:first-child):has(.section-full) {
+  .snap .header-group {
     scroll-snap-align: start;
   }
 
-  /* Short sections and the footer settle at the bottom of the screen. */
+  .snap .footer-group {
+    scroll-snap-align: end;
+  }
+
+  /* Also the fallback while stacking isn't ready, or if its script fails. */
   .snap:not(.stack-ready)
     main
-    > .shopify-section:not(:first-child):not(:has(.section-full)),
-  .snap .footer-group {
+    > .shopify-section:not(
+      :nth-child(1 of .shopify-section:not(:has(> [data-empty])))
+    ):has(.section-full) {
+    scroll-snap-align: start;
+  }
+
+  /* Short sections settle at the bottom of the screen. */
+  .snap:not(.stack-ready)
+    main
+    > .shopify-section:not(
+      :nth-child(1 of .shopify-section:not(:has(> [data-empty])))
+    ):not(:has(.section-full, > [data-empty])) {
     scroll-snap-align: end;
   }
 
@@ -424,7 +436,12 @@ main > .shopify-section:first-child .section-full {
 
   /* Off until a section starts to slide in; before that it would show at the bottom of the screen above. */
   @supports (animation-timeline: view()) {
-    .stack-ready main > .shopify-section + .shopify-section {
+    .stack-ready
+      main
+      > .shopify-section:not(
+        :nth-child(1 of .shopify-section:not(:has(> [data-empty]))),
+        :has(> [data-empty])
+      ) {
       animation: stack-shadow var(--ease-linear) both;
       animation-timeline: view();
       animation-range: entry 0% entry 100%;
@@ -488,7 +505,9 @@ main > .shopify-section:first-child .section-full {
     /* The first section never slides in, so its image sinks as the next one covers it. */
     .stack-ready
       main
-      > .shopify-section:first-child
+      > .shopify-section:nth-child(
+        1 of .shopify-section:not(:has(> [data-empty]))
+      )
       .parallax
       .parallax__media {
       animation-timeline: scroll(root block);
@@ -515,7 +534,13 @@ main > .shopify-section:first-child .section-full {
   }
 
   /* Nothing comes before the first section, so its image settles once on load, without waiting for the script. */
-  .snap.stack main > .shopify-section:first-child .parallax .parallax__media {
+  .snap.stack
+    main
+    > .shopify-section:nth-child(
+      1 of .shopify-section:not(:has(> [data-empty]))
+    )
+    .parallax
+    .parallax__media {
     inset: calc(var(--parallax-shift) * -1) 0;
     animation: parallax-in var(--duration-settle) var(--ease-settle) both;
   }

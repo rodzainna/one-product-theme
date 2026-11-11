@@ -15,8 +15,8 @@ const render = (sections, { sticky = false, footer = 0 } = {}) => {
     : "";
   document.body.innerHTML = `${markerStyles}${pinned}<main id="MainContent" style="position:relative">${sections
     .map(
-      ({ height, full = true, id = "" }) =>
-        `<div class="shopify-section" style="height:${height}px"><div ${full ? 'class="section-full"' : ""} ${id ? `id="${id}"` : ""}>x</div></div>`,
+      ({ height, full = true, id = "", empty = false }) =>
+        `<div class="shopify-section" style="height:${height}px"><div ${full ? 'class="section-full"' : ""} ${id ? `id="${id}"` : ""} ${empty ? "data-empty" : ""}>x</div></div>`,
     )
     .join(
       "",
@@ -365,6 +365,22 @@ test("an empty first section takes no snap and is never current", () => {
     true,
     false,
   ]);
+});
+
+test("a section flagged empty passes the first marker to the next section", () => {
+  render([{ height: 0, full: false, empty: true }, { height: 800 }]);
+  const has = (name) => markers().map((m) => m.classList.contains(name));
+  expect(has("snap-marker--first")).toEqual([false, true]);
+});
+
+test("a short first section after an empty one rests at the top, not by its end", () => {
+  render([
+    { height: 0, full: false, empty: true },
+    { height: 300, full: false },
+    { height: 800 },
+  ]);
+  const has = (name) => markers().map((m) => m.classList.contains(name));
+  expect(has("snap-marker--end")).toEqual([false, false, false]);
 });
 
 test("an empty short section is not marked to snap by its end", () => {

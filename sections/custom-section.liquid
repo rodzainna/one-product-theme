@@ -3,9 +3,19 @@
   if section.settings.parallax and section.settings.full_screen and section.settings.background_image
     assign parallax = true
   endif
+
+  assign is_empty = false
+  if section.blocks.size == 0 and section.settings.full_screen == false
+    assign is_empty = true
+  endif
 -%}
-<div class="custom-section full-width color-{{ section.settings.color_scheme }}{% if section.settings.full_screen %} section-full{% endif %}{% if parallax %} parallax{% endif %}">
-  {% if section.settings.background_image %}
+<div
+  class="custom-section full-width color-{{ section.settings.color_scheme }}{% if section.settings.full_screen %} section-full{% endif %}{% if parallax %} parallax{% endif %}"
+  {% if is_empty %}
+    data-empty
+  {% endif %}
+>
+  {% if section.settings.background_image and is_empty == false %}
     {%- liquid
       assign preload_background = false
       if section.index == 1
