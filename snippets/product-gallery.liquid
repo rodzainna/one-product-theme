@@ -1,0 +1,253 @@
+{% doc %}
+  Renders a product's media: on desktop the current media with a row of thumbnails, on
+  phones a swipe row. Starts on the selected variant's media and jumps to it when another
+  variant is picked (assets/product-gallery.js). Renders nothing without media.
+
+  @param {product} product - The product
+  @param {string} id - Unique on the page, so the script can find this gallery in a re-rendered section
+  @param {boolean} [square] - Crops images and frames other media in a square
+
+  @example
+  {% render 'product-gallery', product: product, id: gallery_id, square: true %}
+{% enddoc %}
+
+{%- liquid
+  assign variant_media = product.selected_or_first_available_variant.featured_media
+  assign current = variant_media | default: product.featured_media
+  assign count = product.media.size
+-%}
+
+{%- if count > 0 -%}
+  <script src="{{ 'product-gallery.js' | asset_url }}" type="module"></script>
+  <product-gallery
+    class="gallery{% unless square %} gallery--original{% endunless %}"
+    id="{{ id }}"
+    data-variant-media="{{ variant_media.id }}"
+  >
+    <ul class="gallery__track" aria-label="{{ 'products.product.media.gallery' | t }}">
+      {%- comment -%} The starting media goes first, so phones show it and it loads first; thumbnails keep the admin order. {%- endcomment -%}
+      {%- for pass in (1..2) -%}
+        {%- for media in product.media -%}
+          {%- liquid
+            assign is_current = false
+            if media.id == current.id
+              assign is_current = true
+            endif
+            assign render_now = is_current
+            if pass == 2
+              assign render_now = true
+              if is_current
+                assign render_now = false
+              endif
+            endif
+            unless render_now
+              continue
+            endunless
+          -%}
+          <li
+            class="gallery__item"
+            data-media-id="{{ media.id }}"
+            {% if is_current %}
+              data-current
+            {% endif %}
+          >
+            {% render 'product-media',
+              media: media,
+              sizes: '(min-width: 900px) 52vw, 88vw',
+              square: square,
+              preload: is_current,
+              product_title: product.title
+            %}
+          </li>
+        {%- endfor -%}
+      {%- endfor -%}
+    </ul>
+
+    {%- if count > 1 -%}
+      <ul class="gallery__thumbs">
+        {%- for media in product.media -%}
+          {%- assign thumb_alt = media.alt | default: product.title -%}
+          <li>
+            <button
+              type="button"
+              class="gallery__thumb"
+              data-media-id="{{ media.id }}"
+              aria-label="{{ 'products.product.media.show' | t: index: forloop.index, count: count, alt: thumb_alt }}"
+              aria-current="{% if media.id == current.id %}true{% else %}false{% endif %}"
+            >
+              {%- liquid
+                assign focal_point = media.preview_image.presentation.focal_point
+                assign thumb_style = ''
+                if focal_point != blank
+                  assign thumb_style = 'object-position: ' | append: focal_point
+                endif
+              -%}
+              {%- comment -%} Wide enough that the short side is 128px, so the square crop stays sharp at 2x. {%- endcomment -%}
+              {%- assign thumb_width = media.preview_image.aspect_ratio | at_least: 1 | times: 128 | ceil -%}
+              {{
+                media.preview_image
+                | image_url: width: thumb_width
+                | image_tag: alt: '', loading: 'lazy', width: 64, height: 64, style: thumb_style
+              }}
+              {%- case media.media_type -%}
+                {%- when 'video', 'external_video' -%}
+                  <span class="gallery__badge">{% render 'icon', name: 'play', size: 'sm' %}</span>
+                {%- when 'model' -%}
+                  <span class="gallery__badge">{% render 'icon', name: 'box', size: 'sm' %}</span>
+              {%- endcase -%}
+            </button>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- assign models = product.media | where: 'media_type', 'model' -%}
+    {%- if models.size > 0 -%}
+      <script type="application/json" data-models>
+        {{ models | json }}
+      </script>
+    {%- endif -%}
+  </product-gallery>
+{%- endif -%}
+
+{% stylesheet %}
+  .gallery {
+    --thumb-size: 4rem;
+    --thumb-row: calc(var(--thumb-size) + 4px + var(--space-s));
+
+    display: block;
+    min-width: 0;
+  }
+
+  .gallery__track,
+  .gallery__thumbs {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .gallery__item > * {
+    border-radius: var(--radius-card);
+  }
+
+  /* One row that scrolls; the padding leaves room for the focus ring. */
+  .gallery__thumbs {
+    display: flex;
+    gap: var(--space-xs);
+    margin: calc(var(--space-s) - var(--space-xs)) calc(-1 * var(--space-xs)) calc(-1 * var(--space-xs));
+    padding: var(--space-xs);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .gallery__thumbs > li {
+    flex: none;
+  }
+
+  .gallery__thumb {
+    position: relative;
+    display: block;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    background: none;
+    cursor: pointer;
+    transition: border-color var(--duration) var(--ease);
+  }
+
+  .gallery__thumb img {
+    display: block;
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+  }
+
+  @media (hover: hover) {
+    .gallery__thumb:hover {
+      border-color: var(--color-control-border);
+    }
+  }
+
+  .gallery__thumb[aria-current='true'] {
+    border-color: var(--color-foreground);
+  }
+
+  .gallery__thumb:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .gallery__badge {
+    position: absolute;
+    inset-block-end: var(--badge-pad);
+    inset-inline-end: var(--badge-pad);
+    padding: var(--badge-pad);
+    border-radius: var(--radius-full);
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  /* Phones: a swipe row with a peek of the next media, no slider library. */
+  @media (max-width: 899px) {
+    .gallery__track {
+      display: flex;
+      gap: var(--space-xs);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .gallery__track:focus-visible {
+      outline: var(--focus-ring);
+      outline-offset: var(--focus-offset);
+    }
+
+    .gallery__item {
+      flex: 0 0 88%;
+      scroll-snap-align: center;
+    }
+
+    .gallery__item:only-child {
+      flex-basis: 100%;
+    }
+
+    .gallery__thumbs {
+      display: none;
+    }
+  }
+
+  /* Desktop: one media at a time, sized so the buy box fits one screen. */
+  @media (min-width: 900px) {
+    .gallery {
+      justify-self: end;
+      width: min(100%, calc(100svh - var(--header-group-h, 0px) - 2 * var(--space-xl) - var(--thumb-row)));
+    }
+
+    .gallery:not(:has(.gallery__thumbs)) {
+      --thumb-row: 0px;
+    }
+
+    .gallery__item:not([data-current]) {
+      display: none;
+    }
+
+    /* Original keeps each media uncropped inside a square, so nothing jumps between media. */
+    .gallery--original .gallery__item > * {
+      aspect-ratio: 1;
+    }
+
+    .gallery--original .gallery__item .image > img {
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  /* Short desktop windows: smaller thumbnails, as in the prototype. */
+  @media (min-width: 900px) and (max-height: 800px) {
+    .gallery {
+      --thumb-size: 3.25rem;
+    }
+  }
+{% endstylesheet %}

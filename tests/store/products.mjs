@@ -37,6 +37,37 @@ const sizes = (prices, quantities) => ({
   })),
 });
 
+// One of each media type, freely licensed; the square, portrait and landscape images test ratios.
+const image = (colour, size, text) => ({
+  originalSource: `https://placehold.co/${size}/${colour}/FFFFFF.png?text=${text}`,
+  alt: `${text} test image`,
+  contentType: "IMAGE",
+});
+const red = image("C62828", "1200x1200", "Red");
+const blue = image("1E4FA8", "1200x1600", "Blue");
+const media = [
+  red,
+  blue,
+  image("5F6B73", "1600x1000", "Landscape"),
+  {
+    originalSource:
+      "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    alt: "A flower opening (CC0)",
+    contentType: "VIDEO",
+  },
+  {
+    originalSource: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+    alt: "Big Buck Bunny (Blender Foundation)",
+    contentType: "EXTERNAL_VIDEO",
+  },
+  {
+    originalSource:
+      "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Avocado/glTF-Binary/Avocado.glb",
+    alt: "Avocado 3D model (CC0)",
+    contentType: "MODEL_3D",
+  },
+];
+
 // Size × Colour, with M / Blue sold out and no L / Blue at all.
 const twoOptions = () => {
   const combinations = [
@@ -51,11 +82,13 @@ const twoOptions = () => {
       { name: "Size", values: ["S", "M", "L"].map((name) => ({ name })) },
       { name: "Colour", values: ["Red", "Blue"].map((name) => ({ name })) },
     ],
+    files: media,
     variants: combinations.map(([size, colour, price, quantity]) => ({
       optionValues: [
         { optionName: "Size", name: size },
         { optionName: "Colour", name: colour },
       ],
+      file: colour === "Red" ? red : blue,
       price,
       ...stock(quantity),
     })),

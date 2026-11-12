@@ -6,6 +6,7 @@
     "blog": "Blog",
     "buttons": "Buttons",
     "buy_buttons": "Buy buttons",
+    "cards_and_media": "Cards and media",
     "cart": "Cart",
     "collection": "Collection",
     "collection_card": "Collection card",
@@ -44,6 +45,7 @@
     "background_gradient": "Optional. Shows instead of the background color. Keep it close to that color so text stays readable.",
     "favicon": "Use a square image at least 180 × 180px.",
     "full_screen": "Makes the section at least as tall as the screen.",
+    "media_ratio": "Square crops images around their focal point. Original keeps each image's shape.",
     "option_style": "Options follow their order on the product in the admin. Pills show as swatches when every value has a color or image.",
     "parallax": "The background image moves slower than the page as it scrolls. Visitors who reduce motion see a still image.",
     "parallax_strength": "Higher values move background images further.",
@@ -63,12 +65,14 @@
     "button_radius": "Corner radius",
     "button_text": "Button text",
     "color_scheme": "Color scheme",
+    "corner_radius": "Corner radius",
     "full_screen": "Full screen",
     "grid_gap": "Grid spacing",
     "grid_item_width": "Grid item width",
     "heading_scale": "Heading size",
     "headings": "Headings",
     "layout_direction": "Layout direction",
+    "media_ratio": "Media shape",
     "menu": "Menu",
     "option_1_style": "Option 1 style",
     "option_2_style": "Option 2 style",
@@ -100,6 +104,10 @@
     "direction": {
       "horizontal": "Horizontal",
       "vertical": "Vertical"
+    },
+    "media_ratio": {
+      "square": "Square",
+      "original": "Original"
     },
     "option_style": {
       "pills": "Pills",

@@ -1,0 +1,189 @@
+{% doc %}
+  Renders one product media item in a frame of its own shape, or a square: an image, a
+  Shopify-hosted video, a YouTube or Vimeo video, or a 3D model with a View in your space
+  button. Videos and models show their preview image until the poster button is pressed;
+  assets/product-gallery.js then loads the player from the template and starts it.
+
+  @param {media} media - A product media item
+  @param {string} [sizes] - The img sizes attribute for images
+  @param {boolean} [square] - Crops images and frames everything else in a square
+  @param {boolean} [preload] - For the first visible media: loads its image or poster first
+  @param {string} [product_title] - Names the product in the View in your space button, and media without alt text
+
+  @example
+  {% render 'product-media', media: media, sizes: '(min-width: 900px) 50vw, 88vw', square: true %}
+{% enddoc %}
+
+{%- liquid
+  assign ratio = media.aspect_ratio | default: media.preview_image.aspect_ratio | default: 1
+  if square or media.media_type == 'model'
+    assign ratio = 1
+  endif
+-%}
+
+{%- if media.media_type == 'image' -%}
+  {%- liquid
+    assign crop = null
+    if square
+      assign crop = '1'
+    endif
+    assign loading = 'lazy'
+    if preload
+      assign loading = null
+    endif
+  -%}
+  {% render 'image', image: media, sizes: sizes, aspect_ratio: crop, preload: preload, loading: loading %}
+{%- else -%}
+  {%- liquid
+    assign media_label = media.alt | default: product_title
+    if media.media_type == 'model'
+      assign poster_label = 'products.product.media.load_model' | t: alt: media_label
+      assign poster_icon = 'box'
+    else
+      assign poster_label = 'products.product.media.play_video' | t: alt: media_label
+      assign poster_icon = 'play'
+    endif
+  -%}
+  <div class="product-media product-media--{{ media.media_type }}" style="--media-ratio: {{ ratio }}">
+    {%- comment -%} The player loads only when asked for, so its scripts don't slow the page. {%- endcomment -%}
+    <button type="button" class="product-media__poster" aria-label="{{ poster_label }}">
+      {% render 'image', image: media.preview_image, alt: '', sizes: sizes, preload: preload, loading: 'lazy' %}
+      <span class="product-media__play">{% render 'icon', name: poster_icon %}</span>
+    </button>
+    <template>
+      {%- case media.media_type -%}
+        {%- when 'video' -%}
+          {{ media | video_tag: image_size: '1600x', controls: true, playsinline: true }}
+        {%- when 'external_video' -%}
+          {%- liquid
+            if media.host == 'youtube'
+              assign video_url = media | external_video_url: autoplay: 1, enablejsapi: 1, rel: 0
+            else
+              assign video_url = media | external_video_url: autoplay: 1, api: 1
+            endif
+          -%}
+          {{ video_url | external_video_tag: title: media_label }}
+        {%- when 'model' -%}
+          {{ media | model_viewer_tag: image_size: '1600x' }}
+        {%- else -%}
+          {{ media | media_tag }}
+      {%- endcase -%}
+    </template>
+    {%- if media.media_type == 'model' -%}
+      <button
+        type="button"
+        class="product-media__xr"
+        data-shopify-xr
+        data-shopify-model3d-id="{{ media.id }}"
+        data-shopify-title="{{ product_title | escape }}"
+        data-shopify-xr-hidden
+      >
+        {%- render 'icon', name: 'box', size: 'sm' -%}
+        {{ 'products.product.media.view_in_space' | t }}
+      </button>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .product-media {
+    position: relative;
+    display: grid;
+    aspect-ratio: var(--media-ratio);
+    overflow: hidden;
+    background: var(--color-hover);
+  }
+
+  .product-media > video,
+  .product-media > iframe,
+  .product-media > model-viewer,
+  .product-media__poster {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .product-media > video {
+    object-fit: contain;
+  }
+
+  .product-media__poster {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  /* Contained like the player, so nothing shifts when it loads. */
+  .product-media__poster > .image {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+  }
+
+  .product-media__poster .image > img {
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .product-media__play {
+    grid-area: 1 / 1;
+    display: grid;
+    place-items: center;
+    width: var(--control-h);
+    height: var(--control-h);
+    border-radius: var(--radius-full);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    border: 1px solid var(--color-border);
+    transition: scale var(--duration) var(--ease);
+  }
+
+  @media (hover: hover) {
+    .product-media__poster:hover .product-media__play {
+      scale: 1.08;
+    }
+  }
+
+  /* On the frame, because the frame clips anything drawn outside the poster. */
+  .product-media:has(.product-media__poster:focus-visible) {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .product-media__poster:focus-visible {
+    outline: none;
+  }
+
+  .product-media__xr {
+    position: absolute;
+    inset-block-end: var(--space-xs);
+    inset-inline-start: 50%;
+    display: inline-flex;
+    gap: var(--space-xs);
+    align-items: center;
+    min-height: var(--control-h-sm);
+    padding: var(--control-pad-y) var(--control-pad-s);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-size: var(--text-small);
+    font-weight: var(--weight-ui);
+    white-space: nowrap;
+    cursor: pointer;
+    translate: -50% 0;
+  }
+
+  /* Shopify's XR script sets this when the device can't show models in AR. */
+  .product-media__xr[data-shopify-xr-hidden] {
+    display: none;
+  }
+
+  .product-media__xr:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+{% endstylesheet %}

@@ -26,6 +26,50 @@ const execute = (query, variables = {}, { mutation = false } = {}) => {
   return JSON.parse(readFileSync(resultFile, "utf8"));
 };
 
+// Shopify takes videos and 3D models only from its own storage, so copy them there first.
+const STAGED = {
+  VIDEO: ["VIDEO", "video/mp4"],
+  MODEL_3D: ["MODEL_3D", "model/gltf-binary"],
+};
+const stage = async (file) => {
+  if (!STAGED[file.contentType]) return file;
+  const [resource, mimeType] = STAGED[file.contentType];
+  const source = await fetch(file.originalSource);
+  if (!source.ok) {
+    throw new Error(
+      `Download of ${file.originalSource} failed: ${source.status}`,
+    );
+  }
+  const body = await source.blob();
+  const filename = new URL(file.originalSource).pathname.split("/").pop();
+  const { stagedUploadsCreate } = execute(
+    "mutation ($input: [StagedUploadInput!]!) { stagedUploadsCreate(input: $input) { stagedTargets { url resourceUrl parameters { name value } } userErrors { message } } }",
+    {
+      input: [
+        {
+          filename,
+          mimeType,
+          resource,
+          fileSize: String(body.size),
+          httpMethod: "POST",
+        },
+      ],
+    },
+    { mutation: true },
+  );
+  if (stagedUploadsCreate.userErrors.length) {
+    throw new Error(JSON.stringify(stagedUploadsCreate.userErrors));
+  }
+  const [target] = stagedUploadsCreate.stagedTargets;
+  const form = new FormData();
+  target.parameters.forEach(({ name, value }) => form.append(name, value));
+  form.append("file", body, filename);
+  const upload = await fetch(target.url, { method: "POST", body: form });
+  if (!upload.ok)
+    throw new Error(`Upload of ${filename} failed: ${upload.status}`);
+  return { ...file, originalSource: target.resourceUrl };
+};
+
 const publish = (id, publicationId) => {
   const { publishablePublish } = execute(
     "mutation ($id: ID!, $publication: ID!) { publishablePublish(id: $id, input: [{ publicationId: $publication }]) { userErrors { message } } }",
@@ -53,13 +97,13 @@ try {
     `query ($publication: ID!) { ${products
       .map(
         (p, i) =>
-          `p${i}: productByIdentifier(identifier: { handle: ${JSON.stringify(p.handle)} }) { id status publishedOnPublication(publicationId: $publication) }`,
+          `p${i}: productByIdentifier(identifier: { handle: ${JSON.stringify(p.handle)} }) { id status mediaCount { count } publishedOnPublication(publicationId: $publication) }`,
       )
       .join(" ")} }`,
     { publication: onlineStore.id },
   );
 
-  products.forEach((product, i) => {
+  for (const [i, product] of products.entries()) {
     const found = existing[`p${i}`];
     if (found) {
       if (found.status !== "ACTIVE") {
@@ -68,12 +112,20 @@ try {
         );
       }
       if (!found.publishedOnPublication) publish(found.id, onlineStore.id);
-      console.log(`kept     ${product.handle}`);
-      return;
+      const media = product.files?.length ?? 0;
+      const note =
+        found.mediaCount.count < media
+          ? ` (has ${found.mediaCount.count} of ${media} media; delete it and run again to add them)`
+          : "";
+      console.log(`kept     ${product.handle}${note}`);
+      continue;
     }
 
     const input = {
       ...product,
+      ...(product.files && {
+        files: await Promise.all(product.files.map(stage)),
+      }),
       variants: product.variants.map((variant) => ({
         ...variant,
         inventoryQuantities: variant.inventoryQuantities.map((q) => ({
@@ -94,7 +146,7 @@ try {
     }
     publish(productSet.product.id, onlineStore.id);
     console.log(`created  ${product.handle}`);
-  });
+  }
 } catch (error) {
   const reason = String(error.stderr ?? "").trim();
   console.error(reason || error.message.split("\n")[0].slice(0, 200));

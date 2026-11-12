@@ -210,5 +210,20 @@
         "default": "outline"
       }
     ]
+  },
+  {
+    "name": "t:general.cards_and_media",
+    "settings": [
+      {
+        "type": "range",
+        "id": "card_radius",
+        "min": 0,
+        "max": 24,
+        "step": 2,
+        "unit": "px",
+        "default": 12,
+        "label": "t:labels.corner_radius"
+      }
+    ]
   }
 ]

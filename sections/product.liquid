@@ -1,23 +1,19 @@
 {% comment %}
-  The product page's buy box: images on the left and blocks on the right from 900px,
+  The product page's buy box: the media gallery on the left and blocks on the right from 900px,
   stacked on phones. The blocks read the product through closest.product.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/product
 {% endcomment %}
 
 <div class="buy-box">
-  <div class="buy-box__media">
-    {%- assign images = product.media | where: 'media_type', 'image' -%}
-    {%- for media in images -%}
-      {% render 'image',
-        class: 'product-image',
-        image: media,
-        sizes: '(min-width: 900px) 52vw, 100vw',
-        preload: forloop.first,
-        loading: 'lazy'
-      %}
-    {%- endfor -%}
-  </div>
+  {%- liquid
+    assign square = false
+    if section.settings.media_ratio == 'square'
+      assign square = true
+    endif
+    assign gallery_id = 'Gallery-' | append: section.id
+  -%}
+  {% render 'product-gallery', product: product, id: gallery_id, square: square %}
 
   <div class="buy-box__info">
     {% content_for 'blocks' %}
@@ -42,6 +38,11 @@
     .buy-box {
       grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
     }
+
+    /* Stays on the right when the product has no media. */
+    .buy-box__info {
+      grid-column: -2;
+    }
   }
 {% endstylesheet %}
 
@@ -55,7 +56,19 @@
     { "type": "_variant-picker" },
     { "type": "_buy-buttons" }
   ],
-  "settings": [],
+  "settings": [
+    {
+      "type": "select",
+      "id": "media_ratio",
+      "label": "t:labels.media_ratio",
+      "info": "t:info.media_ratio",
+      "options": [
+        { "value": "square", "label": "t:options.media_ratio.square" },
+        { "value": "original", "label": "t:options.media_ratio.original" }
+      ],
+      "default": "square"
+    }
+  ],
   "disabled_on": {
     "groups": ["header", "footer"]
   }

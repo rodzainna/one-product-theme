@@ -67,6 +67,13 @@
       "add_to_cart": "Add to cart",
       "duties_and_tax_included": "Duties and tax included.",
       "duties_included": "Duties included.",
+      "media": {
+        "gallery": "Product media",
+        "load_model": "Load 3D model: {{ alt }}",
+        "play_video": "Play video: {{ alt }}",
+        "show": "Show {{ alt }}, {{ index }} of {{ count }}",
+        "view_in_space": "View in your space"
+      },
       "on_sale": "Sale",
       "one_time_purchase": "One-time purchase",
       "option_picked_html": "{{ option }}: {{ value }}",
