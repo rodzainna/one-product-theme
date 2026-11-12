@@ -10,7 +10,7 @@ An industry-agnostic Shopify theme for stores that sell one product. Every headi
 
 ## Development
 
-Requires Node 22.22.2+ (or 24.15+), [pnpm](https://pnpm.io/) 11+ and [Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli).
+Requires Node 22.22.2+ (or 24.15+, or 26+), [pnpm](https://pnpm.io/) 11+ and [Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli).
 
 ```sh
 pnpm install
@@ -22,7 +22,16 @@ pnpm test:store                 # Vitest: tests/store/ against a running preview
 pnpm format                     # Prettier (Liquid, CSS, JS, JSON)
 ```
 
-`pnpm test:store` fetches rendered sections from the preview of a test store, because Liquid only renders on Shopify. It expects the products named in `tests/store/` (for example `test-size-sold-out`, with size S out of stock) and a preview started with the storefront password, at `http://127.0.0.1:9293` unless `STORE_URL` says otherwise. `read -s` keeps the password out of your shell history:
+`pnpm test:store` fetches rendered sections from the preview of a test store, because Liquid only renders on Shopify. It expects the products in `tests/store/products.mjs` (for example `test-size-sold-out`, with size S out of stock). Create any that are missing with your own Shopify CLI login for that store:
+
+```sh
+shopify store auth --store <test-store>.myshopify.com --scopes write_products,write_inventory,read_locations,write_publications
+pnpm test:store:setup <test-store>.myshopify.com
+```
+
+Existing products are left as they are, so to apply a change in `products.mjs`, delete that product on the store and run the setup again.
+
+Then start a preview with the storefront password, at `http://127.0.0.1:9293` unless `STORE_URL` says otherwise. `read -s` keeps the password out of your shell history:
 
 ```sh
 read -s SHOPIFY_FLAG_STORE_PASSWORD && export SHOPIFY_FLAG_STORE_PASSWORD

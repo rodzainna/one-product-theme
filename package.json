@@ -9,6 +9,7 @@
     "lint:css": "node scripts/lint-css.mjs",
     "test": "vitest run",
     "test:store": "vitest run --config vitest.store.config.mjs",
+    "test:store:setup": "node scripts/test-store-setup.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

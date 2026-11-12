@@ -24,7 +24,7 @@ export async function get(path) {
   }
   if (response.status === 404) {
     throw new Error(
-      `GET ${path}: 404. Does the test store have the products in tests/store/? (README, "pnpm test:store")`,
+      `GET ${path}: 404. Is it in tests/store/products.mjs, and created on the test store? (pnpm test:store:setup <store>.myshopify.com, README)`,
     );
   }
   if (!response.ok) throw new Error(`GET ${path}: ${response.status}`);
