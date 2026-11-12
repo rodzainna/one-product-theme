@@ -1,0 +1,49 @@
+{% doc %}
+  Renders the buy box: the media gallery on the left and the section's blocks on the right
+  from 900px, stacked on phones. Shared by the product and featured product sections.
+
+  @param {product} product - The product the gallery shows
+  @param {string} blocks - The section's rendered blocks, from content_for 'blocks'
+  @param {string} section_id - The section's ID, for the gallery's ID
+  @param {boolean} [square] - Crops images and frames other media in a square
+  @param {boolean} [preload] - For a buy box above the fold: loads the starting media first
+
+  @example
+  {% render 'buy-box', product: product, blocks: blocks, section_id: section.id, square: true, preload: true %}
+{% enddoc %}
+
+{%- assign gallery_id = 'Gallery-' | append: section_id -%}
+
+<div class="buy-box">
+  {% render 'product-gallery', product: product, id: gallery_id, square: square, preload: preload %}
+
+  <div class="buy-box__info">
+    {{ blocks }}
+  </div>
+</div>
+
+{% stylesheet %}
+  .buy-box {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-xl);
+    align-items: start;
+    padding-block: var(--space-xl);
+  }
+
+  .buy-box__info {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  @media (min-width: 900px) {
+    .buy-box {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    }
+
+    /* Stays on the right when the product has no media. */
+    .buy-box__info {
+      grid-column: -2;
+    }
+  }
+{% endstylesheet %}

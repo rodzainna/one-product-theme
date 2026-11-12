@@ -44,7 +44,7 @@
   data-url="{{ current_product.url }}"
   data-section-id="{{ section.id }}"
   data-variant-id="{{ current_variant.id }}"
-  {% if template.name == 'product' and product.id == current_product.id %}
+  {% if template.name == 'product' and section.settings.product == blank %}
     data-update-url
   {% endif %}
   {% if current_product.has_only_default_variant %}

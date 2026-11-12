@@ -730,9 +730,16 @@ main
   }
 }
 
-/* Room for the sticky add-to-cart bar (--sticky-bar-h is 0 while it's hidden), so it never covers focus, a snapped section's end or the footer. */
+/* Room for the sticky add-to-cart bar (--sticky-bar-h is 0 while it's hidden), so it never covers focus or the footer. */
 html {
   scroll-padding-block-end: var(--sticky-bar-h);
+}
+
+/* Not where pages snap: the snap points would move as the bar shows and hides. */
+@media (min-width: 900px) and (pointer: fine) {
+  html.snap {
+    scroll-padding-block-end: 0;
+  }
 }
 
 .footer-group {

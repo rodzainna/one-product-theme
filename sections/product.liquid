@@ -1,50 +1,18 @@
 {% comment %}
-  The product page's buy box: the media gallery on the left and blocks on the right from 900px,
-  stacked on phones. The blocks read the product through closest.product.
+  The product page's buy box (snippets/buy-box.liquid). The blocks read the template's
+  product through closest.product.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/product
 {% endcomment %}
 
-<div class="buy-box">
-  {%- liquid
-    assign square = false
-    if section.settings.media_ratio == 'square'
-      assign square = true
-    endif
-    assign gallery_id = 'Gallery-' | append: section.id
-  -%}
-  {% render 'product-gallery', product: product, id: gallery_id, square: square %}
-
-  <div class="buy-box__info">
-    {% content_for 'blocks' %}
-  </div>
-</div>
-
-{% stylesheet %}
-  .buy-box {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-xl);
-    align-items: start;
-    padding-block: var(--space-xl);
-  }
-
-  .buy-box__info {
-    display: grid;
-    gap: var(--space-s);
-  }
-
-  @media (min-width: 900px) {
-    .buy-box {
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-    }
-
-    /* Stays on the right when the product has no media. */
-    .buy-box__info {
-      grid-column: -2;
-    }
-  }
-{% endstylesheet %}
+{%- liquid
+  assign square = false
+  if section.settings.media_ratio == 'square'
+    assign square = true
+  endif
+-%}
+{%- capture blocks -%}{% content_for 'blocks' %}{%- endcapture -%}
+{% render 'buy-box', product: product, blocks: blocks, section_id: section.id, square: square, preload: true %}
 
 {% schema %}
 {

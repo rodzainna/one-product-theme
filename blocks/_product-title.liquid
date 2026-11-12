@@ -1,6 +1,6 @@
 {% doc %}
-  Renders the product's vendor and title. The title is the page's h1 on the product
-  template, and an h2 elsewhere, where the hero owns the h1.
+  Renders the product's vendor and title. The title is the page's h1 in the product
+  page's own section, and an h2 in a featured product section, where the hero owns the h1.
 
   @example
   {% content_for 'block', type: '_product-title', id: 'title' %}
@@ -12,7 +12,7 @@
   {%- if block.settings.show_vendor and current_product.vendor != blank -%}
     <p class="product-title__vendor">{{ current_product.vendor | escape }}</p>
   {%- endif -%}
-  {%- if template.name == 'product' -%}
+  {%- if template.name == 'product' and section.settings.product == blank -%}
     <h1 class="product-title__heading">{{ current_product.title | escape }}</h1>
   {%- else -%}
     <h2 class="product-title__heading">{{ current_product.title | escape }}</h2>

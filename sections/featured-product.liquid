@@ -1,0 +1,130 @@
+{% comment %}
+  A buy box for the product picked in the section settings (snippets/buy-box.liquid), on
+  any page; the home page uses it as its buy box. The blocks read that product through
+  closest.product. With no product picked, the theme editor shows a placeholder and
+  shoppers see nothing; data-empty lets snapping and stacking skip the section.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/blocks/theme-blocks/dynamic-sources
+{% endcomment %}
+
+{%- liquid
+  assign featured = section.settings.product
+  assign square = false
+  if section.settings.media_ratio == 'square'
+    assign square = true
+  endif
+  assign preload = false
+  if section.index == 1
+    assign preload = true
+  endif
+-%}
+
+{%- if featured != blank or request.design_mode -%}
+  <div class="featured-product full-width color-{{ section.settings.color_scheme }}">
+    <div class="featured-product__content">
+      {%- if featured != blank -%}
+        {%- capture blocks -%}{% content_for 'blocks' %}{%- endcapture -%}
+        {% render 'buy-box',
+          product: featured,
+          blocks: blocks,
+          section_id: section.id,
+          square: square,
+          preload: preload
+        %}
+      {%- else -%}
+        <div class="buy-box">
+          <div class="featured-product__placeholder">
+            {{ 'product-1' | placeholder_svg_tag }}
+          </div>
+          <div class="buy-box__info">
+            <h2>{{ 'products.product.placeholder_title' | t }}</h2>
+            <p>{{ 'products.product.placeholder_text' | t }}</p>
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- else -%}
+  <div data-empty></div>
+{%- endif -%}
+
+{% stylesheet %}
+  .featured-product__content {
+    display: grid;
+    grid-template-columns: var(--content-grid);
+  }
+
+  .featured-product__content > * {
+    grid-column: 2;
+  }
+
+  .featured-product__placeholder {
+    aspect-ratio: 1;
+    background: var(--color-hover);
+  }
+
+  .featured-product__placeholder > svg {
+    width: 100%;
+    height: 100%;
+    fill: var(--color-foreground-muted);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.featured_product",
+  "blocks": [
+    { "type": "_product-title" },
+    { "type": "_product-price" },
+    { "type": "_product-description" },
+    { "type": "_variant-picker" },
+    { "type": "_buy-buttons" },
+    { "type": "_product-rating" },
+    { "type": "_pickup-availability" },
+    { "type": "_custom-liquid" },
+    { "type": "@app" }
+  ],
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "t:general.product"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "media_ratio",
+      "label": "t:labels.media_ratio",
+      "info": "t:info.media_ratio",
+      "options": [
+        { "value": "square", "label": "t:options.media_ratio.square" },
+        { "value": "original", "label": "t:options.media_ratio.original" }
+      ],
+      "default": "square"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.featured_product",
+      "blocks": {
+        "title": { "type": "_product-title" },
+        "rating": { "type": "_product-rating" },
+        "price": { "type": "_product-price" },
+        "description": { "type": "_product-description" },
+        "variant_picker": { "type": "_variant-picker" },
+        "buy_buttons": { "type": "_buy-buttons" },
+        "pickup": { "type": "_pickup-availability" }
+      },
+      "block_order": ["title", "rating", "price", "description", "variant_picker", "buy_buttons", "pickup"]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}

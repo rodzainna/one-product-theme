@@ -6,9 +6,10 @@
   @param {product} product - The product
   @param {string} id - Unique on the page, so the script can find this gallery in a re-rendered section
   @param {boolean} [square] - Crops images and frames other media in a square
+  @param {boolean} [preload] - For a gallery above the fold: loads the starting media first
 
   @example
-  {% render 'product-gallery', product: product, id: gallery_id, square: true %}
+  {% render 'product-gallery', product: product, id: gallery_id, square: true, preload: true %}
 {% enddoc %}
 
 {%- liquid
@@ -34,6 +35,10 @@
               assign is_current = true
             endif
             assign render_now = is_current
+            assign preload_media = false
+            if is_current and preload
+              assign preload_media = true
+            endif
             if pass == 2
               assign render_now = true
               if is_current
@@ -55,7 +60,7 @@
               media: media,
               sizes: '(min-width: 900px) 52vw, 88vw',
               square: square,
-              preload: is_current,
+              preload: preload_media,
               product_title: product.title
             %}
           </li>

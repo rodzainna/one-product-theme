@@ -124,4 +124,59 @@ describe("sticky add to cart", () => {
     await settle();
     expect(room()).toBe("60px");
   });
+
+  test("with two buy boxes, only the one the shopper has reached shows its bar", async () => {
+    await page.viewport(800, 600);
+    const box = (id) => `
+      <div class="shopify-section" style="position: relative">
+        <div class="buy-box__info">
+          <div style="height: 300px"></div>
+          <button id="${id}">Add to cart</button>
+          <div style="height: 300px"></div>
+          <sticky-add-to-cart class="sticky-bar" data-button="${id}" popover="manual"><button>Add</button></sticky-add-to-cart>
+        </div>
+      </div>
+      <div class="shopify-section" style="height: 1500px"></div>`;
+    document.body.innerHTML = `
+      <style>body { margin: 0; } .sticky-bar { position: fixed; inset: auto 0 0; margin: 0; height: 60px; padding: 0; border: 0; }</style>
+      <main>${box("First")}${box("Second")}</main>`;
+    const [first, second] = document.querySelectorAll("sticky-add-to-cart");
+    // Between the two: the first buy box's bar.
+    scrollTo(0, 1000);
+    await expect.poll(() => open(first)).toBe(true);
+    expect(open(second)).toBe(false);
+    // In the second buy box, with its Add to cart on screen: no bar.
+    scrollTo(0, 2150);
+    await expect.poll(() => open(first)).toBe(false);
+    expect(open(second)).toBe(false);
+    expect(room()).toBe("");
+    // Past the second: only its bar.
+    scrollTo(0, 3000);
+    await expect.poll(() => open(second)).toBe(true);
+    expect(open(first)).toBe(false);
+    expect(room()).toBe("60px");
+  });
+
+  test("hides over a later buy box that has no bar of its own", async () => {
+    await page.viewport(800, 600);
+    document.body.innerHTML = `
+      <style>body { margin: 0; } .sticky-bar { position: fixed; inset: auto 0 0; margin: 0; height: 60px; padding: 0; border: 0; }</style>
+      <main>
+        <div class="shopify-section"><div class="buy-box">
+          <div class="buy-box__info">
+            <button id="First">Add to cart</button>
+            <sticky-add-to-cart class="sticky-bar" data-button="First" popover="manual"><button>Add</button></sticky-add-to-cart>
+          </div>
+        </div></div>
+        <div class="shopify-section" style="height: 1000px"></div>
+        <div class="shopify-section"><div class="buy-box" style="height: 600px"><button>Add to cart</button></div></div>
+        <div class="shopify-section" style="height: 1500px"></div>
+      </main>`;
+    const bar = document.querySelector("sticky-add-to-cart");
+    scrollTo(0, 200);
+    await expect.poll(() => open(bar)).toBe(true);
+    scrollTo(0, 1100);
+    await expect.poll(() => open(bar)).toBe(false);
+    expect(room()).toBe("");
+  });
 });
