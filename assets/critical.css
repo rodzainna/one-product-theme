@@ -729,3 +729,12 @@ main
     text-decoration: underline;
   }
 }
+
+/* Room for the sticky add-to-cart bar (--sticky-bar-h is 0 while it's hidden), so it never covers focus, a snapped section's end or the footer. */
+html {
+  scroll-padding-block-end: var(--sticky-bar-h);
+}
+
+.footer-group {
+  padding-block-end: var(--sticky-bar-h);
+}

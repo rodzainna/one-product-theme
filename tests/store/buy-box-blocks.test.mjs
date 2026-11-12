@@ -60,3 +60,28 @@ describe("gift card", () => {
     expect(await render("test-regular")).not.toContain("gift-card-recipient");
   });
 });
+
+describe("sticky add to cart", () => {
+  test("its button submits the buy box form and follows the variant's state", async () => {
+    const html = await render("test-two-options");
+    const formId = html.match(/<form[^>]*id="(Product-form-[^"]+)"/)?.[1];
+    expect(formId).toBeTruthy();
+    const bar =
+      html.match(/<sticky-add-to-cart[\s\S]*?<\/sticky-add-to-cart>/)?.[0] ??
+      "";
+    expect(bar).toMatch(/<sticky-add-to-cart[^>]*\spopover="manual"/);
+    expect(bar).toMatch(
+      new RegExp(`<button[^>]*name="add"[^>]*form="${formId}"`),
+    );
+    expect(text(bar)).toContain("Test two options S / Red $10.00 Add to cart");
+  });
+
+  test("is disabled and reads Sold out with a sold-out product", async () => {
+    const bar =
+      (await render("test-sold-out")).match(
+        /<sticky-add-to-cart[\s\S]*?<\/sticky-add-to-cart>/,
+      )?.[0] ?? "";
+    expect(bar).toMatch(/<button[^>]*\sdisabled/);
+    expect(text(bar)).toMatch(/Sold out$/);
+  });
+});
