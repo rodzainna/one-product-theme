@@ -3,9 +3,21 @@ import locale from "../../locales/en.default.json" with { type: "json" };
 import { product, section, sectionId } from "./store.mjs";
 
 const t = locale.products.product;
+const taxLines = [
+  t.tax_included,
+  t.duties_and_tax_included,
+  t.duties_included,
+].map((line) => line.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
 const text = (html) =>
   html
     .replace(/<style[\s\S]*?<\/style>/g, "")
+    .replace(/<script[\s\S]*?<\/script>/g, "")
+    .replace(/<tool-tip[\s\S]*?<\/tool-tip>/g, "")
+    // The tax line depends on the store's tax setting; the tax note tests cover it.
+    .replace(
+      new RegExp(`<p class="price__note">(${taxLines.join("|")})</p>`, "g"),
+      "",
+    )
     .replace(/<span class="visually-hidden">[\s\S]*?<\/span>/g, "")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ")
@@ -22,7 +34,11 @@ const part = (html, pattern, name) => {
   return match[0];
 };
 const priceBlock = (html) =>
-  part(html, /<div class="price price--lg">[\s\S]*?<\/div>/, "price");
+  part(
+    html,
+    /<div class="price price--lg">[\s\S]*?<\/tool-tip>[\s\S]*?<\/div>/,
+    "price",
+  );
 const addButton = (html) =>
   part(html, /<button[^>]*name="add"[^>]*>[\s\S]*?<\/button>/, "add button");
 
@@ -95,6 +111,43 @@ describe("price", () => {
     expect(note).toContain(
       `&nbsp;${locale.accessibility.unit_price_separator}&nbsp;`,
     );
+  });
+});
+
+describe("tax note", () => {
+  const tooltip = (h) =>
+    part(h, /<tool-tip class="tooltip">[\s\S]*?<\/tool-tip>/, "tax tooltip");
+
+  test("an ⓘ on the price line names and describes itself through its popover", () => {
+    const price = priceBlock(html["test-sale"]);
+    const tip = tooltip(price);
+    const id = tip.match(/popovertarget="([^"]+)"/)?.[1];
+    expect(id).toBeTruthy();
+    expect(tip).toContain(`aria-describedby="${id}"`);
+    expect(tip).toContain(`popover id="${id}"`);
+    expect(tip).toContain(`aria-label="${t.tax_info_label}"`);
+  });
+
+  test("the visible line and the ⓘ text agree on what's included", () => {
+    const expected = {
+      [t.duties_and_tax_included]: [t.tax_info_duties_and_tax_included],
+      [t.tax_included]: [t.tax_info_included],
+      [t.duties_included]: [t.tax_info_duties_included],
+      none: [t.tax_info_excluded],
+    };
+    for (const handle of ["test-regular", "test-sale", "test-unit-price"]) {
+      const price = priceBlock(html[handle]);
+      const line =
+        [t.duties_and_tax_included, t.tax_included, t.duties_included].find(
+          (note) => price.includes(`<p class="price__note">${note}</p>`),
+        ) ?? "none";
+      const bubble = text(
+        tooltip(price).match(
+          /<span class="tooltip__bubble"[\s\S]*?<\/span>/,
+        )[0],
+      );
+      expect(expected[line]).toContain(bubble);
+    }
   });
 });
 

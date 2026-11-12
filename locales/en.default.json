@@ -65,6 +65,8 @@
   "products": {
     "product": {
       "add_to_cart": "Add to cart",
+      "duties_and_tax_included": "Duties and tax included.",
+      "duties_included": "Duties included.",
       "on_sale": "Sale",
       "one_time_purchase": "One-time purchase",
       "purchase_options": "Purchase options",
@@ -72,6 +74,12 @@
       "regular_price": "Regular price",
       "sale_price": "Sale price",
       "sold_out": "Sold out",
+      "tax_included": "Tax included.",
+      "tax_info_duties_and_tax_included": "Duties and tax included. Shipping calculated at checkout.",
+      "tax_info_duties_included": "Duties included. Tax and shipping calculated at checkout.",
+      "tax_info_excluded": "Tax and shipping calculated at checkout.",
+      "tax_info_included": "Tax included. Shipping calculated at checkout.",
+      "tax_info_label": "Tax and shipping",
       "unit_price": "Unit price"
     }
   },

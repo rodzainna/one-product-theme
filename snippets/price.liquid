@@ -6,6 +6,7 @@
   @param {variant} variant - The variant to price
   @param {selling_plan_allocation} [allocation] - The selected selling plan allocation, if any
   @param {string} [size] - lg for the buy box, or blank for the default
+  @param {string} [tax_info_id] - For the buy box: unique id for an ⓘ with the tax and shipping note, plus a visible line when the store's prices include tax or duties
 
   @example
   {% render 'price', variant: product.selected_or_first_available_variant, size: 'lg' %}
@@ -37,6 +38,26 @@
     {%- render 'badge', text: sale_label, variant: 'sale' -%}
   {%- endif -%}
 
+  {%- if tax_info_id != blank -%}
+    {%- liquid
+      assign tax_label = 'products.product.tax_info_label' | t
+      assign tax_line = blank
+      if cart.duties_included and cart.taxes_included
+        assign tax_line = 'products.product.duties_and_tax_included' | t
+        assign tax_text = 'products.product.tax_info_duties_and_tax_included' | t
+      elsif cart.taxes_included
+        assign tax_line = 'products.product.tax_included' | t
+        assign tax_text = 'products.product.tax_info_included' | t
+      elsif cart.duties_included
+        assign tax_line = 'products.product.duties_included' | t
+        assign tax_text = 'products.product.tax_info_duties_included' | t
+      else
+        assign tax_text = 'products.product.tax_info_excluded' | t
+      endif
+    -%}
+    {%- render 'tooltip', id: tax_info_id, label: tax_label, text: tax_text -%}
+  {%- endif -%}
+
   {%- if variant.unit_price_measurement -%}
     {%- assign measurement = variant.unit_price_measurement -%}
     <p class="price__note">
@@ -49,6 +70,10 @@
       {%- if measurement.reference_value != 1 %}{{ measurement.reference_value }}{% endif -%}
       {{- measurement.reference_unit -}}
     </p>
+  {%- endif -%}
+
+  {%- if tax_line != blank -%}
+    <p class="price__note">{{ tax_line }}</p>
   {%- endif -%}
 </div>
 
