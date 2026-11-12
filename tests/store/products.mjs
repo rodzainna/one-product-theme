@@ -68,6 +68,38 @@ const media = [
   },
 ];
 
+// Subscription plans; not part of ProductSetInput, so the setup script adds them afterwards.
+const weeks = (count) => ({ interval: "WEEK", intervalCount: count });
+const plan = (name, delivery, billing, percentage) => ({
+  name,
+  options: [name],
+  category: "SUBSCRIPTION",
+  billingPolicy: { recurring: { ...weeks(billing), minCycles: 1 } },
+  deliveryPolicy: { recurring: weeks(delivery) },
+  pricingPolicies: [
+    {
+      fixed: { adjustmentType: "PERCENTAGE", adjustmentValue: { percentage } },
+    },
+  ],
+});
+const sellingPlanGroups = [
+  {
+    name: "Subscribe & save",
+    merchantCode: "subscribe-save",
+    options: ["Delivery every"],
+    sellingPlansToCreate: [
+      plan("Every 2 weeks", 2, 2, 10),
+      plan("Every 4 weeks", 4, 4, 10),
+    ],
+  },
+  {
+    name: "Prepaid",
+    merchantCode: "prepaid",
+    options: ["Deliveries"],
+    sellingPlansToCreate: [plan("4 deliveries, every 2 weeks", 2, 8, 15)],
+  },
+];
+
 // Size × Colour, with M / Blue sold out and no L / Blue at all.
 const twoOptions = () => {
   const combinations = [
@@ -119,6 +151,7 @@ export const products = [
       "Each size has its own price.",
     ),
     ...sizes(["10.00", "15.00", "20.00"], [50, 50, 50]),
+    sellingPlanGroups,
   },
   {
     ...base(

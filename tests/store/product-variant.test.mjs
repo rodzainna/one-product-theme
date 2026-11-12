@@ -209,9 +209,12 @@ describe("the picker and the form", () => {
     );
   });
 
-  test("a product with only the default variant has no picker", async () => {
+  test("a product with only the default variant has a hidden picker with no options", async () => {
     const html = await section("/products/test-regular", main);
-    expect(html).not.toContain("<variant-picker");
+    const picker =
+      html.match(/<variant-picker[\s\S]*?<\/variant-picker>/)?.[0] ?? "";
+    expect(picker).toMatch(/<variant-picker[^>]*\shidden[\s>]/);
+    expect(picker).not.toMatch(/<fieldset|<select/);
     expect(idInput(html)).toMatch(/value="\d+"/);
   });
 });

@@ -12,6 +12,7 @@
   @param {number} [max] - Highest value, if any
   @param {number} [step] - Increment, default 1
   @param {boolean} [disabled] - Disables the input and both buttons
+  @param {string} [input_attributes] - Extra attributes for the input, e.g. data-variant-attributes="min max step"
 
   @example
   {% render 'quantity-input', id: quantity_id, label: quantity_label, min: rule.min, max: rule.max, step: rule.increment %}
@@ -51,6 +52,7 @@
       {% if disabled %}
         disabled
       {% endif %}
+      {{ input_attributes }}
     >
     {%- render 'icon-button', icon: 'plus', label: increase_label, size: 'sm', attributes: 'data-quantity-step="1"' -%}
     <span class="visually-hidden" aria-live="polite"></span>

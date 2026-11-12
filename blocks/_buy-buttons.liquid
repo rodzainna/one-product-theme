@@ -14,6 +14,15 @@
   assign current_product = closest.product
   assign current_variant = current_product.selected_or_first_available_variant
   assign selected_allocation = current_variant.selected_selling_plan_allocation
+  # Shopify sets the variant's plan only when the URL names a variant; ?selling_plan= alone sets the product's.
+  if selected_allocation == blank and current_product.selected_selling_plan
+    for candidate in current_variant.selling_plan_allocations
+      if candidate.selling_plan.id == current_product.selected_selling_plan.id
+        assign selected_allocation = candidate
+        break
+      endif
+    endfor
+  endif
   if selected_allocation == blank and current_product.requires_selling_plan
     assign selected_allocation = current_variant.selling_plan_allocations.first
   endif
@@ -56,25 +65,60 @@
               variant: 'card'
             %}
           {%- endunless -%}
-          {%- for allocation in current_variant.selling_plan_allocations -%}
-            {%- liquid
-              assign plan = allocation.selling_plan
-              assign plan_id = plan_prefix | append: '-' | append: plan.id
-              assign plan_price = allocation.price | money | strip_html
-              assign plan_checked = false
-              if plan.id == selected_plan_id
-                assign plan_checked = true
+          {%- comment -%} Plans in their admin groups, each group named when there's more than one. {%- endcomment -%}
+          {%- liquid
+            # Only groups with plans for this variant count, and only they are shown.
+            assign group_count = 0
+            for group in current_product.selling_plan_groups
+              assign group_allocations = current_variant.selling_plan_allocations | where: 'selling_plan_group_id', group.id
+              if group_allocations.size > 0
+                assign group_count = group_count | plus: 1
               endif
+            endfor
+            assign grouped = false
+            if group_count > 1
+              assign grouped = true
+            endif
+          -%}
+          {%- for group in current_product.selling_plan_groups -%}
+            {%- assign group_allocations = current_variant.selling_plan_allocations
+              | where: 'selling_plan_group_id', group.id
             -%}
-            {% render 'radio',
-              id: plan_id,
-              name: 'selling_plan',
-              value: plan.id,
-              label: plan.name,
-              hint: plan_price,
-              checked: plan_checked,
-              variant: 'card'
-            %}
+            {%- if group_allocations.size == 0 -%}
+              {%- continue -%}
+            {%- endif -%}
+            {%- if grouped -%}
+              <fieldset class="choice-group choice-group--cards buy-buttons__plan-group">
+                <legend>{{ group.name | escape }}</legend>
+            {%- endif -%}
+            {%- for allocation in group_allocations -%}
+              {%- liquid
+                assign plan = allocation.selling_plan
+                assign plan_id = plan_prefix | append: '-' | append: plan.id
+                # A prepaid plan charges several deliveries at checkout.
+                assign plan_price = allocation.per_delivery_price | money | strip_html
+                if allocation.checkout_charge_amount != allocation.per_delivery_price
+                  assign plan_total = allocation.checkout_charge_amount | money | strip_html
+                  assign plan_price = 'products.product.plan_prepaid' | t: price: plan_price, total: plan_total
+                endif
+                assign plan_checked = false
+                if plan.id == selected_plan_id
+                  assign plan_checked = true
+                endif
+              -%}
+              {% render 'radio',
+                id: plan_id,
+                name: 'selling_plan',
+                value: plan.id,
+                label: plan.name,
+                hint: plan_price,
+                checked: plan_checked,
+                variant: 'card'
+              %}
+            {%- endfor -%}
+            {%- if grouped -%}
+              </fieldset>
+            {%- endif -%}
           {%- endfor -%}
         </fieldset>
       {%- endif -%}
@@ -82,12 +126,29 @@
 
     <div class="buy-buttons__row">
       {%- liquid
+        # B2B quantity rules count what's already in the cart: the rest of the minimum, up to the maximum.
         assign quantity_rule = current_variant.quantity_rule
+        assign in_cart = 0
+        assign quantity_min = 1
+        if current_variant != blank
+          assign in_cart = cart.items | where: 'variant_id', current_variant.id | map: 'quantity' | sum
+          assign quantity_min = quantity_rule.min | minus: in_cart | at_least: quantity_rule.increment
+        endif
+        assign quantity_max = null
+        assign max_reached = false
+        if quantity_rule.max != blank
+          assign quantity_max = quantity_rule.max | minus: in_cart
+          if quantity_max < quantity_min
+            assign max_reached = true
+          endif
+        endif
         assign quantity_id = 'Product-quantity-' | append: id_suffix
+        assign rules_id = 'Product-rules-' | append: id_suffix
+        assign quantity_attributes = 'data-variant-attributes="min max step disabled" aria-describedby="' | append: rules_id | append: '"'
         assign quantity_label = 'products.product.quantity' | t
-        assign product_sold_out = true
-        if current_product.available
-          assign product_sold_out = false
+        assign quantity_disabled = true
+        if current_product.available and max_reached == false
+          assign quantity_disabled = false
         endif
         assign add_label = 'products.product.add_to_cart' | t
         assign add_disabled = false
@@ -97,6 +158,9 @@
         elsif current_variant.available == false
           assign add_label = 'products.product.sold_out' | t
           assign add_disabled = true
+        elsif max_reached
+          assign add_label = 'products.product.max_in_cart' | t
+          assign add_disabled = true
         endif
         assign add_attributes = 'id="Product-add-' | append: id_suffix | append: '" data-variant-region'
       -%}
@@ -104,10 +168,11 @@
         id: quantity_id,
         label: quantity_label,
         label_hidden: true,
-        disabled: product_sold_out,
-        min: quantity_rule.min,
-        max: quantity_rule.max,
-        step: quantity_rule.increment
+        disabled: quantity_disabled,
+        min: quantity_min,
+        max: quantity_max,
+        step: quantity_rule.increment,
+        input_attributes: quantity_attributes
       %}
       {% render 'button',
         label: add_label,
@@ -117,16 +182,43 @@
         attributes: add_attributes
       %}
     </div>
-    <div
-      class="buy-buttons__accelerated"
-      id="Product-accelerated-{{ id_suffix }}"
-      data-variant-hidden
-      {% if add_disabled %}
-        hidden
-      {% endif %}
-    >
-      {{ form | payment_button }}
-    </div>
+    <p class="buy-buttons__rules" id="{{ rules_id }}" data-variant-region>
+      {%- if quantity_rule.min > 1 or quantity_rule.increment > 1 or quantity_rule.max != blank -%}
+        {%- liquid
+          assign rules = ''
+          if quantity_rule.min > 1
+            assign rules = 'products.product.quantity_minimum' | t: count: quantity_rule.min
+          endif
+          if quantity_rule.max != blank
+            assign rule_text = 'products.product.quantity_maximum' | t: count: quantity_rule.max
+            assign rules = rules | append: ' · ' | append: rule_text
+          endif
+          if quantity_rule.increment > 1
+            assign rule_text = 'products.product.quantity_increment' | t: count: quantity_rule.increment
+            assign rules = rules | append: ' · ' | append: rule_text
+          endif
+          if in_cart > 0
+            assign rule_text = 'products.product.quantity_in_cart' | t: count: in_cart
+            assign rules = rules | append: ' · ' | append: rule_text
+          endif
+          assign rules = rules | remove_first: ' · '
+        -%}
+        {{ rules }}
+      {%- endif -%}
+    </p>
+    {%- if block.settings.show_dynamic_checkout -%}
+      <div
+        class="buy-buttons__accelerated{% if settings.secondary_button_style == 'solid' %} buy-buttons__accelerated--solid{% endif %}"
+        id="Product-accelerated-{{ id_suffix }}"
+        data-variant-hidden
+        {% if add_disabled %}
+          hidden
+        {% endif %}
+      >
+        {{ form | payment_button }}
+      </div>
+    {%- endif -%}
+    {{ form | payment_terms }}
   {% endform %}
 </div>
 
@@ -149,12 +241,70 @@
   .buy-buttons__row .button {
     flex: 1;
   }
+
+  .buy-buttons__plan-group legend {
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+
+  .buy-buttons__rules {
+    margin: 0;
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+
+  .buy-buttons__rules:empty {
+    display: none;
+  }
+
+  /* Shopify's plain Buy it now, styled as the theme's secondary button; branded ones keep their look. */
+  .buy-buttons__accelerated .shopify-payment-button__button--unbranded {
+    min-height: var(--control-h);
+    padding: var(--control-pad-y) var(--control-pad-l);
+    border: 2px solid var(--color-foreground);
+    border-radius: var(--radius-button);
+    background: transparent;
+    color: var(--color-foreground);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-ui);
+    transition: background-color var(--duration) var(--ease);
+  }
+
+  .buy-buttons__accelerated--solid .shopify-payment-button__button--unbranded {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+
+  @media (hover: hover) {
+    .buy-buttons__accelerated .shopify-payment-button__button--unbranded:hover:not([disabled]) {
+      background: var(--color-hover);
+    }
+
+    .buy-buttons__accelerated--solid .shopify-payment-button__button--unbranded:hover:not([disabled]) {
+      background: var(--color-foreground);
+      opacity: 0.9;
+    }
+  }
+
+  .buy-buttons__accelerated .shopify-payment-button__button--unbranded:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
 {% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.buy_buttons",
-  "settings": [],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_dynamic_checkout",
+      "label": "t:labels.show_dynamic_checkout",
+      "info": "t:info.show_dynamic_checkout",
+      "default": true
+    }
+  ],
   "presets": [{ "name": "t:general.buy_buttons" }]
 }
 {% endschema %}

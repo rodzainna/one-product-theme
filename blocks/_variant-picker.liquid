@@ -2,8 +2,8 @@
   Renders each product option as pills, as swatches when every value has a swatch
   (colour or image, from the option's category metafield), or as a dropdown when its
   style setting says so. assets/variant-picker.js re-renders the section for the picked
-  option values and updates the price, buy buttons and URL. Hidden when the product has
-  only the default variant.
+  option values and updates the price, buy buttons and URL, also when a selling plan is
+  picked. Hidden, with no options, when the product has only the default variant.
 
   @example
   {% content_for 'block', type: '_variant-picker', id: 'variant_picker' %}
@@ -15,21 +15,25 @@
   assign id_suffix = section.id | append: '-' | append: block.id
 -%}
 
-{%- unless current_product.has_only_default_variant -%}
-  <variant-picker
-    class="variant-picker"
-    id="VariantPicker-{{ id_suffix }}"
-    data-url="{{ current_product.url }}"
-    data-section-id="{{ section.id }}"
-    data-variant-id="{{ current_variant.id }}"
-    {% if template.name == 'product' and product.id == current_product.id %}
-      data-update-url
-    {% endif %}
-    {{ block.shopify_attributes }}
-  >
-    <script type="application/json" data-event-data>
-      {{ current_product | standard_event_data: 'view', context: 'page' }}
-    </script>
+{%- comment -%} Hidden with no options for a single-variant product, where it still re-prices selling plans. {%- endcomment -%}
+<variant-picker
+  class="variant-picker"
+  id="VariantPicker-{{ id_suffix }}"
+  data-url="{{ current_product.url }}"
+  data-section-id="{{ section.id }}"
+  data-variant-id="{{ current_variant.id }}"
+  {% if template.name == 'product' and product.id == current_product.id %}
+    data-update-url
+  {% endif %}
+  {% if current_product.has_only_default_variant %}
+    hidden
+  {% endif %}
+  {{ block.shopify_attributes }}
+>
+  <script type="application/json" data-event-data>
+    {{ current_product | standard_event_data: 'view', context: 'page' }}
+  </script>
+  {%- unless current_product.has_only_default_variant -%}
     {%- for option in current_product.options_with_values -%}
       {%- liquid
         assign group_name = 'Option-' | append: id_suffix | append: '-' | append: option.position
@@ -56,9 +60,9 @@
         {% render 'pill-group', legend: option.name, name: group_name, values: option.values %}
       {%- endif -%}
     {%- endfor -%}
-  </variant-picker>
-  <script src="{{ 'variant-picker.js' | asset_url }}" type="module"></script>
-{%- endunless -%}
+  {%- endunless -%}
+</variant-picker>
+<script src="{{ 'variant-picker.js' | asset_url }}" type="module"></script>
 
 {% stylesheet %}
   .variant-picker {

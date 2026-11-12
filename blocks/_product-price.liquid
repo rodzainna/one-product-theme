@@ -10,6 +10,15 @@
   assign current_product = closest.product
   assign current_variant = current_product.selected_or_first_available_variant
   assign allocation = current_variant.selected_selling_plan_allocation
+  # Shopify sets the variant's plan only when the URL names a variant; ?selling_plan= alone sets the product's.
+  if allocation == blank and current_product.selected_selling_plan
+    for candidate in current_variant.selling_plan_allocations
+      if candidate.selling_plan.id == current_product.selected_selling_plan.id
+        assign allocation = candidate
+        break
+      endif
+    endfor
+  endif
   if allocation == blank and current_product.requires_selling_plan
     assign allocation = current_variant.selling_plan_allocations.first
   endif

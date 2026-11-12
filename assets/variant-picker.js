@@ -1,8 +1,9 @@
 /**
  * Re-renders the product section for the picked option values (shopify.dev's
  * high-variant pattern), then swaps the picker and every [data-variant-region] in its
- * section, copies `value` onto every [data-variant-value] and `hidden` onto every
- * [data-variant-hidden] and updates the URL. Each pick dispatches Shopify's standard
+ * section, copies `value` onto every [data-variant-value], `hidden` onto every
+ * [data-variant-hidden] and the attributes listed in [data-variant-attributes], and updates
+ * the URL. Each pick dispatches Shopify's standard
  * `shopify:product:select` event, whose promise resolves with the variant (or null)
  * and the new document. While a request is out, Add to cart is aria-disabled and the
  * form won't submit.
@@ -18,6 +19,7 @@ export class VariantPicker extends HTMLElement {
   connectedCallback() {
     this.#section = this.closest(".shopify-section") ?? document;
     this.addEventListener("change", this.#onChange);
+    this.#section.addEventListener("change", this.#onPlanChange);
     this.#section.addEventListener("submit", this.#onSubmit, true);
     // Picks made before this script ran, or restored by the browser, aren't in the form yet.
     const radios = [...this.querySelectorAll("input[type=radio]")];
@@ -34,8 +36,15 @@ export class VariantPicker extends HTMLElement {
   disconnectedCallback() {
     this.#controller?.abort();
     this.removeEventListener("change", this.#onChange);
+    this.#section.removeEventListener("change", this.#onPlanChange);
     this.#section.removeEventListener("submit", this.#onSubmit, true);
   }
+
+  // A plan changes the price but not the variant, so it re-renders without the select event.
+  #onPlanChange = (event) => {
+    if (event.target.name !== "selling_plan") return;
+    this.#update(null, { announce: false });
+  };
 
   // The form still holds the last variant until the new section lands.
   #onSubmit = (event) => {
@@ -103,7 +112,7 @@ export class VariantPicker extends HTMLElement {
     return result;
   }
 
-  async #update(focusTarget) {
+  async #update(focusTarget, { announce = true } = {}) {
     // Swatch legends name the pick now, not after the section lands.
     for (const group of this.querySelectorAll(".pill-group")) {
       const picked = group.querySelector(".pill-group__picked");
@@ -111,7 +120,12 @@ export class VariantPicker extends HTMLElement {
       if (picked && input) picked.textContent = input.value;
     }
     const url = new URL(this.dataset.url, location.origin);
-    url.searchParams.set("option_values", this.optionValueIds.join(","));
+    // A single-variant product has no options to send, so it names its variant.
+    if (this.optionValueIds.length) {
+      url.searchParams.set("option_values", this.optionValueIds.join(","));
+    } else {
+      url.searchParams.set("variant", this.dataset.variantId);
+    }
     const plan = this.#section.querySelector('[name="selling_plan"]:checked');
     if (plan?.value) url.searchParams.set("selling_plan", plan.value);
 
@@ -119,7 +133,7 @@ export class VariantPicker extends HTMLElement {
     const controller = (this.#controller = new AbortController());
     this.#setBusy();
     // A superseded pick's promise never settles, so listeners only hear the final variant.
-    const announced = this.#announce();
+    const announced = announce ? this.#announce() : null;
     let html;
     try {
       html = await this.#fetchSection(url, controller.signal);
@@ -171,6 +185,20 @@ export class VariantPicker extends HTMLElement {
     )) {
       element.hidden = doc.getElementById(element.id)?.hidden ?? false;
     }
+    // Copied, not swapped, so the shopper's quantity stays while its limits follow the variant.
+    for (const element of this.#section.querySelectorAll(
+      "[data-variant-attributes]",
+    )) {
+      const next = doc.getElementById(element.id);
+      if (!next) continue;
+      for (const name of element.dataset.variantAttributes.split(" ")) {
+        if (next.hasAttribute(name)) {
+          element.setAttribute(name, next.getAttribute(name));
+        } else {
+          element.removeAttribute(name);
+        }
+      }
+    }
     // Set in place, so scripts watching the form's id input hear the change.
     for (const input of this.#section.querySelectorAll(
       "[data-variant-value]",
@@ -196,6 +224,9 @@ export class VariantPicker extends HTMLElement {
         page.searchParams.delete("variant");
         page.searchParams.set("option_values", this.optionValueIds.join(","));
       }
+      const plan = this.#section.querySelector('[name="selling_plan"]:checked');
+      if (plan?.value) page.searchParams.set("selling_plan", plan.value);
+      else page.searchParams.delete("selling_plan");
       history.replaceState(history.state, "", page);
     }
   }

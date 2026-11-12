@@ -51,6 +51,7 @@
     "parallax_strength": "Higher values move background images further.",
     "scroll_snap": "Home and story pages scroll one section at a time on screens 900px and wider with a mouse or trackpad.",
     "section_dots": "A dot per section on the right of the screen, named after its heading.",
+    "show_dynamic_checkout": "Lets customers check out directly with a familiar payment method, such as Shop Pay or PayPal.",
     "show_vendor": "Hidden on short desktop windows, so the buy box fits on one screen.",
     "stack_sections": "On home and story pages, each section pins and the next slides over it. Screens 900px and wider with a mouse or trackpad."
   },
@@ -85,6 +86,7 @@
     "scroll_snap": "Snap to sections",
     "secondary_button_style": "Secondary button style",
     "section_dots": "Show section dots",
+    "show_dynamic_checkout": "Show dynamic checkout buttons",
     "show_payment_icons": "Show payment icons",
     "show_vendor": "Show vendor",
     "stack_sections": "Stack sections",

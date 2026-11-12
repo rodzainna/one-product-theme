@@ -52,6 +52,7 @@ const section = ({
           <label><input type="radio" id="PlanOnce" name="selling_plan" value="" ${plan ? "" : "checked"}>Once</label>
           <label><input type="radio" name="selling_plan" value="77" ${plan ? "checked" : ""}>Monthly</label>
         </div>
+        <input type="number" id="Qty" name="quantity" value="1" ${size === "M" ? 'min="6" max="60" step="6"' : 'min="1" step="1"'} data-variant-attributes="min max step disabled">
         <button id="Add" name="add" data-variant-region ${variant ? "" : "disabled"}>${variant ? "Add to cart" : "Unavailable"}</button>
         <div id="Accel" data-variant-hidden ${variant ? "" : "hidden"}><button type="button">Buy it now</button></div>
       </form>
@@ -64,7 +65,8 @@ const section = ({
 const answer = (url) => {
   const ids = new URL(url).searchParams.get("option_values").split(",");
   const name = (id) => Object.keys(VALUES).find((key) => VALUES[key] === id);
-  return section({ size: name(ids[0]), colour: name(ids[1]) });
+  const plan = new URL(url).searchParams.get("selling_plan") ?? "";
+  return section({ size: name(ids[0]), colour: name(ids[1]), plan });
 };
 
 const startUrl = location.href;
@@ -98,6 +100,53 @@ const selected = (target) =>
 const updated = () => selected(picker());
 const requestUrl = (call = 0) => new URL(fetchSpy.mock.calls[call][0]);
 const variantParam = () => new URL(location.href).searchParams.get("variant");
+
+describe("a selling plan change", () => {
+  test("re-renders for the plan without announcing a variant, and keeps it in the URL", async () => {
+    render();
+    const events = [];
+    picker().addEventListener("shopify:product:select", (e) => events.push(e));
+    await userEvent.click(page.getByLabelText("Monthly"));
+    await expect.poll(() => fetchSpy.mock.calls.length).toBe(1);
+    expect(requestUrl().searchParams.get("selling_plan")).toBe("77");
+    await expect
+      .poll(() => new URL(location.href).searchParams.get("selling_plan"))
+      .toBe("77");
+    expect(events).toHaveLength(0);
+    await userEvent.click(page.getByLabelText("Once"));
+    await expect
+      .poll(() => new URL(location.href).searchParams.has("selling_plan"))
+      .toBe(false);
+  });
+});
+
+describe("a single-variant product", () => {
+  test("its hidden picker re-prices a plan by naming the variant", async () => {
+    document.body.innerHTML = `
+      <div class="shopify-section">
+        <variant-picker id="Picker" hidden data-url="${location.pathname}" data-section-id="template--1__main" data-variant-id="101"></variant-picker>
+        <div id="Price" data-variant-region>Price</div>
+        <form><div id="Plans" data-variant-region>
+          <label><input type="radio" id="Once" name="selling_plan" value="" checked>Once</label>
+          <label><input type="radio" id="Monthly" name="selling_plan" value="77">Monthly</label>
+        </div></form>
+      </div>`;
+    fetchSpy.mockImplementation(
+      async () =>
+        new Response(
+          document.body.innerHTML.replace(">Price<", ">Plan price<"),
+        ),
+    );
+    document.getElementById("Monthly").click();
+    await expect
+      .poll(() => document.getElementById("Price").textContent)
+      .toBe("Plan price");
+    const url = requestUrl();
+    expect(url.searchParams.get("variant")).toBe("101");
+    expect(url.searchParams.has("option_values")).toBe(false);
+    expect(url.searchParams.get("selling_plan")).toBe("77");
+  });
+});
 
 describe("the request", () => {
   test("asks for the picker's section with the checked option value ids in order", async () => {
@@ -159,6 +208,27 @@ describe("the request", () => {
 });
 
 describe("the update", () => {
+  test("copies the quantity limits onto the same input, keeping the shopper's quantity", async () => {
+    render();
+    const quantity = document.getElementById("Qty");
+    quantity.value = "12";
+    let done = updated();
+    await userEvent.click(page.getByLabelText("M"));
+    await done;
+    expect(document.getElementById("Qty")).toBe(quantity);
+    expect([quantity.min, quantity.max, quantity.step]).toEqual([
+      "6",
+      "60",
+      "6",
+    ]);
+    expect(quantity.value).toBe("12");
+    done = updated();
+    await userEvent.click(page.getByLabelText("S"));
+    await done;
+    expect(quantity.hasAttribute("max")).toBe(false);
+    expect(quantity.min).toBe("1");
+  });
+
   test("swaps the price, id, plans and button, and keeps the picks", async () => {
     render();
     const done = updated();
@@ -314,6 +384,8 @@ describe("the update", () => {
     document.querySelector("form").requestSubmit();
     release();
     await done;
+    // assets/quantity-input.js snaps the quantity to the new minimum on a real page.
+    document.getElementById("Qty").value = "6";
     document.querySelector("form").requestSubmit();
     document.removeEventListener("submit", record);
     expect(blocked).toEqual([true, false]);

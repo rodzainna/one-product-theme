@@ -97,7 +97,7 @@ try {
     `query ($publication: ID!) { ${products
       .map(
         (p, i) =>
-          `p${i}: productByIdentifier(identifier: { handle: ${JSON.stringify(p.handle)} }) { id status mediaCount { count } publishedOnPublication(publicationId: $publication) }`,
+          `p${i}: productByIdentifier(identifier: { handle: ${JSON.stringify(p.handle)} }) { id status mediaCount { count } sellingPlanGroupsCount { count } publishedOnPublication(publicationId: $publication) }`,
       )
       .join(" ")} }`,
     { publication: onlineStore.id },
@@ -113,16 +113,23 @@ try {
       }
       if (!found.publishedOnPublication) publish(found.id, onlineStore.id);
       const media = product.files?.length ?? 0;
-      const note =
-        found.mediaCount.count < media
-          ? ` (has ${found.mediaCount.count} of ${media} media; delete it and run again to add them)`
-          : "";
+      const groups = product.sellingPlanGroups?.length ?? 0;
+      const missing = [
+        found.mediaCount.count < media &&
+          `${found.mediaCount.count} of ${media} media`,
+        found.sellingPlanGroupsCount.count < groups &&
+          `${found.sellingPlanGroupsCount.count} of ${groups} plan groups`,
+      ].filter(Boolean);
+      const note = missing.length
+        ? ` (has ${missing.join(", ")}; delete it and run again to add them)`
+        : "";
       console.log(`kept     ${product.handle}${note}`);
       continue;
     }
 
+    const { sellingPlanGroups = [], ...productInput } = product;
     const input = {
-      ...product,
+      ...productInput,
       ...(product.files && {
         files: await Promise.all(product.files.map(stage)),
       }),
@@ -143,6 +150,16 @@ try {
       throw new Error(
         `${product.handle}: ${JSON.stringify(productSet.userErrors)}`,
       );
+    }
+    for (const group of sellingPlanGroups) {
+      const { sellingPlanGroupCreate } = execute(
+        "mutation ($input: SellingPlanGroupInput!, $resources: SellingPlanGroupResourceInput) { sellingPlanGroupCreate(input: $input, resources: $resources) { userErrors { message } } }",
+        { input: group, resources: { productIds: [productSet.product.id] } },
+        { mutation: true },
+      );
+      if (sellingPlanGroupCreate.userErrors.length) {
+        throw new Error(JSON.stringify(sellingPlanGroupCreate.userErrors));
+      }
     }
     publish(productSet.product.id, onlineStore.id);
     console.log(`created  ${product.handle}`);
