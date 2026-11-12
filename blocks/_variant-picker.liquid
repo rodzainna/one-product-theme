@@ -1,0 +1,120 @@
+{% doc %}
+  Renders each product option as pills, or as a dropdown when its style setting says so.
+  assets/variant-picker.js re-renders the section
+  for the picked option values and updates the price, buy buttons and URL. Hidden when
+  the product has only the default variant.
+
+  @example
+  {% content_for 'block', type: '_variant-picker', id: 'variant_picker' %}
+{% enddoc %}
+
+{%- liquid
+  assign current_product = closest.product
+  assign current_variant = current_product.selected_or_first_available_variant
+  assign id_suffix = section.id | append: '-' | append: block.id
+-%}
+
+{%- unless current_product.has_only_default_variant -%}
+  <variant-picker
+    class="variant-picker"
+    id="VariantPicker-{{ id_suffix }}"
+    data-url="{{ current_product.url }}"
+    data-section-id="{{ section.id }}"
+    data-variant-id="{{ current_variant.id }}"
+    {% if template.name == 'product' and product.id == current_product.id %}
+      data-update-url
+    {% endif %}
+    {{ block.shopify_attributes }}
+  >
+    <script type="application/json" data-event-data>
+      {{ current_product | standard_event_data: 'view', context: 'page' }}
+    </script>
+    {%- for option in current_product.options_with_values -%}
+      {%- liquid
+        assign group_name = 'Option-' | append: id_suffix | append: '-' | append: option.position
+        assign style_key = 'option_' | append: option.position | append: '_style'
+      -%}
+      {%- if block.settings[style_key] == 'dropdown' -%}
+        {%- capture value_options -%}
+          {%- for value in option.values -%}
+            <option
+              value="{{ value.name | escape }}"
+              data-option-value-id="{{ value.id }}"
+              data-option-name="{{ option.name | escape }}"
+              {% if value.selected %}
+                selected
+              {% endif %}
+            >
+              {{- value.name | escape -}}
+              {%- unless value.available %} ({{ 'products.product.sold_out' | t }}){% endunless -%}
+            </option>
+          {%- endfor -%}
+        {%- endcapture -%}
+        {% render 'select', id: group_name, label: option.name, name: group_name, options_html: value_options %}
+      {%- else -%}
+        {% render 'pill-group', legend: option.name, name: group_name, values: option.values %}
+      {%- endif -%}
+    {%- endfor -%}
+  </variant-picker>
+  <script src="{{ 'variant-picker.js' | asset_url }}" type="module"></script>
+{%- endunless -%}
+
+{% stylesheet %}
+  .variant-picker {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  /* Short desktop windows: options sit side by side, so the buy box fits one screen. */
+  @media (min-width: 900px) and (max-height: 800px) {
+    .variant-picker {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+    }
+
+    .variant-picker > .field {
+      flex: 1 1 12rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.variant_picker",
+  "settings": [
+    {
+      "type": "select",
+      "id": "option_1_style",
+      "label": "t:labels.option_1_style",
+      "info": "t:info.option_style",
+      "options": [
+        { "value": "pills", "label": "t:options.option_style.pills" },
+        { "value": "dropdown", "label": "t:options.option_style.dropdown" }
+      ],
+      "default": "pills"
+    },
+    {
+      "type": "select",
+      "id": "option_2_style",
+      "label": "t:labels.option_2_style",
+      "options": [
+        { "value": "pills", "label": "t:options.option_style.pills" },
+        { "value": "dropdown", "label": "t:options.option_style.dropdown" }
+      ],
+      "default": "pills"
+    },
+    {
+      "type": "select",
+      "id": "option_3_style",
+      "label": "t:labels.option_3_style",
+      "options": [
+        { "value": "pills", "label": "t:options.option_style.pills" },
+        { "value": "dropdown", "label": "t:options.option_style.dropdown" }
+      ],
+      "default": "pills"
+    }
+  ],
+  "presets": [{ "name": "t:general.variant_picker" }]
+}
+{% endschema %}

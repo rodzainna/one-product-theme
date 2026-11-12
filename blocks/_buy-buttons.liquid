@@ -1,7 +1,10 @@
 {% doc %}
-  Renders the product form: variant, purchase options, quantity, Add to cart and
-  accelerated checkout. Add to cart becomes a disabled "Sold out" button when every
-  variant is sold out; per-variant states need variant JS.
+  Renders the product form: variant id, purchase options, quantity, Add to cart and
+  accelerated checkout. Add to cart reads "Sold out" or "Unavailable" and is disabled
+  when the selected variant can't be bought, and accelerated checkout is hidden. On a
+  variant change, assets/variant-picker.js swaps each data-variant-region, sets the id
+  input's value (data-variant-value) and copies hidden onto data-variant-hidden, whose
+  content Shopify's own script fills.
 
   @example
   {% content_for 'block', type: '_buy-buttons', id: 'buy_buttons' %}
@@ -20,102 +23,110 @@
 
 <div class="buy-buttons" {{ block.shopify_attributes }}>
   {% form 'product', current_product, class: 'buy-buttons__form' %}
-    {%- if current_product.has_only_default_variant -%}
-      <input type="hidden" name="id" value="{{ current_variant.id }}">
-    {%- else -%}
-      {%- liquid
-        assign sold_out_label = 'products.product.sold_out' | t
-        assign variant_label = current_product.options | join: ' / '
-        assign variant_id = 'Product-variant-' | append: id_suffix
-      -%}
-      {%- capture variant_options -%}
-        {%- for variant in current_product.variants -%}
-          <option
-            value="{{ variant.id }}"
-            {% if variant == current_variant %}
-              selected
-            {% endif %}
-          >
-            {{- variant.title | escape }} - {{ variant.price | money -}}
-            {%- unless variant.available %} ({{ sold_out_label }}){% endunless -%}
-          </option>
-        {%- endfor -%}
-      {%- endcapture -%}
-      {% render 'select', id: variant_id, label: variant_label, name: 'id', options_html: variant_options %}
-    {%- endif -%}
+    <input
+      type="hidden"
+      name="id"
+      value="{{ current_variant.id }}"
+      id="Product-id-{{ id_suffix }}"
+      data-variant-value
+    >
 
-    {%- if current_variant.selling_plan_allocations.size > 0 -%}
-      {%- liquid
-        assign plan_prefix = 'Product-plan-' | append: id_suffix
-        assign one_time_id = plan_prefix | append: '-once'
-        assign one_time_label = 'products.product.one_time_purchase' | t
-        assign one_time_price = current_variant.price | money | strip_html
-        assign one_time_checked = false
-        if selected_plan_id == blank
-          assign one_time_checked = true
-        endif
-      -%}
-      <fieldset class="choice-group choice-group--cards">
-        <legend>{{ 'products.product.purchase_options' | t }}</legend>
-        {%- unless current_product.requires_selling_plan -%}
-          {% render 'radio',
-            id: one_time_id,
-            name: 'selling_plan',
-            value: '',
-            label: one_time_label,
-            hint: one_time_price,
-            checked: one_time_checked,
-            variant: 'card'
-          %}
-        {%- endunless -%}
-        {%- for allocation in current_variant.selling_plan_allocations -%}
-          {%- liquid
-            assign plan = allocation.selling_plan
-            assign plan_id = plan_prefix | append: '-' | append: plan.id
-            assign plan_price = allocation.price | money | strip_html
-            assign plan_checked = false
-            if plan.id == selected_plan_id
-              assign plan_checked = true
-            endif
-          -%}
-          {% render 'radio',
-            id: plan_id,
-            name: 'selling_plan',
-            value: plan.id,
-            label: plan.name,
-            hint: plan_price,
-            checked: plan_checked,
-            variant: 'card'
-          %}
-        {%- endfor -%}
-      </fieldset>
-    {%- endif -%}
+    <div class="buy-buttons__plans" id="Product-plans-{{ id_suffix }}" data-variant-region>
+      {%- if current_variant.selling_plan_allocations.size > 0 -%}
+        {%- liquid
+          assign plan_prefix = 'Product-plan-' | append: id_suffix
+          assign one_time_id = plan_prefix | append: '-once'
+          assign one_time_label = 'products.product.one_time_purchase' | t
+          assign one_time_price = current_variant.price | money | strip_html
+          assign one_time_checked = false
+          if selected_plan_id == blank
+            assign one_time_checked = true
+          endif
+        -%}
+        <fieldset class="choice-group choice-group--cards">
+          <legend>{{ 'products.product.purchase_options' | t }}</legend>
+          {%- unless current_product.requires_selling_plan -%}
+            {% render 'radio',
+              id: one_time_id,
+              name: 'selling_plan',
+              value: '',
+              label: one_time_label,
+              hint: one_time_price,
+              checked: one_time_checked,
+              variant: 'card'
+            %}
+          {%- endunless -%}
+          {%- for allocation in current_variant.selling_plan_allocations -%}
+            {%- liquid
+              assign plan = allocation.selling_plan
+              assign plan_id = plan_prefix | append: '-' | append: plan.id
+              assign plan_price = allocation.price | money | strip_html
+              assign plan_checked = false
+              if plan.id == selected_plan_id
+                assign plan_checked = true
+              endif
+            -%}
+            {% render 'radio',
+              id: plan_id,
+              name: 'selling_plan',
+              value: plan.id,
+              label: plan.name,
+              hint: plan_price,
+              checked: plan_checked,
+              variant: 'card'
+            %}
+          {%- endfor -%}
+        </fieldset>
+      {%- endif -%}
+    </div>
 
     <div class="buy-buttons__row">
       {%- liquid
         assign quantity_rule = current_variant.quantity_rule
         assign quantity_id = 'Product-quantity-' | append: id_suffix
         assign quantity_label = 'products.product.quantity' | t
-        assign sold_out = false
+        assign product_sold_out = true
+        if current_product.available
+          assign product_sold_out = false
+        endif
         assign add_label = 'products.product.add_to_cart' | t
-        # Without variant JS, only a fully sold-out product can be disabled safely.
-        unless current_product.available
-          assign sold_out = true
+        assign add_disabled = false
+        if current_variant == blank
+          assign add_label = 'products.product.unavailable' | t
+          assign add_disabled = true
+        elsif current_variant.available == false
           assign add_label = 'products.product.sold_out' | t
-        endunless
+          assign add_disabled = true
+        endif
+        assign add_attributes = 'id="Product-add-' | append: id_suffix | append: '" data-variant-region'
       -%}
       {% render 'quantity-input',
         id: quantity_id,
         label: quantity_label,
         label_hidden: true,
-        disabled: sold_out,
+        disabled: product_sold_out,
         min: quantity_rule.min,
         max: quantity_rule.max,
         step: quantity_rule.increment
       %}
-      {% render 'button', label: add_label, type: 'submit', name: 'add', disabled: sold_out %}
+      {% render 'button',
+        label: add_label,
+        type: 'submit',
+        name: 'add',
+        disabled: add_disabled,
+        attributes: add_attributes
+      %}
     </div>
-    {{ form | payment_button }}
+    <div
+      class="buy-buttons__accelerated"
+      id="Product-accelerated-{{ id_suffix }}"
+      data-variant-hidden
+      {% if add_disabled %}
+        hidden
+      {% endif %}
+    >
+      {{ form | payment_button }}
+    </div>
   {% endform %}
 </div>
 
@@ -123,6 +134,11 @@
   .buy-buttons__form {
     display: grid;
     gap: var(--space-s);
+  }
+
+  /* No box of its own, so an empty one adds no gap. */
+  .buy-buttons__plans {
+    display: contents;
   }
 
   .buy-buttons__row {

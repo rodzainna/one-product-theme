@@ -167,14 +167,20 @@ describe("add to cart", () => {
     expect(text(button)).toBe(t.add_to_cart);
   });
 
-  test("stays enabled for a sold-out size of an in-stock product (needs variant JS)", async () => {
+  test("a sold-out size of an in-stock product disables only the button", async () => {
     const path = "/products/test-size-sold-out";
     const s = json["test-size-sold-out"].variants.find((v) => v.title === "S");
     expect(s.available).toBe(false);
     const sold = await section(`${path}?variant=${s.id}`, main);
     const button = addButton(sold);
-    expect(button).not.toMatch(/\sdisabled[\s>]/);
-    expect(text(button)).toBe(t.add_to_cart);
+    expect(button).toMatch(/\sdisabled[\s>]/);
+    expect(text(button)).toBe(t.sold_out);
+    const quantity = part(
+      sold,
+      /<input[^>]*id="Product-quantity-[^"]+"[^>]*>/,
+      "quantity",
+    );
+    expect(quantity).not.toMatch(/\sdisabled[\s>]/);
   });
 
   test("becomes a disabled Sold out button when every variant is sold out", () => {

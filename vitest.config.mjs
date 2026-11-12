@@ -15,6 +15,14 @@ export default defineConfig({
         },
       },
       {
+        resolve: {
+          alias: {
+            "@shopify/events": new URL(
+              "./tests/browser/stubs/shopify-events.mjs",
+              import.meta.url,
+            ).pathname,
+          },
+        },
         test: {
           name: "browser",
           include: [browserTests],

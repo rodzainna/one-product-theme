@@ -1,0 +1,117 @@
+{% doc %}
+  Renders one product option as a fieldset of radio pills. A sold-out value stays
+  selectable and is named as sold out, so its price and image can still be seen.
+
+  @param {string} legend - The option name, shown as the legend
+  @param {string} name - Radio group name, unique on the page
+  @param {product_option_value[]} values - The option's values
+  @param {string} [size] - sm, or blank for the default
+
+  @example
+  {% render 'pill-group', legend: option.name, name: group_name, values: option.values %}
+{% enddoc %}
+
+<fieldset class="pill-group{% if size == 'sm' %} pill-group--sm{% endif %}">
+  <legend>{{ legend | escape }}</legend>
+  <div class="pill-group__row">
+    {%- for value in values -%}
+      <label class="pill{% unless value.available %} pill--unavailable{% endunless %}">
+        <input
+          type="radio"
+          name="{{ name }}"
+          value="{{ value.name | escape }}"
+          data-option-value-id="{{ value.id }}"
+          data-option-name="{{ legend | escape }}"
+          {% if value.selected %}
+            checked
+          {% endif %}
+        >
+        <span>
+          {{- value.name | escape -}}
+          {%- unless value.available -%}
+            <span class="visually-hidden"> ({{ 'products.product.sold_out' | t }})</span>
+          {%- endunless -%}
+        </span>
+      </label>
+    {%- endfor -%}
+  </div>
+</fieldset>
+
+{% stylesheet %}
+  .pill-group {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .pill-group legend {
+    margin-block-end: var(--field-gap);
+    padding: 0;
+  }
+
+  .pill-group__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .pill input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .pill > span {
+    display: inline-grid;
+    place-items: center;
+    min-width: 72px;
+    min-height: var(--control-h);
+    padding: var(--control-pad-y) var(--control-pad-m);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-button);
+    font-weight: var(--weight-ui);
+    line-height: 1.25;
+    cursor: pointer;
+    transition: background-color var(--duration) var(--ease);
+  }
+
+  @media (hover: hover) {
+    .pill > span:hover {
+      background: var(--color-hover);
+    }
+  }
+
+  .pill input:checked + span {
+    border-color: var(--color-foreground);
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+
+  .pill input:focus-visible + span {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* Sold out stays selectable: muted text, not a faded disabled look. */
+  .pill--unavailable > span {
+    color: var(--color-foreground-muted);
+    text-decoration: line-through;
+  }
+
+  .pill-group--sm .pill > span {
+    min-width: 56px;
+    min-height: var(--control-h-sm);
+    padding: var(--control-pad-y) var(--control-pad-s);
+    font-size: var(--text-small);
+  }
+
+  @media (forced-colors: active) {
+    .pill input:checked + span {
+      border-color: Highlight;
+      background: Highlight;
+      color: HighlightText;
+      forced-color-adjust: none;
+    }
+  }
+{% endstylesheet %}

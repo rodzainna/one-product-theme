@@ -80,6 +80,7 @@
       "tax_info_excluded": "Tax and shipping calculated at checkout.",
       "tax_info_included": "Tax included. Shipping calculated at checkout.",
       "tax_info_label": "Tax and shipping",
+      "unavailable": "Unavailable",
       "unit_price": "Unit price"
     }
   },

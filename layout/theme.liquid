@@ -43,6 +43,11 @@
     {% # Social, title, etc. %}
     {% render 'meta-tags' %}
 
+    {% # Shopify's standard storefront events, so apps can follow what the shopper does %}
+    <script type="importmap">
+      { "imports": { "@shopify/events": "https://cdn.shopify.com/storefront/standard-events.js" } }
+    </script>
+
     {{ content_for_header }}
   </head>
 

@@ -37,12 +37,14 @@
     "sidebar": "Sidebar",
     "text": "Text",
     "theme": "Theme",
-    "typography": "Typography"
+    "typography": "Typography",
+    "variant_picker": "Variant picker"
   },
   "info": {
     "background_gradient": "Optional. Shows instead of the background color. Keep it close to that color so text stays readable.",
     "favicon": "Use a square image at least 180 × 180px.",
     "full_screen": "Makes the section at least as tall as the screen.",
+    "option_style": "Options follow their order on the product in the admin.",
     "parallax": "The background image moves slower than the page as it scrolls. Visitors who reduce motion see a still image.",
     "parallax_strength": "Higher values move background images further.",
     "scroll_snap": "Home and story pages scroll one section at a time on screens 900px and wider with a mouse or trackpad.",
@@ -68,6 +70,9 @@
     "headings": "Headings",
     "layout_direction": "Layout direction",
     "menu": "Menu",
+    "option_1_style": "Option 1 style",
+    "option_2_style": "Option 2 style",
+    "option_3_style": "Option 3 style",
     "padding": "Padding",
     "page_margin": "Page margin",
     "page_width": "Page width",
@@ -95,6 +100,10 @@
     "direction": {
       "horizontal": "Horizontal",
       "vertical": "Vertical"
+    },
+    "option_style": {
+      "pills": "Pills",
+      "dropdown": "Dropdown"
     },
     "page_width": {
       "narrow": "Narrow",

@@ -1,5 +1,6 @@
 {% doc %}
   Renders the price of the selected variant, or of its selected selling plan, with the tax note.
+  Empty when the picked options match no variant; assets/variant-picker.js swaps it on change.
 
   @example
   {% content_for 'block', type: '_product-price', id: 'price' %}
@@ -15,8 +16,15 @@
   assign tax_info_id = 'Price-tax-' | append: section.id | append: '-' | append: block.id
 -%}
 
-<div class="product-price" {{ block.shopify_attributes }}>
-  {% render 'price', variant: current_variant, allocation: allocation, size: 'lg', tax_info_id: tax_info_id %}
+<div
+  class="product-price"
+  id="Price-{{ section.id }}-{{ block.id }}"
+  data-variant-region
+  {{ block.shopify_attributes }}
+>
+  {%- if current_variant != blank -%}
+    {% render 'price', variant: current_variant, allocation: allocation, size: 'lg', tax_info_id: tax_info_id %}
+  {%- endif -%}
 </div>
 
 {% schema %}

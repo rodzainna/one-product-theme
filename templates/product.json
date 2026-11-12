@@ -15,9 +15,10 @@
         "title": { "type": "_product-title", "settings": { "show_vendor": true } },
         "price": { "type": "_product-price", "settings": {} },
         "description": { "type": "_product-description", "settings": {} },
+        "variant_picker": { "type": "_variant-picker", "settings": {} },
         "buy_buttons": { "type": "_buy-buttons", "settings": {} }
       },
-      "block_order": ["title", "price", "description", "buy_buttons"],
+      "block_order": ["title", "price", "description", "variant_picker", "buy_buttons"],
       "settings": {}
     }
   },
