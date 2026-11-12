@@ -1,6 +1,7 @@
 {% doc %}
-  Renders one product option as a fieldset of radio pills. A sold-out value stays
-  selectable and is named as sold out, so its price and image can still be seen.
+  Renders one product option as a fieldset of radio pills, or of colour or image swatches
+  when every value has one, with the picked value named in the legend. A sold-out value
+  stays selectable and is named as sold out, so its price and image can still be seen.
 
   @param {string} legend - The option name, shown as the legend
   @param {string} name - Radio group name, unique on the page
@@ -11,11 +12,39 @@
   {% render 'pill-group', legend: option.name, name: group_name, values: option.values %}
 {% enddoc %}
 
+{%- liquid
+  # value.swatch is nil unless the value has a saved colour or image.
+  assign swatches = values | map: 'swatch' | compact
+  assign item = 'pill'
+  if swatches.size == values.size
+    assign item = 'swatch'
+  endif
+  assign picked = values | where: 'selected' | first
+  assign sold_out_text = 'products.product.sold_out' | t | prepend: ' (' | append: ')'
+-%}
+
 <fieldset class="pill-group{% if size == 'sm' %} pill-group--sm{% endif %}">
-  <legend>{{ legend | escape }}</legend>
+  <legend>
+    {%- if item == 'swatch' and picked -%}
+      {%- liquid
+        # _html keys don't escape their values, so both are escaped here.
+        assign option_name = legend | escape
+        assign picked_name = picked.name | escape
+        assign picked_html = '<span class="pill-group__picked" aria-hidden="true">' | append: picked_name | append: '</span>'
+      -%}
+      {{ 'products.product.option_picked_html' | t: option: option_name, value: picked_html }}
+    {%- else -%}
+      {{- legend | escape -}}
+    {%- endif -%}
+  </legend>
   <div class="pill-group__row">
     {%- for value in values -%}
-      <label class="pill{% unless value.available %} pill--unavailable{% endunless %}">
+      <label
+        class="{{ item }}{% unless value.available %} {{ item }}--unavailable{% endunless %}"
+        {% if item == 'swatch' %}
+          title="{{ value.name | escape }}"
+        {% endif %}
+      >
         <input
           type="radio"
           name="{{ name }}"
@@ -26,12 +55,32 @@
             checked
           {% endif %}
         >
-        <span>
+        {%- capture value_label -%}
           {{- value.name | escape -}}
           {%- unless value.available -%}
-            <span class="visually-hidden"> ({{ 'products.product.sold_out' | t }})</span>
+            <span class="visually-hidden">{{ sold_out_text }}</span>
           {%- endunless -%}
-        </span>
+        {%- endcapture -%}
+        {%- if item == 'swatch' -%}
+          {%- liquid
+            assign chip_style = ''
+            if value.swatch.color
+              assign chip_style = '--swatch-color: rgb(' | append: value.swatch.color.rgb | append: ');'
+            endif
+            if value.swatch.image
+              assign image_url = value.swatch.image | image_url: width: 120
+              assign focal_point = value.swatch.image.presentation.focal_point
+              assign chip_style = chip_style | append: ' --swatch-image: url("' | append: image_url | append: '");'
+              if focal_point != blank
+                assign chip_style = chip_style | append: ' --swatch-position: ' | append: focal_point
+              endif
+            endif
+          -%}
+          <span class="swatch__chip" style="{{ chip_style | escape }}"></span>
+          <span class="visually-hidden">{{ value_label }}</span>
+        {%- else -%}
+          <span>{{ value_label }}</span>
+        {%- endif -%}
       </label>
     {%- endfor -%}
   </div>
@@ -56,7 +105,8 @@
     gap: var(--space-xs);
   }
 
-  .pill input {
+  .pill input,
+  .swatch input {
     position: absolute;
     opacity: 0;
     pointer-events: none;
@@ -106,12 +156,91 @@
     font-size: var(--text-small);
   }
 
+  /* Swatch: the hairline keeps pale colours visible on any scheme. */
+  .swatch {
+    display: inline-flex;
+    cursor: pointer;
+  }
+
+  .swatch__chip {
+    position: relative;
+    display: block;
+    width: var(--control-h);
+    height: var(--control-h);
+    padding: var(--swatch-inset);
+    border: 2px solid transparent;
+    border-radius: var(--radius-full);
+    background-color: var(--swatch-color, transparent);
+    background-image: var(--swatch-image, none);
+    background-position: var(--swatch-position, center);
+    background-size: cover;
+    background-origin: content-box;
+    background-clip: content-box;
+    forced-color-adjust: none;
+    transition: border-color var(--duration) var(--ease);
+  }
+
+  .swatch__chip::after,
+  .swatch--unavailable .swatch__chip::before {
+    content: '';
+    position: absolute;
+    inset: var(--swatch-inset);
+    border-radius: var(--radius-full);
+  }
+
+  .swatch__chip::after {
+    border: 1px solid var(--color-control-border);
+  }
+
+  /* Two-tone strike, so it shows on any swatch colour. */
+  .swatch--unavailable .swatch__chip::before {
+    background: linear-gradient(
+      to top right,
+      transparent 45%,
+      var(--color-background) 45%,
+      var(--color-background) 47%,
+      var(--color-foreground) 47%,
+      var(--color-foreground) 53%,
+      var(--color-background) 53%,
+      var(--color-background) 55%,
+      transparent 55%
+    );
+  }
+
+  @media (hover: hover) {
+    .swatch input:not(:checked) + .swatch__chip:hover {
+      border-color: var(--color-control-border);
+    }
+  }
+
+  .swatch input:checked + .swatch__chip {
+    border-color: var(--color-foreground);
+  }
+
+  .swatch input:focus-visible + .swatch__chip {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .pill-group--sm .swatch__chip {
+    width: var(--control-h-sm);
+    height: var(--control-h-sm);
+  }
+
   @media (forced-colors: active) {
     .pill input:checked + span {
       border-color: Highlight;
       background: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
+    }
+
+    .swatch input:checked + .swatch__chip {
+      border-color: Highlight;
+    }
+
+    .swatch input:focus-visible + .swatch__chip {
+      outline-color: CanvasText;
     }
   }
 {% endstylesheet %}

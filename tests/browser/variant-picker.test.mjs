@@ -324,6 +324,47 @@ describe("the update", () => {
   });
 });
 
+describe("swatch legend", () => {
+  test("names a pick restored before the script ran", async () => {
+    const holder = document.createElement("div");
+    holder.innerHTML = section();
+    holder.querySelector("fieldset").classList.add("pill-group");
+    holder.querySelector("legend").innerHTML =
+      'Size: <span class="pill-group__picked" aria-hidden="true">S</span>';
+    holder.querySelector('input[value="L"]').checked = true;
+    let release;
+    fetchSpy.mockImplementationOnce(
+      (url) =>
+        new Promise(
+          (resolve) => (release = () => resolve(new Response(answer(url)))),
+        ),
+    );
+    document.body.append(...holder.childNodes);
+    expect(document.querySelector(".pill-group__picked").textContent).toBe("L");
+    release();
+  });
+
+  test("names the picked value as soon as it's picked", async () => {
+    render();
+    document.querySelector("fieldset").classList.add("pill-group");
+    const legend = document.querySelector("fieldset legend");
+    legend.innerHTML =
+      'Size: <span class="pill-group__picked" aria-hidden="true">S</span>';
+    let release;
+    fetchSpy.mockImplementationOnce(
+      (url) =>
+        new Promise(
+          (resolve) => (release = () => resolve(new Response(answer(url)))),
+        ),
+    );
+    const done = updated();
+    await userEvent.click(page.getByLabelText("M"));
+    expect(legend.querySelector(".pill-group__picked").textContent).toBe("M");
+    release();
+    await done;
+  });
+});
+
 describe("focus", () => {
   test("stays on the pill picked with the arrow keys", async () => {
     render();

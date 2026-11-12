@@ -104,6 +104,12 @@ export class VariantPicker extends HTMLElement {
   }
 
   async #update(focusTarget) {
+    // Swatch legends name the pick now, not after the section lands.
+    for (const group of this.querySelectorAll(".pill-group")) {
+      const picked = group.querySelector(".pill-group__picked");
+      const input = group.querySelector("input:checked");
+      if (picked && input) picked.textContent = input.value;
+    }
     const url = new URL(this.dataset.url, location.origin);
     url.searchParams.set("option_values", this.optionValueIds.join(","));
     const plan = this.#section.querySelector('[name="selling_plan"]:checked');

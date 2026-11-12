@@ -1,8 +1,9 @@
 {% doc %}
-  Renders each product option as pills, or as a dropdown when its style setting says so.
-  assets/variant-picker.js re-renders the section
-  for the picked option values and updates the price, buy buttons and URL. Hidden when
-  the product has only the default variant.
+  Renders each product option as pills, as swatches when every value has a swatch
+  (colour or image, from the option's category metafield), or as a dropdown when its
+  style setting says so. assets/variant-picker.js re-renders the section for the picked
+  option values and updates the price, buy buttons and URL. Hidden when the product has
+  only the default variant.
 
   @example
   {% content_for 'block', type: '_variant-picker', id: 'variant_picker' %}

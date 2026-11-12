@@ -7,7 +7,7 @@ const t = locale.products.product;
 const pills = (html) =>
   [
     ...html.matchAll(
-      /<label class="pill( pill--unavailable)?">\s*<input([^>]*)>([\s\S]*?)<\/label>/g,
+      /<label\s+class="pill( pill--unavailable)?"\s*>\s*<input([^>]*)>([\s\S]*?)<\/label>/g,
     ),
   ].map(([, unavailable, attributes, label]) => ({
     name: attributes.match(/value="([^"]*)"/)[1],
