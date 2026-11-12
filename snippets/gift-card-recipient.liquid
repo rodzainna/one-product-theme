@@ -1,0 +1,91 @@
+{% doc %}
+  Renders the optional gift card recipient fields for the product form: a checkbox that, when
+  checked, shows and enables recipient email, name, message and send date. Field names follow
+  shopify.dev's gift card recipient guide; unchecked, the fields are disabled so none are sent.
+  Needs assets/gift-card-recipient.js.
+
+  @param {string} id_suffix - Unique per form
+
+  @example
+  {% render 'gift-card-recipient', id_suffix: id_suffix %}
+{% enddoc %}
+
+{%- liquid
+  assign prefix = 'Recipient-' | append: id_suffix
+  assign fields_id = prefix | append: '-fields'
+  assign email_id = prefix | append: '-email'
+  assign name_id = prefix | append: '-name'
+  assign message_id = prefix | append: '-message'
+  assign send_on_id = prefix | append: '-send-on'
+  assign send_label = 'products.gift_card.send_to_recipient' | t
+  assign email_label = 'products.gift_card.email' | t
+  assign name_label = 'products.gift_card.name' | t
+  assign message_label = 'products.gift_card.message' | t
+  assign message_hint = 'products.gift_card.message_hint' | t
+  assign send_on_label = 'products.gift_card.send_on' | t
+  assign send_on_hint = 'products.gift_card.send_on_hint' | t
+  assign controls = 'aria-controls="' | append: fields_id | append: '"'
+-%}
+
+<gift-card-recipient class="gift-card-recipient">
+  {% render 'checkbox',
+    id: prefix,
+    name: 'properties[__shopify_send_gift_card_to_recipient]',
+    value: 'true',
+    label: send_label,
+    attributes: controls
+  %}
+  <fieldset class="gift-card-recipient__fields" id="{{ fields_id }}" hidden disabled>
+    <legend class="visually-hidden">{{ send_label }}</legend>
+    {% render 'input',
+      id: email_id,
+      label: email_label,
+      type: 'email',
+      name: 'properties[Recipient email]',
+      autocomplete: 'off',
+      required: true
+    %}
+    {% render 'input',
+      id: name_id,
+      label: name_label,
+      name: 'properties[Recipient name]',
+      autocomplete: 'off',
+      attributes: 'maxlength="255"'
+    %}
+    {% render 'input',
+      id: message_id,
+      label: message_label,
+      type: 'textarea',
+      name: 'properties[Message]',
+      rows: 3,
+      hint: message_hint,
+      attributes: 'maxlength="200"'
+    %}
+    {% render 'input',
+      id: send_on_id,
+      label: send_on_label,
+      type: 'date',
+      name: 'properties[Send on]',
+      hint: send_on_hint,
+      attributes: 'data-send-on'
+    %}
+    <input type="hidden" name="properties[__shopify_offset]" data-offset>
+  </fieldset>
+</gift-card-recipient>
+
+<script src="{{ 'gift-card-recipient.js' | asset_url }}" type="module"></script>
+
+{% stylesheet %}
+  .gift-card-recipient__fields {
+    display: grid;
+    gap: var(--space-s);
+    min-width: 0;
+    margin: var(--space-xs) 0 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .gift-card-recipient__fields[hidden] {
+    display: none;
+  }
+{% endstylesheet %}

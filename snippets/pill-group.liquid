@@ -7,6 +7,7 @@
   @param {string} name - Radio group name, unique on the page
   @param {product_option_value[]} values - The option's values
   @param {string} [size] - sm, or blank for the default
+  @param {string} [aside] - HTML on the legend's line, at the end, such as a Size guide button
 
   @example
   {% render 'pill-group', legend: option.name, name: group_name, values: option.values %}
@@ -23,7 +24,7 @@
   assign sold_out_text = 'products.product.sold_out' | t | prepend: ' (' | append: ')'
 -%}
 
-<fieldset class="pill-group{% if size == 'sm' %} pill-group--sm{% endif %}">
+<fieldset class="pill-group{% if size == 'sm' %} pill-group--sm{% endif %}{% if aside != blank %} pill-group--aside{% endif %}">
   <legend>
     {%- if item == 'swatch' and picked -%}
       {%- liquid
@@ -37,6 +38,9 @@
       {{- legend | escape -}}
     {%- endif -%}
   </legend>
+  {%- if aside != blank -%}
+    <div class="pill-group__aside">{{ aside }}</div>
+  {%- endif -%}
   <div class="pill-group__row">
     {%- for value in values -%}
       <label
@@ -99,7 +103,18 @@
     padding: 0;
   }
 
+  /* A floated legend lets the aside share its line. */
+  .pill-group--aside legend {
+    float: inline-start;
+  }
+
+  .pill-group__aside {
+    margin-block-end: var(--field-gap);
+    text-align: end;
+  }
+
   .pill-group__row {
+    clear: both;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-xs);

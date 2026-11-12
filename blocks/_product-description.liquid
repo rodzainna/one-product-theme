@@ -1,25 +1,80 @@
 {% doc %}
-  Renders the product description as rich text. Renders nothing when it's empty, except in
-  the theme editor, so the block can still be selected.
+  Renders the product description as rich text, with an optional "More info ›" button that
+  opens the longer details in a dialog. Renders nothing when both are empty, except in the
+  theme editor, so the block can still be selected. The details can be connected to a
+  product metafield, so each product has its own.
 
   @example
   {% content_for 'block', type: '_product-description', id: 'description' %}
 {% enddoc %}
 
-{%- assign current_product = closest.product -%}
+{%- liquid
+  assign current_product = closest.product
+  assign has_details = false
+  if block.settings.details_content != blank
+    assign has_details = true
+  endif
+  assign dialog_id = 'Details-' | append: section.id | append: '-' | append: block.id
+  assign details_label = block.settings.details_label | default: 'products.product.more_info' | t
+  assign details_heading = block.settings.details_heading | default: 'products.product.details' | t
+-%}
 
-{%- if current_product.description != blank or request.design_mode -%}
+{%- if current_product.description != blank or has_details or request.design_mode -%}
   <div class="product-description" {{ block.shopify_attributes }}>
     {%- if current_product.description != blank -%}
       {% render 'rte', content: current_product.description %}
     {%- endif -%}
+    {%- if has_details -%}
+      <button
+        type="button"
+        class="link-button"
+        data-dialog-open="{{ dialog_id }}"
+        aria-haspopup="dialog"
+      >
+        {{- details_label | escape -}}
+        <span aria-hidden="true"> ›</span>
+      </button>
+      {%- capture details_html -%}{% render 'rte', content: block.settings.details_content %}{%- endcapture -%}
+      {% render 'dialog', id: dialog_id, title: details_heading, content: details_html %}
+    {%- endif -%}
   </div>
 {%- endif -%}
+
+{% stylesheet %}
+  .product-description {
+    display: grid;
+    gap: var(--space-2xs);
+    justify-items: start;
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.description",
-  "settings": [],
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:general.details_dialog"
+    },
+    {
+      "type": "text",
+      "id": "details_label",
+      "label": "t:labels.button_label",
+      "default": "More info"
+    },
+    {
+      "type": "text",
+      "id": "details_heading",
+      "label": "t:labels.heading",
+      "default": "Product details"
+    },
+    {
+      "type": "richtext",
+      "id": "details_content",
+      "label": "t:labels.content",
+      "info": "t:info.details_content"
+    }
+  ],
   "presets": [{ "name": "t:general.description" }]
 }
 {% endschema %}

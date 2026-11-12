@@ -97,7 +97,7 @@ try {
     `query ($publication: ID!) { ${products
       .map(
         (p, i) =>
-          `p${i}: productByIdentifier(identifier: { handle: ${JSON.stringify(p.handle)} }) { id status mediaCount { count } sellingPlanGroupsCount { count } publishedOnPublication(publicationId: $publication) }`,
+          `p${i}: productByIdentifier(identifier: { handle: ${JSON.stringify(p.handle)} }) { id status mediaCount { count } sellingPlanGroupsCount { count } metafields(first: 20) { nodes { namespace key } } publishedOnPublication(publicationId: $publication) }`,
       )
       .join(" ")} }`,
     { publication: onlineStore.id },
@@ -119,6 +119,14 @@ try {
           `${found.mediaCount.count} of ${media} media`,
         found.sellingPlanGroupsCount.count < groups &&
           `${found.sellingPlanGroupsCount.count} of ${groups} plan groups`,
+        ...(product.metafields ?? [])
+          .filter(
+            ({ namespace, key }) =>
+              !found.metafields.nodes.some(
+                (m) => m.namespace === namespace && m.key === key,
+              ),
+          )
+          .map(({ namespace, key }) => `no ${namespace}.${key} metafield`),
       ].filter(Boolean);
       const note = missing.length
         ? ` (has ${missing.join(", ")}; delete it and run again to add them)`

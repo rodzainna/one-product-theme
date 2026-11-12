@@ -1,0 +1,25 @@
+{% doc %}
+  Renders the merchant's own Liquid, such as an app snippet, in the buy box.
+
+  @example
+  {% content_for 'block', type: '_custom-liquid', id: 'custom_liquid' %}
+{% enddoc %}
+
+<div class="custom-liquid" {{ block.shopify_attributes }}>
+  {{ block.settings.custom_liquid }}
+</div>
+
+{% schema %}
+{
+  "name": "t:general.custom_liquid",
+  "settings": [
+    {
+      "type": "liquid",
+      "id": "custom_liquid",
+      "label": "t:labels.custom_liquid",
+      "info": "t:info.custom_liquid"
+    }
+  ],
+  "presets": [{ "name": "t:general.custom_liquid" }]
+}
+{% endschema %}

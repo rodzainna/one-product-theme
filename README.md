@@ -29,6 +29,8 @@ shopify store auth --store <test-store>.myshopify.com --scopes write_products,wr
 pnpm test:store:setup <test-store>.myshopify.com
 ```
 
+The pickup tests also need local pickup turned on for the store's location, with an address (Settings → Locations). The gift card product needs gift cards activated (Products → Gift cards).
+
 Existing products are left as they are, so to apply a change in `products.mjs`, delete that product on the store and run the setup again.
 
 Then start a preview with the storefront password, at `http://127.0.0.1:9293` unless `STORE_URL` says otherwise. `read -s` keeps the password out of your shell history:

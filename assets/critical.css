@@ -709,3 +709,23 @@ main
 .shopify-section > .full-width {
   grid-column: 1 / -1;
 }
+
+/* A text-style button in the accent colour, 24px tall so it meets WCAG 2.5.8. */
+.link-button {
+  min-height: var(--target-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: var(--weight-ui);
+  line-height: inherit;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .link-button:hover {
+    text-decoration: underline;
+  }
+}

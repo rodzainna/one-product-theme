@@ -13,6 +13,28 @@
   assign current_product = closest.product
   assign current_variant = current_product.selected_or_first_available_variant
   assign id_suffix = section.id | append: '-' | append: block.id
+  assign size_guide_id = 'SizeGuide-' | append: id_suffix
+  assign size_guide_heading = block.settings.size_guide_heading | default: 'products.product.size_guide' | t
+  assign size_guide_option = block.settings.size_guide_option | strip | downcase
+  assign size_guide_html = ''
+  assign size_guide_shown = false
+  if block.settings.size_guide_content != blank and current_product.has_only_default_variant == false
+    for option in current_product.options_with_values
+      assign option_name = option.name | strip | downcase
+      if option_name == size_guide_option
+        assign size_guide_shown = true
+      endif
+    endfor
+  endif
+  if size_guide_shown
+    capture size_guide_html
+      echo '<button type="button" class="link-button" aria-haspopup="dialog" data-dialog-open="'
+      echo size_guide_id
+      echo '">'
+      echo size_guide_heading | escape
+      echo '</button>'
+    endcapture
+  endif
 -%}
 
 {%- comment -%} Hidden with no options for a single-variant product, where it still re-prices selling plans. {%- endcomment -%}
@@ -38,6 +60,11 @@
       {%- liquid
         assign group_name = 'Option-' | append: id_suffix | append: '-' | append: option.position
         assign style_key = 'option_' | append: option.position | append: '_style'
+        assign option_name = option.name | strip | downcase
+        assign option_aside = ''
+        if option_name == size_guide_option
+          assign option_aside = size_guide_html
+        endif
       -%}
       {%- if block.settings[style_key] == 'dropdown' -%}
         {%- capture value_options -%}
@@ -55,19 +82,37 @@
             </option>
           {%- endfor -%}
         {%- endcapture -%}
-        {% render 'select', id: group_name, label: option.name, name: group_name, options_html: value_options %}
+        {%- if option_aside != blank -%}
+          <div class="variant-picker__option">
+            {% render 'select', id: group_name, label: option.name, name: group_name, options_html: value_options %}
+            {{ option_aside }}
+          </div>
+        {%- else -%}
+          {% render 'select', id: group_name, label: option.name, name: group_name, options_html: value_options %}
+        {%- endif -%}
       {%- else -%}
-        {% render 'pill-group', legend: option.name, name: group_name, values: option.values %}
+        {% render 'pill-group', legend: option.name, name: group_name, values: option.values, aside: option_aside %}
       {%- endif -%}
     {%- endfor -%}
   {%- endunless -%}
 </variant-picker>
 <script src="{{ 'variant-picker.js' | asset_url }}" type="module"></script>
+{%- comment -%} Outside the picker, which is re-rendered on every pick. {%- endcomment -%}
+{%- if size_guide_shown -%}
+  {%- capture size_guide_body -%}{% render 'rte', content: block.settings.size_guide_content %}{%- endcapture -%}
+  {% render 'dialog', id: size_guide_id, title: size_guide_heading, content: size_guide_body %}
+{%- endif -%}
 
 {% stylesheet %}
   .variant-picker {
     display: grid;
     gap: var(--space-s);
+  }
+
+  .variant-picker__option {
+    display: grid;
+    gap: var(--space-2xs);
+    justify-items: start;
   }
 
   /* Short desktop windows: options sit side by side, so the buy box fits one screen. */
@@ -78,7 +123,8 @@
       align-items: end;
     }
 
-    .variant-picker > .field {
+    .variant-picker > .field,
+    .variant-picker__option {
       flex: 1 1 12rem;
     }
   }
@@ -118,6 +164,29 @@
         { "value": "dropdown", "label": "t:options.option_style.dropdown" }
       ],
       "default": "pills"
+    },
+    {
+      "type": "header",
+      "content": "t:general.size_guide"
+    },
+    {
+      "type": "text",
+      "id": "size_guide_option",
+      "label": "t:labels.size_guide_option",
+      "info": "t:info.size_guide_option",
+      "default": "Size"
+    },
+    {
+      "type": "text",
+      "id": "size_guide_heading",
+      "label": "t:labels.heading",
+      "default": "Size guide"
+    },
+    {
+      "type": "richtext",
+      "id": "size_guide_content",
+      "label": "t:labels.content",
+      "info": "t:info.size_guide_content"
     }
   ],
   "presets": [{ "name": "t:general.variant_picker" }]

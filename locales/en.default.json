@@ -5,6 +5,7 @@
     "back_to_shopping": "Back to shopping"
   },
   "accessibility": {
+    "close": "Close",
     "decrease_quantity": "Decrease quantity",
     "increase_quantity": "Increase quantity",
     "page_sections": "Page sections",
@@ -63,8 +64,25 @@
     "enter": "Enter"
   },
   "products": {
+    "gift_card": {
+      "send_to_recipient": "Send as a gift to someone",
+      "email": "Recipient email",
+      "name": "Recipient name (optional)",
+      "message": "Message (optional)",
+      "message_hint": "Up to 200 characters.",
+      "send_on": "Send on (optional)",
+      "send_on_hint": "Leave empty to send it straight away. Up to 90 days ahead."
+    },
+    "pickup": {
+      "available": "Pickup available",
+      "available_at_html": "Pickup available at <strong>{{ location }}</strong>",
+      "unavailable": "Pickup currently unavailable",
+      "unavailable_at_html": "Pickup currently unavailable at <strong>{{ location }}</strong>",
+      "view_stores": "View store information"
+    },
     "product": {
       "add_to_cart": "Add to cart",
+      "details": "Product details",
       "duties_and_tax_included": "Duties and tax included.",
       "duties_included": "Duties included.",
       "max_in_cart": "Maximum in cart",
@@ -75,6 +93,8 @@
         "show": "Show {{ alt }}, {{ index }} of {{ count }}",
         "view_in_space": "View in your space"
       },
+      "more_info": "More info",
+      "no_rating": "No rating yet. The stars show once a review app adds a rating to this product.",
       "on_sale": "Sale",
       "one_time_purchase": "One-time purchase",
       "option_picked_html": "{{ option }}: {{ value }}",
@@ -85,8 +105,14 @@
       "quantity_increment": "Increments of {{ count }}",
       "quantity_maximum": "Maximum of {{ count }}",
       "quantity_minimum": "Minimum of {{ count }}",
+      "rating": "Rated {{ score }} out of {{ max }}",
       "regular_price": "Regular price",
+      "reviews_count": {
+        "one": "{{ count }} review",
+        "other": "{{ count }} reviews"
+      },
       "sale_price": "Sale price",
+      "size_guide": "Size guide",
       "sold_out": "Sold out",
       "tax_included": "Tax included.",
       "tax_info_duties_and_tax_included": "Duties and tax included. Shipping calculated at checkout.",

@@ -1,7 +1,7 @@
 {% doc %}
   Renders a decorative Lucide-style icon in the current text colour.
 
-  @param {string} name - account, alert, box, cart, check, chevron-down, info, minus, play or plus
+  @param {string} name - account, alert, box, cart, check, chevron-down, close, info, minus, play or plus
   @param {string} [size] - sm, or blank for the default
 
   @example
@@ -15,6 +15,8 @@
   focusable="false"
 >
   {%- case name -%}
+    {%- when 'close' -%}
+      <path d="M6 6l12 12M18 6 6 18"/>
     {%- when 'chevron-down' -%}
       <path d="m6 9 6 6 6-6"/>
     {%- when 'alert' -%}

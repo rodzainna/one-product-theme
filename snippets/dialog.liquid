@@ -1,0 +1,112 @@
+{% doc %}
+  Renders a modal <dialog> with a heading, a Close button and a body that scrolls on its own.
+  Any button with data-dialog-open="<id>" opens it (assets/dialog.js). Esc and Close always
+  close it; an outside click does too unless close_outside is false, for dialogs where
+  someone types, so a stray click can't lose their work.
+
+  @param {string} id - Unique id, used by the buttons that open it
+  @param {string} title - The heading, already translated
+  @param {string} content - The body HTML
+  @param {string} [description] - Muted text at the top of the body, read with the title
+  @param {boolean} [close_outside] - Default true; false keeps it open on an outside click
+
+  @example
+  {% render 'dialog', id: dialog_id, title: block.settings.heading, content: block.settings.content %}
+{% enddoc %}
+
+{%- liquid
+  assign title_id = id | append: '-title'
+  assign description_id = id | append: '-description'
+  assign close_label = 'accessibility.close' | t
+-%}
+
+<dialog
+  class="dialog"
+  id="{{ id }}"
+  aria-labelledby="{{ title_id }}"
+  {% if description != blank %}
+    aria-describedby="{{ description_id }}"
+  {% endif %}
+  {% unless close_outside == false %}
+    data-close-outside
+  {% endunless %}
+>
+  <div class="dialog__head">
+    <h2 class="dialog__title" id="{{ title_id }}">{{ title | escape }}</h2>
+    {% render 'icon-button', icon: 'close', label: close_label, attributes: 'data-dialog-close' %}
+  </div>
+  <div class="dialog__body" tabindex="0">
+    {%- if description != blank -%}
+      <p class="dialog__description" id="{{ description_id }}">{{ description | escape }}</p>
+    {%- endif -%}
+    {{ content }}
+  </div>
+</dialog>
+
+<script src="{{ 'dialog.js' | asset_url }}" type="module"></script>
+
+{% stylesheet %}
+  /* margin: auto centres it; the base reset removes the browser's own. */
+  .dialog {
+    width: min(100% - 2rem, 32rem);
+    margin: auto;
+    max-height: min(100dvh - 2rem, 48rem);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-card);
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .dialog[open] {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  .dialog::backdrop {
+    background: var(--color-overlay);
+  }
+
+  /* The page behind doesn't scroll; padding takes the scrollbar's place so nothing shifts. */
+  html:has(dialog:modal) {
+    padding-inline-end: var(--scrollbar-width);
+    overflow: hidden;
+  }
+
+  .dialog__head {
+    display: flex;
+    flex: none;
+    gap: var(--space-s);
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-m);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .dialog__title {
+    margin: 0;
+    font-size: var(--text-lg);
+  }
+
+  /* Only the body scrolls, so Close stays in view. */
+  .dialog__body {
+    flex: 1;
+    min-height: 0;
+    padding: var(--space-m);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .dialog__body:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: calc(-1 * var(--focus-offset));
+  }
+
+  .dialog__description {
+    margin-block-start: 0;
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+{% endstylesheet %}

@@ -176,5 +176,47 @@ export const products = [
       "Size × Colour. M / Blue is sold out; L / Blue doesn't exist.",
     ),
     ...twoOptions(),
+    // The standard review metafields that review apps fill in.
+    metafields: [
+      {
+        namespace: "reviews",
+        key: "rating",
+        type: "rating",
+        value: JSON.stringify({
+          value: "4.5",
+          scale_min: "1.0",
+          scale_max: "5.0",
+        }),
+      },
+      {
+        namespace: "reviews",
+        key: "rating_count",
+        type: "number_integer",
+        value: "126",
+      },
+    ],
+  },
+  {
+    ...base(
+      "test-gift-card",
+      "Test gift card",
+      "A gift card, for the recipient form.",
+    ),
+    giftCard: true,
+    productOptions: [
+      {
+        name: "Denomination",
+        values: ["$25", "$50"].map((name) => ({ name })),
+      },
+    ],
+    variants: [
+      ["$25", "25.00"],
+      ["$50", "50.00"],
+    ].map(([name, price]) => ({
+      optionValues: [{ optionName: "Denomination", name }],
+      price,
+      inventoryItem: { tracked: false },
+      inventoryQuantities: [],
+    })),
   },
 ];

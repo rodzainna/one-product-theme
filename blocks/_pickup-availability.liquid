@@ -1,0 +1,127 @@
+{% doc %}
+  Renders whether the selected variant can be picked up at the nearest pickup location, with
+  a dialog listing every location that offers pickup. Only locations with local pickup
+  enabled count (shopify.dev: store_availability). assets/variant-picker.js swaps it on a
+  variant change. Renders nothing when no location offers pickup.
+
+  @example
+  {% content_for 'block', type: '_pickup-availability', id: 'pickup' %}
+{% enddoc %}
+
+{%- liquid
+  assign current_product = closest.product
+  assign current_variant = current_product.selected_or_first_available_variant
+  assign pickups = current_variant.store_availabilities | where: 'pick_up_enabled', true
+  assign region_id = 'Pickup-' | append: section.id | append: '-' | append: block.id
+  assign dialog_id = region_id | append: '-dialog'
+-%}
+
+<div class="pickup" id="{{ region_id }}" data-variant-region {{ block.shopify_attributes }}>
+  {%- if current_variant != blank and pickups.size > 0 -%}
+    {%- liquid
+      assign nearest = pickups.first
+      # _html keys don't escape their values.
+      assign location_name = nearest.location.name | escape
+    -%}
+    {%- if nearest.available -%}
+      {% render 'icon', name: 'check', size: 'sm' %}
+    {%- else -%}
+      {% render 'icon', name: 'close', size: 'sm' %}
+    {%- endif -%}
+    <div class="pickup__text">
+      {%- if nearest.available -%}
+        <p>{{ 'products.pickup.available_at_html' | t: location: location_name }}</p>
+        <p class="pickup__time">{{ nearest.pick_up_time }}</p>
+      {%- else -%}
+        <p>{{ 'products.pickup.unavailable_at_html' | t: location: location_name }}</p>
+      {%- endif -%}
+      <button type="button" class="link-button" data-dialog-open="{{ dialog_id }}" aria-haspopup="dialog">
+        {{- 'products.pickup.view_stores' | t -}}
+      </button>
+    </div>
+    {%- capture stores_html -%}
+      <ul class="pickup__stores" role="list">
+        {%- for pickup in pickups -%}
+          <li>
+            <h3 class="pickup__store">{{ pickup.location.name | escape }}</h3>
+            <p>
+              {%- if pickup.available -%}
+                {{ 'products.pickup.available' | t }} · {{ pickup.pick_up_time }}
+              {%- else -%}
+                {{ 'products.pickup.unavailable' | t }}
+              {%- endif -%}
+            </p>
+            <address>{{ pickup.location.address | format_address }}</address>
+            {%- if pickup.location.address.phone != blank -%}
+              <p>{{ pickup.location.address.phone | escape }}</p>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endcapture -%}
+    {%- assign variant_title = current_product.title | append: ' – ' | append: current_variant.title -%}
+    {%- if current_product.has_only_default_variant -%}
+      {%- assign variant_title = current_product.title -%}
+    {%- endif -%}
+    {% render 'dialog', id: dialog_id, title: variant_title, content: stores_html %}
+  {%- endif -%}
+</div>
+
+{%- comment -%} Loaded outside the region: scripts in a swapped-in region don't run. {%- endcomment -%}
+<script src="{{ 'dialog.js' | asset_url }}" type="module"></script>
+
+{% stylesheet %}
+  .pickup {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-xs);
+    align-items: start;
+    font-size: var(--text-small);
+  }
+
+  .pickup:empty {
+    display: none;
+  }
+
+  .pickup > .icon {
+    margin-block-start: 0.15em;
+  }
+
+  .pickup p {
+    margin: 0;
+  }
+
+  .pickup__time {
+    color: var(--color-foreground-muted);
+  }
+
+  .pickup__stores {
+    display: grid;
+    gap: var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pickup__stores li {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .pickup__store {
+    margin: 0;
+    font-size: var(--text-body);
+  }
+
+  .pickup__stores address {
+    font-style: normal;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.pickup_availability",
+  "settings": [],
+  "presets": [{ "name": "t:general.pickup_availability" }]
+}
+{% endschema %}

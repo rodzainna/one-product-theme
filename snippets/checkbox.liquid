@@ -1,0 +1,59 @@
+{% doc %}
+  Renders a branded checkbox on a real input, so it works without JS.
+
+  @param {string} id - Unique id
+  @param {string} name - Form field name
+  @param {string} label - Visible label, already translated
+  @param {string} [value] - Submitted value when checked, default on
+  @param {string} [hint] - Description under the label, already translated
+  @param {boolean} [checked] - Starts checked
+  @param {boolean} [disabled] - Disables it
+  @param {string} [attributes] - Extra HTML attributes, e.g. aria-controls
+
+  @example
+  {% render 'checkbox', id: send_id, name: 'properties[__shopify_send_gift_card_to_recipient]', label: send_label %}
+{% enddoc %}
+
+<label class="choice checkbox">
+  <input
+    type="checkbox"
+    id="{{ id }}"
+    name="{{ name | escape }}"
+    value="{{ value | default: 'on' | escape }}"
+    {% if checked %}
+      checked
+    {% endif %}
+    {% if disabled %}
+      disabled
+    {% endif %}
+    {{ attributes }}
+  >
+  {%- if hint != blank -%}
+    <span class="choice__text">
+      <span class="choice__title">{{ label | escape_once }}</span>
+      <span class="choice__hint">{{ hint | escape_once }}</span>
+    </span>
+  {%- else -%}
+    <span>{{ label | escape_once }}</span>
+  {%- endif -%}
+</label>
+
+{% stylesheet %}
+  .checkbox input {
+    border-radius: var(--radius-xs);
+  }
+
+  /* Lucide's check, as a mask so it takes the scheme's colour. */
+  .checkbox input:checked::before {
+    width: 0.875rem;
+    height: 0.875rem;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+  }
+
+  @media (forced-colors: active) {
+    .checkbox input:checked::before {
+      background: HighlightText;
+    }
+  }
+{% endstylesheet %}

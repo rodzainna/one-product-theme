@@ -124,6 +124,10 @@
       {%- endif -%}
     </div>
 
+    {%- if current_product.gift_card? -%}
+      {% render 'gift-card-recipient', id_suffix: id_suffix %}
+    {%- endif -%}
+
     <div class="buy-buttons__row">
       {%- liquid
         # B2B quantity rules count what's already in the cart: the rest of the minimum, up to the maximum.
