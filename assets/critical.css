@@ -686,7 +686,7 @@ main
  */
 .shopify-section {
   --content-width: min(
-    calc(var(--page-width) - var(--page-margin) * 2),
+    var(--page-width),
     calc(100% - var(--page-gutter, var(--page-margin)) * 2)
   );
   --content-margin: minmax(var(--page-gutter, var(--page-margin)), 1fr);
