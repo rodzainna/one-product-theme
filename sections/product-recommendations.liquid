@@ -1,0 +1,146 @@
+{% comment %}
+  Related ("You may also like") or complementary ("Pairs well with") products for the
+  template's product, or the one picked in the settings. The page renders it empty;
+  assets/product-recommendations.js fetches it from the Product Recommendations API as it
+  nears the screen, and it stays empty when there's nothing to recommend. Complementary
+  products are set in the Shopify Search & Discovery app.
+
+  https://shopify.dev/docs/storefronts/themes/product-merchandising/recommendations/related-products
+{% endcomment %}
+
+{%- liquid
+  assign source = section.settings.product | default: product
+  assign intent = section.settings.intent
+  assign filled = false
+  if recommendations.performed? and recommendations.products_count > 0
+    assign filled = true
+  endif
+  if section.settings.heading != blank
+    assign heading = section.settings.heading
+  elsif intent == 'complementary'
+    assign heading = 'products.recommendations.complementary_heading' | t
+  else
+    assign heading = 'products.recommendations.related_heading' | t
+  endif
+-%}
+
+{%- if source != blank -%}
+  <script src="{{ 'product-recommendations.js' | asset_url }}" type="module"></script>
+  <product-recommendations
+    class="recommendations full-width color-{{ section.settings.color_scheme }}"
+    id="Recommendations-{{ section.id }}"
+    data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ source.id }}&limit={{ section.settings.products_to_show }}&intent={{ intent }}"
+    {% unless filled %}
+      data-empty
+    {% endunless %}
+  >
+    {%- if filled -%}
+      <div class="recommendations__content">
+        <h2 class="recommendations__heading h3">{{ heading | escape }}</h2>
+        <ul class="recommendations__grid">
+          {%- for recommended in recommendations.products -%}
+            <li>
+              {% render 'product-card', product: recommended, sizes: '(min-width: 900px) 22vw, 44vw' %}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+  </product-recommendations>
+{%- else -%}
+  <div data-empty></div>
+{%- endif -%}
+
+{% stylesheet %}
+  .recommendations {
+    display: block;
+  }
+
+  .recommendations__content {
+    display: grid;
+    grid-template-columns: var(--content-grid);
+    padding-block: var(--space-xl);
+  }
+
+  .recommendations__content > * {
+    grid-column: 2;
+  }
+
+  .recommendations__heading {
+    margin-block: 0 var(--space-m);
+  }
+
+  .recommendations__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .recommendations__grid > li {
+    display: grid;
+  }
+
+  @media (min-width: 900px) {
+    .recommendations__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-m);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.product_recommendations",
+  "settings": [
+    {
+      "type": "select",
+      "id": "intent",
+      "label": "t:labels.intent",
+      "info": "t:info.intent",
+      "options": [
+        { "value": "related", "label": "t:options.intent.related" },
+        { "value": "complementary", "label": "t:options.intent.complementary" }
+      ],
+      "default": "related"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "t:general.product",
+      "info": "t:info.recommendations_product"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "info": "t:info.recommendations_heading"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "t:labels.products_to_show",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-1"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.product_recommendations"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}

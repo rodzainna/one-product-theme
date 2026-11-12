@@ -176,6 +176,11 @@ export const products = [
       "Size × Colour. M / Blue is sold out; L / Blue doesn't exist.",
     ),
     ...twoOptions(),
+    // Search & Discovery's picks, by handle; the setup script sets them once every product exists.
+    recommendations: {
+      complementary: ["test-sale", "test-several-prices", "test-unit-price"],
+      related: ["test-regular", "test-size-sold-out"],
+    },
     // The standard review metafields that review apps fill in.
     metafields: [
       {

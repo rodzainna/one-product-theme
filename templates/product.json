@@ -22,7 +22,15 @@
       },
       "block_order": ["title", "rating", "price", "description", "variant_picker", "buy_buttons", "pickup"],
       "settings": {}
+    },
+    "complementary": {
+      "type": "product-recommendations",
+      "settings": { "intent": "complementary" }
+    },
+    "related": {
+      "type": "product-recommendations",
+      "settings": { "intent": "related" }
     }
   },
-  "order": ["main"]
+  "order": ["main", "complementary", "related"]
 }

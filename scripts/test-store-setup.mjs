@@ -103,8 +103,10 @@ try {
     { publication: onlineStore.id },
   );
 
+  const ids = {};
   for (const [i, product] of products.entries()) {
     const found = existing[`p${i}`];
+    if (found) ids[product.handle] = found.id;
     if (found) {
       if (found.status !== "ACTIVE") {
         throw new Error(
@@ -135,7 +137,11 @@ try {
       continue;
     }
 
-    const { sellingPlanGroups = [], ...productInput } = product;
+    const {
+      sellingPlanGroups = [],
+      recommendations,
+      ...productInput
+    } = product;
     const input = {
       ...productInput,
       ...(product.files && {
@@ -170,7 +176,39 @@ try {
       }
     }
     publish(productSet.product.id, onlineStore.id);
+    ids[product.handle] = productSet.product.id;
     console.log(`created  ${product.handle}`);
+  }
+
+  // Recommendations reference other products, so they go on once every product exists.
+  const RECOMMENDATIONS = "shopify--discovery--product_recommendation";
+  for (const [i, product] of products.entries()) {
+    if (!product.recommendations) continue;
+    const has = (key) =>
+      existing[`p${i}`]?.metafields.nodes.some(
+        (m) => m.namespace === RECOMMENDATIONS && m.key === key,
+      );
+    const metafields = Object.entries(product.recommendations)
+      .filter(([intent]) => !has(`${intent}_products`))
+      .map(([intent, handles]) => ({
+        ownerId: ids[product.handle],
+        namespace: RECOMMENDATIONS,
+        key: `${intent}_products`,
+        type: "list.product_reference",
+        value: JSON.stringify(handles.map((handle) => ids[handle])),
+      }));
+    if (!metafields.length) continue;
+    const { metafieldsSet } = execute(
+      "mutation ($metafields: [MetafieldsSetInput!]!) { metafieldsSet(metafields: $metafields) { userErrors { message } } }",
+      { metafields },
+      { mutation: true },
+    );
+    if (metafieldsSet.userErrors.length) {
+      throw new Error(
+        `${product.handle} recommendations: ${JSON.stringify(metafieldsSet.userErrors)} (is Search & Discovery installed?)`,
+      );
+    }
+    console.log(`set      ${product.handle} recommendations`);
   }
 } catch (error) {
   const reason = String(error.stderr ?? "").trim();

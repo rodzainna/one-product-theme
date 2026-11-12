@@ -101,6 +101,7 @@
       "placeholder_text": "Pick a product in this section's settings to show its buy box here.",
       "placeholder_title": "Your product's name",
       "plan_prepaid": "{{ price }} per delivery · {{ total }} at checkout",
+      "price_from": "From {{ price }}",
       "purchase_options": "Purchase options",
       "quantity": "Quantity",
       "quantity_in_cart": "{{ count }} in cart",
@@ -124,6 +125,10 @@
       "tax_info_label": "Tax and shipping",
       "unavailable": "Unavailable",
       "unit_price": "Unit price"
+    },
+    "recommendations": {
+      "complementary_heading": "Pairs well with",
+      "related_heading": "You may also like"
     }
   },
   "search": {

@@ -29,7 +29,7 @@ shopify store auth --store <test-store>.myshopify.com --scopes write_products,wr
 pnpm test:store:setup <test-store>.myshopify.com
 ```
 
-The pickup tests also need local pickup turned on for the store's location, with an address (Settings → Locations). The gift card product needs gift cards activated (Products → Gift cards).
+The pickup tests also need local pickup turned on for the store's location, with an address (Settings → Locations). The gift card product needs gift cards activated (Products → Gift cards). The recommendation tests need the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app installed first; the setup script then sets test-two-options' related and complementary products.
 
 Existing products are left as they are, so to apply a change in `products.mjs`, delete that product on the store and run the setup again.
 

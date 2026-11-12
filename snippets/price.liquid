@@ -6,6 +6,7 @@
   @param {variant} variant - The variant to price
   @param {selling_plan_allocation} [allocation] - The selected selling plan allocation, if any
   @param {string} [size] - lg for the buy box, or blank for the default
+  @param {product} [range_product] - For product cards: shows "From" the lowest price when the variants' prices differ (not `product`, which Liquid fills with the page's product)
   @param {string} [tax_info_id] - For the buy box: unique id for an ⓘ with the tax and shipping note, plus a visible line when the store's prices include tax or duties
 
   @example
@@ -18,10 +19,19 @@
   if variant.available and source.compare_at_price > source.price
     assign on_sale = true
   endif
+  # A range has no single variant, so its sale badge and unit price would belong to just one.
+  assign price_range = false
+  if range_product.price_varies
+    assign price_range = true
+    assign on_sale = false
+  endif
 -%}
 
 <div class="price{% if size == 'lg' %} price--lg{% endif %}">
-  {%- if on_sale -%}
+  {%- if price_range -%}
+    {%- assign price_min = range_product.price_min | money | strip_html -%}
+    <span>{{ 'products.product.price_from' | t: price: price_min }}</span>
+  {%- elsif on_sale -%}
     <span class="visually-hidden">{{ 'products.product.sale_price' | t }}</span>
     <span>{{ source.price | money }}</span>
     <span class="visually-hidden">{{ 'products.product.regular_price' | t }}</span>
@@ -58,7 +68,7 @@
     {%- render 'tooltip', id: tax_info_id, label: tax_label, text: tax_text -%}
   {%- endif -%}
 
-  {%- if variant.unit_price_measurement -%}
+  {%- if variant.unit_price_measurement and price_range == false -%}
     {%- assign measurement = variant.unit_price_measurement -%}
     <p class="price__note">
       <span class="visually-hidden">{{ 'products.product.unit_price' | t }}</span>
