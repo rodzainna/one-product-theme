@@ -21,7 +21,7 @@
         {% render 'button', label: continue_label, variant: 'secondary', attributes: 'data-dialog-close' %}
       </div>
     {%- else -%}
-      {% render 'cart-form', form_id: form_id, id_prefix: section.id %}
+      {% render 'cart-form', form_id: form_id, id_prefix: section.id, heading_tag: 'h3' %}
     {%- endif -%}
   </div>
   <p class="visually-hidden" role="status" data-cart-status data-added="{{ 'cart.added' | t: title: '[title]' | escape }}"></p>
@@ -30,7 +30,7 @@
 {%- capture summary -%}
   <div class="cart-drawer__summary" id="CartDrawerSummary" data-cart-region>
     {%- if cart.item_count > 0 -%}
-      {%- if section.settings.show_note -%}
+      {%- if settings.cart_note -%}
         {%- liquid
           assign note_label = 'cart.note' | t
           assign note_id = 'CartNote-' | append: section.id
@@ -50,7 +50,7 @@
           %}
         </details>
       {%- endif -%}
-      {% render 'cart-summary', form_id: form_id, show_dynamic_checkout: section.settings.show_dynamic_checkout %}
+      {% render 'cart-summary', form_id: form_id, show_dynamic_checkout: settings.cart_dynamic_checkout %}
     {%- endif -%}
   </div>
 {%- endcapture -%}
@@ -106,19 +106,6 @@
 {% schema %}
 {
   "name": "t:general.cart_drawer",
-  "settings": [
-    {
-      "type": "checkbox",
-      "id": "show_note",
-      "label": "t:labels.show_cart_note",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_dynamic_checkout",
-      "label": "t:labels.show_dynamic_checkout",
-      "default": true
-    }
-  ]
+  "settings": []
 }
 {% endschema %}

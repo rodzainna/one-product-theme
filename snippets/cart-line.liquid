@@ -5,6 +5,7 @@
 
   @param {line_item} item - The cart line
   @param {string} id_prefix - The caller's section id, so the page and drawer don't share ids
+  @param {string} [heading_tag] - The title's heading element, default h2; the drawer uses h3 under its own title
 
   @example
   {% render 'cart-line', item: item, id_prefix: section.id %}
@@ -29,9 +30,9 @@
   </div>
 
   <div class="cart-line__details">
-    <h2 class="cart-line__title">
+    <{{ heading_tag | default: 'h2' }} class="cart-line__title">
       <a href="{{ item.url }}">{{ item.product.title | escape }}</a>
-    </h2>
+    </{{ heading_tag | default: 'h2' }}>
 
     {%- capture meta -%}
       {%- unless item.product.has_only_default_variant -%}

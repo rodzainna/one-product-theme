@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { page, userEvent } from "vitest/browser";
+import { CartLinesUpdateEvent } from "@shopify/standard-events";
 import "../../assets/variant-picker.js";
 
 // Option value ids, and the variant each Size/Colour pair maps to (L / Blue has none).
@@ -493,5 +494,57 @@ describe("focus", () => {
     await done;
     expect(document.activeElement.id).toBe("PlanOnce");
     expect(document.activeElement.isConnected).toBe(true);
+  });
+});
+
+describe("a cart change", () => {
+  const cartChanged = (settle) => {
+    const deferred = CartLinesUpdateEvent.createPromise();
+    document.dispatchEvent(
+      new CartLinesUpdateEvent({
+        action: "add",
+        context: "product",
+        lines: [{ merchandiseId: "101", quantity: 1 }],
+        promise: deferred.promise,
+      }),
+    );
+    settle(deferred);
+  };
+
+  test("re-renders the buy box from the server once it lands, for the same variant, without announcing", async () => {
+    render({ size: "M" });
+    const events = [];
+    picker().addEventListener("shopify:product:select", (e) => events.push(e));
+    cartChanged((deferred) => deferred.resolve({ cart: null }));
+    await expect.poll(() => fetchSpy.mock.calls.length).toBe(1);
+    expect(requestUrl().searchParams.get("option_values")).toBe("12,21");
+    expect(events).toHaveLength(0);
+  });
+
+  test("waits for the change to land, and ignores one that failed", async () => {
+    render();
+    cartChanged(() => {});
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(fetchSpy).not.toHaveBeenCalled();
+    document.body.innerHTML = "";
+    render();
+    cartChanged((deferred) => deferred.reject(new Error("offline")));
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  test("a picker that left the page stops listening", () => {
+    render();
+    document.body.innerHTML = "";
+    const then = vi.fn();
+    document.dispatchEvent(
+      new CartLinesUpdateEvent({
+        action: "add",
+        context: "product",
+        lines: [],
+        promise: { then },
+      }),
+    );
+    expect(then).not.toHaveBeenCalled();
   });
 });

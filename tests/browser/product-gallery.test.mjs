@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { page, userEvent } from "vitest/browser";
-import { ProductSelectEvent } from "@shopify/events";
+import { ProductSelectEvent } from "@shopify/standard-events";
 import galleryLiquid from "../../snippets/product-gallery.liquid?raw";
 import "../../assets/product-gallery.js";
 

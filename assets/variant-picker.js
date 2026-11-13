@@ -9,7 +9,7 @@
  * form won't submit.
  */
 // Loaded on demand, so the picker still works if Shopify's CDN can't be reached.
-const standardEvents = import("@shopify/events").catch(() => null);
+const standardEvents = import("@shopify/standard-events").catch(() => null);
 
 export class VariantPicker extends HTMLElement {
   #controller;
@@ -21,6 +21,7 @@ export class VariantPicker extends HTMLElement {
     this.addEventListener("change", this.#onChange);
     this.#section.addEventListener("change", this.#onPlanChange);
     this.#section.addEventListener("submit", this.#onSubmit, true);
+    document.addEventListener("shopify:cart:lines-update", this.#onCartUpdate);
     // Picks made before this script ran, or restored by the browser, aren't in the form yet.
     const radios = [...this.querySelectorAll("input[type=radio]")];
     const selects = [...this.querySelectorAll("select")];
@@ -38,7 +39,19 @@ export class VariantPicker extends HTMLElement {
     this.removeEventListener("change", this.#onChange);
     this.#section.removeEventListener("change", this.#onPlanChange);
     this.#section.removeEventListener("submit", this.#onSubmit, true);
+    document.removeEventListener(
+      "shopify:cart:lines-update",
+      this.#onCartUpdate,
+    );
   }
+
+  // Quantity limits and "N in cart" come from the cart, so a cart change re-renders them.
+  #onCartUpdate = (event) => {
+    event.promise.then(
+      () => this.#update(null, { announce: false }),
+      () => {},
+    );
+  };
 
   // A plan changes the price but not the variant, so it re-renders without the select event.
   #onPlanChange = (event) => {

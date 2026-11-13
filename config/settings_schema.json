@@ -245,6 +245,18 @@
           }
         ],
         "default": "drawer"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_note",
+        "label": "t:labels.show_cart_note",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_dynamic_checkout",
+        "label": "t:labels.show_dynamic_checkout",
+        "default": true
       }
     ]
   }

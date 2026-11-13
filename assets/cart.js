@@ -4,6 +4,9 @@
  */
 import { openDialog } from "dialog";
 
+// Shopify's standard cart events let apps follow what the shopper does (shopify.dev, "Dispatch events").
+const standardEvents = import("@shopify/standard-events").catch(() => null);
+
 const root = window.Shopify?.routes?.root ?? "/";
 const QUANTITY_DELAY = 300;
 const NOTE_DELAY = 400;
@@ -85,6 +88,61 @@ const post = (path, body) =>
     body: JSON.stringify(body),
   });
 
+const currentCart = () =>
+  fetch(`${root}cart.js`).then((response) => response.json());
+
+const contextOf = (element) =>
+  element?.closest("#CartDrawer") ? "dialog" : "cart";
+
+// Dispatches a standard cart event, sends the request, then settles the event's promise.
+async function announceChange(name, target, init, send, responseIsCart = true) {
+  const lib = await standardEvents;
+  const EventClass = lib?.[name];
+  const deferred = EventClass?.createPromise();
+  deferred?.promise.catch(() => {});
+  const element = target?.isConnected ? target : document;
+  if (EventClass)
+    element.dispatchEvent(
+      new EventClass({ ...init, promise: deferred.promise }),
+    );
+  let result;
+  try {
+    result = await send();
+  } catch (error) {
+    deferred?.reject(error);
+    if (lib?.CartErrorEvent)
+      element.dispatchEvent(
+        new lib.CartErrorEvent({
+          error: String(error.message),
+          code: "INVALID",
+        }),
+      );
+    throw error;
+  }
+  // A problem describing the change to listeners never breaks the shopper's cart.
+  if (EventClass) {
+    try {
+      const { ok, data } = result;
+      const cart = ok && responseIsCart ? data : await currentCart();
+      deferred.resolve({
+        cart: EventClass.createCartFromAjaxResponse(cart),
+        userErrors: ok
+          ? []
+          : [{ message: data.description ?? "", code: "INVALID" }],
+        warnings: [],
+      });
+    } catch (error) {
+      deferred.reject(error);
+    }
+  }
+  return result;
+}
+
+const send = async (path, body) => {
+  const response = await post(path, body);
+  return { ok: response.ok, data: await response.json() };
+};
+
 const showError = (formId, description) => {
   const error = document
     .getElementById(formId)
@@ -99,17 +157,26 @@ async function refresh(ids) {
   if (response?.ok) applySections(await response.json());
 }
 
-async function changeLine(key, quantity, formId) {
+async function changeLine(key, quantity, formId, target) {
   const ids = sectionIds();
   try {
-    const response = await post("cart/change.js", {
-      id: key,
-      quantity,
-      sections: ids,
-      sections_url: location.pathname,
-    });
-    const data = await response.json();
-    if (!response.ok) {
+    const { ok, data } = await announceChange(
+      "CartLinesUpdateEvent",
+      target,
+      {
+        action: quantity === 0 ? "remove" : "update",
+        context: contextOf(target),
+        lines: [{ id: key, quantity }],
+      },
+      () =>
+        send("cart/change.js", {
+          id: key,
+          quantity,
+          sections: ids,
+          sections_url: location.pathname,
+        }),
+    );
+    if (!ok) {
       await refresh(ids);
       showError(formId, data.description);
       return;
@@ -131,7 +198,7 @@ function scheduleChange(input) {
     quantityTimers.delete(key);
     const quantity = input.valueAsNumber;
     if (Number.isNaN(quantity)) return;
-    enqueue(() => changeLine(key, quantity, formId));
+    enqueue(() => changeLine(key, quantity, formId, input));
   };
   quantityTimers.set(key, { run, timer: setTimeout(run, QUANTITY_DELAY) });
 }
@@ -145,12 +212,20 @@ const flushQuantities = () => {
 
 let noteTimer;
 let pendingNote = null;
-const saveNote = (note) => {
+const saveNote = (textarea) => {
+  const note = textarea.value;
   clearTimeout(noteTimer);
   pendingNote = note;
   noteTimer = setTimeout(() => {
     pendingNote = null;
-    enqueue(() => post("cart/update.js", { note }).catch(() => {}));
+    enqueue(() =>
+      announceChange(
+        "CartNoteUpdateEvent",
+        textarea,
+        { context: contextOf(textarea), note },
+        () => send("cart/update.js", { note }),
+      ).catch(() => {}),
+    );
   }, NOTE_DELAY);
 };
 
@@ -192,13 +267,30 @@ async function addToCart(form, button) {
   body.append("sections", sectionIds().join(","));
   body.append("sections_url", location.pathname);
   try {
-    const response = await fetch(`${root}cart/add.js`, {
-      method: "POST",
-      headers: { Accept: "application/json" },
-      body,
-    });
-    const data = await response.json();
-    if (!response.ok) {
+    const { ok, data } = await announceChange(
+      "CartLinesUpdateEvent",
+      form,
+      {
+        action: "add",
+        context: "product",
+        lines: [
+          {
+            merchandiseId: body.get("id"),
+            quantity: Number(body.get("quantity") || 1),
+          },
+        ],
+      },
+      async () => {
+        const response = await fetch(`${root}cart/add.js`, {
+          method: "POST",
+          headers: { Accept: "application/json" },
+          body,
+        });
+        return { ok: response.ok, data: await response.json() };
+      },
+      false,
+    );
+    if (!ok) {
       if (error) error.textContent = data.description || error.dataset.message;
       return;
     }
@@ -243,7 +335,7 @@ const onChange = (event) => {
 };
 
 const onInput = (event) => {
-  if (event.target.matches?.("[data-cart-note]")) saveNote(event.target.value);
+  if (event.target.matches?.("[data-cart-note]")) saveNote(event.target);
 };
 
 const onClick = (event) => {
@@ -253,7 +345,7 @@ const onClick = (event) => {
     const formId = remove.closest("form")?.id;
     clearTimeout(quantityTimers.get(remove.dataset.lineKey)?.timer);
     quantityTimers.delete(remove.dataset.lineKey);
-    enqueue(() => changeLine(remove.dataset.lineKey, 0, formId));
+    enqueue(() => changeLine(remove.dataset.lineKey, 0, formId, remove));
     return;
   }
   const icon = event.target.closest?.("[data-cart-icon] a");

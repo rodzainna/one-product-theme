@@ -75,6 +75,10 @@ describe("cart page", () => {
       expect(gift).not.toContain("_hidden");
     });
 
+    test("line titles are h2 under the page's h1", () => {
+      expect(html).toContain('<h2 class="cart-line__title"');
+    });
+
     test("a product with only the default variant shows no option list", () => {
       expect(line(html, "Test unit price")).not.toContain("<dl");
     });

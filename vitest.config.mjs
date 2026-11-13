@@ -17,7 +17,7 @@ export default defineConfig({
       {
         resolve: {
           alias: {
-            "@shopify/events": new URL(
+            "@shopify/standard-events": new URL(
               "./tests/browser/stubs/shopify-events.mjs",
               import.meta.url,
             ).pathname,

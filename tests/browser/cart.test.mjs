@@ -57,8 +57,23 @@ const json = (body, status = 200) =>
     headers: { "Content-Type": "application/json" },
   });
 
+// The cart itself, as /cart.js returns it, for the events' promises.
+const ajaxCart = {
+  token: "t",
+  item_count: 1,
+  items: [{ key: "111:aaa", quantity: 1 }],
+};
 const mockFetch = (handler) =>
-  vi.spyOn(window, "fetch").mockImplementation(handler);
+  vi
+    .spyOn(window, "fetch")
+    .mockImplementation((url, init) =>
+      String(url).endsWith("/cart.js")
+        ? Promise.resolve(json(ajaxCart))
+        : handler(url, init),
+    );
+// The requests that change the cart, without the /cart.js reads behind the events.
+const requests = (fetch) =>
+  fetch.mock.calls.filter(([url]) => !String(url).endsWith("/cart.js"));
 
 const submit = (form, submitter) => {
   const event = new SubmitEvent("submit", {
@@ -89,7 +104,7 @@ describe("add to cart", () => {
 
     const drawer = document.getElementById("CartDrawer");
     await expect.poll(() => drawer.open).toBe(true);
-    const [url, init] = fetch.mock.calls[0];
+    const [url, init] = requests(fetch)[0];
     expect(url).toBe("/cart/add.js");
     expect(init.body.get("id")).toBe("99");
     expect(init.body.get("sections").split(",").sort()).toEqual([
@@ -140,7 +155,7 @@ describe("add to cart", () => {
       once: true,
     });
     submit(form);
-    expect(fetch).not.toHaveBeenCalled();
+    expect(requests(fetch)).toHaveLength(0);
 
     render({ withDrawer: false });
     const native = document.getElementById("ProductForm");
@@ -160,7 +175,7 @@ describe("add to cart", () => {
     );
     native.dispatchEvent(event);
     expect(prevented).toBe(false);
-    expect(fetch).not.toHaveBeenCalled();
+    expect(requests(fetch)).toHaveLength(0);
   });
 
   test("a second press while adding is ignored", async () => {
@@ -176,9 +191,9 @@ describe("add to cart", () => {
     const button = form.querySelector("button");
     submit(form, button);
     submit(form, button);
-    await expect.poll(() => fetch.mock.calls.length).toBe(1);
+    await expect.poll(() => requests(fetch).length).toBe(1);
     await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(requests(fetch)).toHaveLength(1);
     release();
     await expect.poll(() => button.hasAttribute("aria-busy")).toBe(false);
   });
@@ -195,8 +210,8 @@ describe("cart lines", () => {
       input.value = value;
       input.dispatchEvent(new Event("change", { bubbles: true }));
     }
-    await expect.poll(() => fetch.mock.calls.length).toBe(1);
-    const [url, init] = fetch.mock.calls[0];
+    await expect.poll(() => requests(fetch).length).toBe(1);
+    const [url, init] = requests(fetch)[0];
     expect(url).toBe("/cart/change.js");
     expect(JSON.parse(init.body)).toMatchObject({ id: KEY, quantity: 3 });
     await expect
@@ -211,8 +226,8 @@ describe("cart lines", () => {
     const event = new MouseEvent("click", { bubbles: true, cancelable: true });
     link.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
-    await expect.poll(() => fetch.mock.calls.length).toBe(1);
-    expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+    await expect.poll(() => requests(fetch).length).toBe(1);
+    expect(JSON.parse(requests(fetch)[0][1].body)).toMatchObject({
       id: KEY,
       quantity: 0,
     });
@@ -238,8 +253,8 @@ describe("cart lines", () => {
     const input = document.getElementById(`Qty-${KEY}`);
     input.value = "9";
     input.dispatchEvent(new Event("change", { bubbles: true }));
-    await expect.poll(() => fetch.mock.calls.length).toBe(2);
-    expect(fetch.mock.calls[1][0]).toMatch(/\?sections=/);
+    await expect.poll(() => requests(fetch).length).toBe(2);
+    expect(requests(fetch)[1][0]).toMatch(/\?sections=/);
     await expect
       .poll(
         () =>
@@ -263,7 +278,7 @@ describe("cart lines", () => {
     expect(
       submit(form, form.querySelector("[data-cart-update]")).defaultPrevented,
     ).toBe(true);
-    await expect.poll(() => fetch.mock.calls.length).toBe(1);
+    await expect.poll(() => requests(fetch).length).toBe(1);
     await expect
       .poll(() => document.querySelector("#CartDrawerLines p")?.textContent)
       .toBe("Fresh 4");
@@ -297,8 +312,8 @@ describe("review fixes", () => {
     input.dispatchEvent(new Event("change", { bubbles: true }));
     document.querySelector(".cart-line__remove").click();
     await new Promise((resolve) => setTimeout(resolve, 600));
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(fetch.mock.calls[0][1].body).quantity).toBe(0);
+    expect(requests(fetch)).toHaveLength(1);
+    expect(JSON.parse(requests(fetch)[0][1].body).quantity).toBe(0);
   });
 
   test("clearing a quantity field keeps the line at its minimum instead of removing it", async () => {
@@ -311,8 +326,8 @@ describe("review fixes", () => {
     input.focus();
     input.value = "";
     input.dispatchEvent(new Event("change", { bubbles: true }));
-    await expect.poll(() => fetch.mock.calls.length).toBe(1);
-    expect(JSON.parse(fetch.mock.calls[0][1].body).quantity).toBe(1);
+    await expect.poll(() => requests(fetch).length).toBe(1);
+    expect(JSON.parse(requests(fetch)[0][1].body).quantity).toBe(1);
   });
 
   test("keyboard focus stays on the same stepper button after a line saves", async () => {
@@ -344,14 +359,14 @@ describe("review fixes", () => {
     const second = document.getElementById(`Qty-${OTHER}`);
     second.focus();
     second.value = "12";
-    await expect.poll(() => fetch.mock.calls.length).toBe(1);
+    await expect.poll(() => requests(fetch).length).toBe(1);
     await expect
       .poll(() => document.querySelector("#CartDrawerLines p")?.textContent)
       .toBe("Fresh 2");
     expect(document.getElementById(`Qty-${OTHER}`).value).toBe("12");
     expect(document.activeElement.id).toBe(`Qty-${OTHER}`);
-    await expect.poll(() => fetch.mock.calls.length).toBe(2);
-    expect(JSON.parse(fetch.mock.calls[1][1].body)).toMatchObject({
+    await expect.poll(() => requests(fetch).length).toBe(2);
+    expect(JSON.parse(requests(fetch)[1][1].body)).toMatchObject({
       id: OTHER,
       quantity: 12,
     });
@@ -367,12 +382,12 @@ describe("review fixes", () => {
     input.focus();
     input.value = "12";
     input.dispatchEvent(new Event("change", { bubbles: true }));
-    await expect.poll(() => fetch.mock.calls.length).toBe(1);
+    await expect.poll(() => requests(fetch).length).toBe(1);
     await expect
       .poll(() => document.getElementById(`Qty-${KEY}`).value)
       .toBe("5");
     await new Promise((resolve) => setTimeout(resolve, 700));
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(requests(fetch)).toHaveLength(1);
   });
 
   test("Add to cart waits for a change that is still saving", async () => {
@@ -404,6 +419,146 @@ describe("review fixes", () => {
     release();
     await expect.poll(() => order.length).toBe(2);
     expect(order[1]).toBe("/cart/add.js");
+  });
+});
+
+const cleanups = [];
+afterEach(() => cleanups.splice(0).forEach((fn) => fn()));
+const heard = (name) => {
+  const events = [];
+  const listener = (event) => events.push(event);
+  document.addEventListener(name, listener);
+  cleanups.push(() => document.removeEventListener(name, listener));
+  return events;
+};
+
+describe("standard cart events", () => {
+  test("an add announces itself before the request and settles with the cart", async () => {
+    render();
+    const events = heard("shopify:cart:lines-update");
+    let requestsAtEvent;
+    const fetch = mockFetch(async () =>
+      json({ title: "A", sections: sections(line(KEY, 1), 1) }),
+    );
+    document.addEventListener(
+      "shopify:cart:lines-update",
+      () => (requestsAtEvent = requests(fetch).length),
+      { once: true },
+    );
+    submit(
+      document.getElementById("ProductForm"),
+      page.getByRole("button", { name: "Add to cart" }).element(),
+    );
+    await expect.poll(() => events.length).toBe(1);
+    const [event] = events;
+    expect(requestsAtEvent).toBe(0);
+    expect(event.action).toBe("add");
+    expect(event.context).toBe("product");
+    expect(event.lines).toEqual([{ merchandiseId: "99", quantity: 1 }]);
+    expect(event.target.getAttribute("id")).toBe("ProductForm");
+    const { cart, userErrors } = await event.promise;
+    expect(cart.totalQuantity).toBe(1);
+    expect(userErrors).toEqual([]);
+  });
+
+  test("a quantity change and a Remove say what changed, from the drawer", async () => {
+    render({ lines: line(KEY, 1) });
+    openDrawer();
+    const events = heard("shopify:cart:lines-update");
+    mockFetch(async () =>
+      json({ ...ajaxCart, sections: sections(line(KEY, 3), 3) }),
+    );
+    const input = document.getElementById(`Qty-${KEY}`);
+    input.value = "3";
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    await expect.poll(() => events.length).toBe(1);
+    expect(events[0]).toMatchObject({
+      action: "update",
+      context: "dialog",
+      lines: [{ id: KEY, quantity: 3 }],
+    });
+    await events[0].promise;
+    document.querySelector(".cart-line__remove").click();
+    await expect.poll(() => events.length).toBe(2);
+    expect(events[1]).toMatchObject({
+      action: "remove",
+      lines: [{ id: KEY, quantity: 0 }],
+    });
+  });
+
+  test("a change Shopify declines settles with the reason and sends no error event", async () => {
+    render({ lines: line(KEY, 1) });
+    openDrawer();
+    const events = heard("shopify:cart:lines-update");
+    const errors = heard("shopify:cart:error");
+    mockFetch(async (url) =>
+      String(url).includes("change.js")
+        ? json({ status: 422, description: "Only 5 left." }, 422)
+        : json(sections(line(KEY, 1), 1)),
+    );
+    const input = document.getElementById(`Qty-${KEY}`);
+    input.value = "9";
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    await expect.poll(() => events.length).toBe(1);
+    const { userErrors } = await events[0].promise;
+    expect(userErrors[0].message).toBe("Only 5 left.");
+    expect(errors).toHaveLength(0);
+  });
+
+  test("a failed request rejects the promise and sends an error event; the cart still shows the problem", async () => {
+    render({ lines: line(KEY, 1) });
+    openDrawer();
+    const events = heard("shopify:cart:lines-update");
+    const errors = heard("shopify:cart:error");
+    mockFetch(async (url) => {
+      if (String(url).includes("change.js")) throw new TypeError("offline");
+      return json(sections(line(KEY, 1), 1));
+    });
+    const input = document.getElementById(`Qty-${KEY}`);
+    input.value = "2";
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    await expect.poll(() => events.length).toBe(1);
+    await expect(events[0].promise).rejects.toThrow("offline");
+    expect(errors).toHaveLength(1);
+    expect(errors[0].error).toBe("offline");
+    await expect
+      .poll(
+        () =>
+          document.querySelector("#CartDrawerForm [data-cart-error]")
+            .textContent,
+      )
+      .toBe("Your cart couldn't be updated.");
+  });
+
+  test("the note announces its change", async () => {
+    render({ lines: line(KEY, 1) });
+    openDrawer();
+    const events = heard("shopify:cart:note-update");
+    mockFetch(async () => json(ajaxCart));
+    document.getElementById("CartDetails")?.setAttribute("open", "");
+    const note = document.getElementById("CartNote");
+    note.value = "Gift";
+    note.dispatchEvent(new Event("input", { bubbles: true }));
+    await expect.poll(() => events.length).toBe(1);
+    expect(events[0]).toMatchObject({ context: "dialog", note: "Gift" });
+    expect((await events[0].promise).cart.totalQuantity).toBe(1);
+  });
+
+  test("failing to describe the change to listeners doesn't stop the cart", async () => {
+    render();
+    const events = heard("shopify:cart:lines-update");
+    vi.spyOn(window, "fetch").mockImplementation(async (url) => {
+      if (String(url).endsWith("/cart.js")) throw new TypeError("no cart");
+      return json({ title: "A", sections: sections(line(KEY, 1), 1) });
+    });
+    submit(
+      document.getElementById("ProductForm"),
+      page.getByRole("button", { name: "Add to cart" }).element(),
+    );
+    await expect
+      .poll(() => document.getElementById("CartDrawer").open)
+      .toBe(true);
+    await expect(events[0].promise).rejects.toThrow("no cart");
   });
 });
 

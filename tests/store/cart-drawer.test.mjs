@@ -29,6 +29,7 @@ describe("cart drawer", () => {
     const page = await cartSession([{ id: regular, quantity: 2 }]);
     const html = drawer(await page("/products/test-regular"));
     expect(html).toContain('class="cart-line"');
+    expect(html).toContain('<h3 class="cart-line__title"');
     expect(html).toContain(`<summary>${t.note_toggle}</summary>`);
     expect(html).toMatch(/name="checkout"[\s\S]{0,200}form="CartDrawerForm"/);
     expect(html).toMatch(/data-line-key="\d+:[0-9a-f]+"/);

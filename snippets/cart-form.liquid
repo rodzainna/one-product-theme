@@ -5,6 +5,7 @@
 
   @param {string} form_id - The form's id, also used by the note and Check out outside it
   @param {string} id_prefix - The caller's section id, so the page and drawer don't share ids
+  @param {string} [heading_tag] - The line titles' heading element, default h2
 
   @example
   {% render 'cart-form', form_id: form_id, id_prefix: section.id %}
@@ -16,7 +17,7 @@
 <form class="cart-form" id="{{ form_id }}" action="{{ routes.cart_url }}" method="post" data-cart-form>
   <ul class="cart-form__lines">
     {%- for item in cart.items -%}
-      <li>{% render 'cart-line', item: item, id_prefix: id_prefix %}</li>
+      <li>{% render 'cart-line', item: item, id_prefix: id_prefix, heading_tag: heading_tag %}</li>
     {%- endfor -%}
   </ul>
   <p class="cart-form__error" role="alert" data-cart-error data-message="{{ 'cart.error' | t | escape }}"></p>

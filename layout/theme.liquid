@@ -47,11 +47,22 @@
     <script type="importmap">
       {
         "imports": {
-          "@shopify/events": "https://cdn.shopify.com/storefront/standard-events.js",
+          "@shopify/standard-events": "https://cdn.shopify.com/storefront/standard-events.js",
           "dialog": "{{ 'dialog.js' | asset_url }}"
         }
       }
     </script>
+
+    {%- if settings.cart_type == 'drawer' and template.name != 'cart' -%}
+      <script>
+        // Apps that ask to show the cart get the drawer.
+        document.addEventListener('DOMContentLoaded', () => {
+          window.Shopify?.actions?.openCart?.configure({
+            handler: () => import('dialog').then(({ openDialog }) => openDialog(document.getElementById('CartDrawer'))),
+          });
+        });
+      </script>
+    {%- endif -%}
 
     {{ content_for_header }}
   </head>

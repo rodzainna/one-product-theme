@@ -21,7 +21,7 @@
     {% render 'cart-form', form_id: form_id, id_prefix: section.id %}
 
     <div class="cart__summary">
-      {%- if section.settings.show_note -%}
+      {%- if settings.cart_note -%}
         {%- liquid
           assign note_label = 'cart.note' | t
           assign note_id = 'CartNote-' | append: section.id
@@ -37,7 +37,7 @@
           attributes: note_attributes
         %}
       {%- endif -%}
-      {% render 'cart-summary', form_id: form_id, show_dynamic_checkout: section.settings.show_dynamic_checkout %}
+      {% render 'cart-summary', form_id: form_id, show_dynamic_checkout: settings.cart_dynamic_checkout %}
     </div>
   {%- endif -%}
 </div>
@@ -97,19 +97,6 @@
 {% schema %}
 {
   "name": "t:general.cart",
-  "settings": [
-    {
-      "type": "checkbox",
-      "id": "show_note",
-      "label": "t:labels.show_cart_note",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_dynamic_checkout",
-      "label": "t:labels.show_dynamic_checkout",
-      "default": true
-    }
-  ]
+  "settings": []
 }
 {% endschema %}
