@@ -1,0 +1,290 @@
+{% comment %}
+  The home page's first screen and its one h1, over an image and/or a video; assets/hero.js runs the video.
+  https://shopify.dev/docs/api/liquid/filters/video_tag
+{% endcomment %}
+
+{%- liquid
+  assign image = section.settings.image
+  assign video = section.settings.video
+  assign has_media = false
+  if image != blank or video != blank
+    assign has_media = true
+  endif
+
+  assign parallax = false
+  if section.settings.parallax and has_media
+    assign parallax = true
+  endif
+
+  assign preload = false
+  if section.index == 1
+    assign preload = true
+  endif
+-%}
+<hero-section
+  class="hero full-width section-full color-{{ section.settings.color_scheme }}{% if parallax %} parallax{% endif %}"
+  style="--hero-overlay: {{ section.settings.overlay }}%;"
+>
+  {%- if has_media -%}
+    <div class="hero__media{% if parallax %} parallax__media{% endif %}" aria-hidden="true">
+      {%- if image != blank -%}
+        {% render 'image', image: image, alt: '', class: 'hero__image', preload: preload %}
+      {%- endif -%}
+      {%- if video != blank -%}
+        {{ video | video_tag: image_size: '1920x', loop: true, muted: true, preload: 'none', class: 'hero__video' }}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="hero__content">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="hero__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+    {%- endif -%}
+    <h1 class="hero__heading">{{ section.settings.heading | default: shop.name | escape }}</h1>
+    {%- if section.settings.text != blank -%}
+      <p class="hero__text">{{ section.settings.text | escape }}</p>
+    {%- endif -%}
+    {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+      {% render 'button', label: section.settings.button_label, url: section.settings.button_link %}
+    {%- endif -%}
+  </div>
+
+  {%- if video != blank -%}
+    <button
+      class="hero__toggle"
+      type="button"
+      data-hero-toggle
+      data-pause="{{ 'hero.pause_video' | t | escape }}"
+      data-play="{{ 'hero.play_video' | t | escape }}"
+      aria-label="{{ 'hero.pause_video' | t }}"
+      hidden
+    >
+      <span data-hero-icon="pause">{% render 'icon', name: 'pause' %}</span>
+      <span data-hero-icon="play" hidden>{% render 'icon', name: 'play' %}</span>
+    </button>
+  {%- endif -%}
+
+  {%- if section.settings.scroll_cue -%}
+    <a class="hero__cue" href="#MainContent" data-hero-cue aria-label="{{ 'hero.scroll_cue' | t }}" hidden>
+      <svg aria-hidden="true" viewBox="0 0 24 36" width="24" height="36">
+        <rect x="1" y="1" width="22" height="34" rx="11" fill="none" stroke="currentColor" stroke-width="2" />
+        <rect class="hero__wheel" x="10.5" y="7" width="3" height="7" rx="1.5" fill="currentColor" />
+      </svg>
+      {% render 'icon', name: 'chevron-down' %}
+    </a>
+  {%- endif -%}
+</hero-section>
+
+<script src="{{ 'hero.js' | asset_url }}" type="module"></script>
+
+{% stylesheet %}
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: var(--content-grid);
+    align-items: center;
+    width: 100%;
+  }
+  .hero__media {
+    position: absolute;
+    inset: 0;
+  }
+  .hero__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--color-background) var(--hero-overlay), transparent);
+  }
+  .hero__image,
+  .hero__media .image > img,
+  .hero__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* An image is the thumb: the video fades in over it once it plays. Without one, the poster shows. */
+  .hero__video {
+    position: absolute;
+    inset: 0;
+    transition: opacity var(--duration-settle) var(--ease);
+  }
+  .hero__media:has(.hero__image) .hero__video {
+    opacity: 0;
+  }
+  .hero[data-playing] .hero__video,
+  .hero[data-paused] .hero__video {
+    opacity: 1;
+  }
+  .hero__content {
+    position: relative;
+    grid-column: 2;
+    display: grid;
+    justify-items: start;
+    gap: var(--space-m);
+    --hero-clearance: calc(var(--space-2xl) * 2);
+    padding-block: var(--space-2xl) var(--hero-clearance);
+  }
+  .hero__content > * {
+    margin: 0;
+  }
+  .hero__eyebrow {
+    font-size: var(--text-small);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .hero__heading {
+    max-width: 16ch;
+  }
+  .hero__text {
+    max-width: 48ch;
+    font-size: var(--text-lg);
+  }
+  .hero__toggle,
+  .hero__cue {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    color: var(--color-foreground);
+  }
+  .hero__toggle {
+    inset-block-end: var(--space-m);
+    inset-inline-end: var(--space-m);
+    width: var(--control-h);
+    height: var(--control-h);
+    border: 1px solid var(--color-control-border);
+    border-radius: var(--radius-full);
+    background: var(--color-background);
+  }
+  .hero__toggle:hover {
+    background: var(--color-hover);
+  }
+  .hero__toggle[hidden],
+  .hero__cue[hidden] {
+    display: none;
+  }
+  /* The mouse icon with a moving wheel, centred at the bottom. */
+  .hero__cue {
+    inset-inline: 0;
+    inset-block-end: var(--space-l);
+    width: fit-content;
+    margin-inline: auto;
+    justify-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-xs);
+    opacity: 0.85;
+  }
+  .hero__cue:hover {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__wheel {
+      animation: hero-wheel var(--duration-cue) var(--ease) infinite;
+    }
+  }
+  @keyframes hero-wheel {
+    0% {
+      translate: 0 0;
+      opacity: 1;
+    }
+    70% {
+      translate: 0 9px;
+      opacity: 0;
+    }
+    100% {
+      translate: 0 0;
+      opacity: 0;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.hero",
+  "limit": 1,
+  "enabled_on": {
+    "templates": ["index"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:labels.image"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "t:labels.video",
+      "info": "t:info.hero_video"
+    },
+    {
+      "type": "range",
+      "id": "overlay",
+      "label": "t:labels.overlay",
+      "info": "t:info.overlay",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "parallax",
+      "label": "t:labels.parallax",
+      "info": "t:info.parallax",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "scroll_cue",
+      "label": "t:labels.scroll_cue",
+      "info": "t:info.scroll_cue",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:labels.content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:labels.eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Your product, front and centre"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "t:labels.text"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:labels.button_label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "t:labels.button_link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.hero"
+    }
+  ]
+}
+{% endschema %}

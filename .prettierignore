@@ -5,3 +5,6 @@ config/settings_data.json
 
 # Written by pnpm
 pnpm-lock.yaml
+
+# Written by Playwright MCP
+.playwright-mcp/

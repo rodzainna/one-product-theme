@@ -1,7 +1,7 @@
 {% doc %}
   Renders a decorative Lucide-style icon in the current text colour.
 
-  @param {string} name - account, alert, box, cart, check, chevron-down, close, info, minus, play or plus
+  @param {string} name - account, alert, box, cart, check, chevron-down, close, info, minus, pause, play or plus
   @param {string} [size] - sm, or blank for the default
 
   @example
@@ -33,6 +33,8 @@
       <path d="M5 12h14"/>
     {%- when 'plus' -%}
       <path d="M5 12h14M12 5v14"/>
+    {%- when 'pause' -%}
+      <path d="M8 5v14M16 5v14"/>
     {%- when 'play' -%}
       <path d="M7 4v16l13-8L7 4Z"/>
     {%- when 'box' -%}

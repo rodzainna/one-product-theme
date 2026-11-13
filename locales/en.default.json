@@ -67,6 +67,11 @@
       "other": "Cart, {{ count }} items"
     }
   },
+  "hero": {
+    "pause_video": "Pause background video",
+    "play_video": "Play background video",
+    "scroll_cue": "Scroll to the next section"
+  },
   "password": {
     "title": "This shop is private",
     "password": "Password",

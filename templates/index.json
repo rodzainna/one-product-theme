@@ -9,6 +9,15 @@
  */
 {
   "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "heading": "Your product, front and centre",
+        "text": "One product, one page. Add an image or a short video and say why it is worth buying.",
+        "button_label": "Shop now",
+        "button_link": "/products/test-two-options"
+      }
+    },
     "main": {
       "type": "custom-section",
       "settings": {}
@@ -28,5 +37,5 @@
       "settings": { "product": "test-two-options" }
     }
   },
-  "order": ["main", "featured_product"]
+  "order": ["hero", "main", "featured_product"]
 }
