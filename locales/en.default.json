@@ -52,6 +52,9 @@
   "collections": {
     "title": "Collections"
   },
+  "features": {
+    "heading": "Features"
+  },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
     "card": "Gift card",

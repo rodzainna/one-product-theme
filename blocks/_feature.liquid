@@ -1,0 +1,134 @@
+{% doc %}
+  One feature in the features section: an icon (built in, or the merchant's own image), a title
+  and a line of text. Shopify wraps each block in a div, so the list uses ARIA roles, not ul and li.
+
+  @example
+  {% content_for 'block', type: '_feature', id: 'feature' %}
+{% enddoc %}
+
+<div class="feature" role="listitem" {{ block.shopify_attributes }}>
+  {%- if block.settings.custom_icon != blank -%}
+    {%- capture icon_sizes -%}
+      (min-width: 700px) {{ section.settings.icon_size_desktop }}px, {{ section.settings.icon_size_mobile }}px
+    {%- endcapture -%}
+    {% render 'image',
+      image: block.settings.custom_icon,
+      alt: '',
+      class: 'feature__icon feature__icon--image',
+      sizes: icon_sizes,
+      width: 288
+    %}
+  {%- elsif block.settings.icon != 'none' -%}
+    <span class="feature__icon">{% render 'icon', name: block.settings.icon %}</span>
+  {%- endif -%}
+  {%- if block.settings.title != blank -%}
+    <h3 class="feature__title">{{ block.settings.title | escape }}</h3>
+  {%- endif -%}
+  {%- if block.settings.text != blank -%}
+    <p class="feature__text">{{ block.settings.text | escape }}</p>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .feature {
+    --feature-icon: var(--features-icon-mobile, 2.75rem);
+    display: grid;
+    grid-template-columns: var(--feature-icon) minmax(0, 1fr);
+    column-gap: var(--space-s);
+    align-content: start;
+  }
+  .feature:not(:has(.feature__icon)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .feature__icon {
+    grid-row: span 2;
+    align-self: start;
+    justify-self: center;
+    color: var(--color-accent);
+  }
+  .feature__icon .icon {
+    width: var(--feature-icon);
+    height: var(--feature-icon);
+    stroke-width: 1.5;
+  }
+  .feature .feature__icon--image {
+    width: var(--feature-icon);
+    height: var(--feature-icon);
+  }
+  .feature .feature__icon--image > img {
+    height: 100%;
+    object-fit: contain;
+  }
+  .feature__title {
+    margin: 0;
+    font-size: var(--text-h4);
+  }
+  .feature__text {
+    margin: var(--space-2xs) 0 0;
+    color: var(--color-foreground-muted);
+  }
+  /* From tablet width the icon sits above its text. */
+  @media (min-width: 700px) {
+    .feature {
+      --feature-icon: var(--features-icon-desktop, 3rem);
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--space-s);
+    }
+    .feature__icon {
+      grid-row: auto;
+      justify-self: start;
+    }
+    .feature__text {
+      margin: 0;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.feature",
+  "settings": [
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "t:labels.icon",
+      "options": [
+        { "value": "none", "label": "t:options.feature_icon.none" },
+        { "value": "leaf", "label": "t:options.feature_icon.leaf" },
+        { "value": "flame", "label": "t:options.feature_icon.flame" },
+        { "value": "droplet", "label": "t:options.feature_icon.droplet" },
+        { "value": "shield-check", "label": "t:options.feature_icon.shield_check" },
+        { "value": "truck", "label": "t:options.feature_icon.truck" },
+        { "value": "heart", "label": "t:options.feature_icon.heart" },
+        { "value": "star", "label": "t:options.feature_icon.star" },
+        { "value": "clock", "label": "t:options.feature_icon.clock" },
+        { "value": "gift", "label": "t:options.feature_icon.gift" },
+        { "value": "box", "label": "t:options.feature_icon.box" }
+      ],
+      "default": "leaf"
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_icon",
+      "label": "t:labels.custom_icon",
+      "info": "t:info.custom_icon"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:labels.title",
+      "default": "A feature"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "t:labels.text"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.feature"
+    }
+  ]
+}
+{% endschema %}

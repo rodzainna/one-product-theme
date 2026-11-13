@@ -35,7 +35,18 @@
       },
       "block_order": ["title", "rating", "price", "description", "variant_picker", "buy_buttons", "pickup"],
       "settings": { "product": "test-two-options" }
+    },
+    "features": {
+      "type": "features",
+      "blocks": {
+        "feature_1": { "type": "_feature", "settings": { "icon": "leaf", "title": "First feature", "text": "Say what makes this product worth buying." } },
+        "feature_2": { "type": "_feature", "settings": { "icon": "shield-check", "title": "Second feature", "text": "Keep each point to a sentence." } },
+        "feature_3": { "type": "_feature", "settings": { "icon": "truck", "title": "Third feature", "text": "Add up to six features." } },
+        "feature_4": { "type": "_feature", "settings": { "icon": "heart", "title": "Fourth feature", "text": "Pick an icon or upload your own." } }
+      },
+      "block_order": ["feature_1", "feature_2", "feature_3", "feature_4"],
+      "settings": { "color_scheme": "scheme-3" }
     }
   },
-  "order": ["hero", "main", "featured_product"]
+  "order": ["hero", "main", "featured_product", "features"]
 }
