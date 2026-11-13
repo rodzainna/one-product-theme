@@ -5,16 +5,18 @@
 
   @param {line_item} item - The cart line
   @param {string} id_prefix - The caller's section id, so the page and drawer don't share ids
-  @param {number} index - The line's position, from 1, for unique ids
 
   @example
-  {% render 'cart-line', item: item, id_prefix: section.id, index: forloop.index %}
+  {% render 'cart-line', item: item, id_prefix: section.id %}
 {% enddoc %}
 
 {%- liquid
   assign rule = item.variant.quantity_rule
-  assign quantity_id = 'CartQuantity-' | append: id_prefix | append: '-' | append: index
+  assign quantity_id = 'CartQuantity-' | append: id_prefix | append: '-' | append: item.key
   assign quantity_label = 'cart.quantity_label' | t: title: item.title
+  assign quantity_min = rule.min | default: 1
+  assign update_name = 'updates[' | append: item.key | append: ']'
+  assign key_attribute = 'data-line-key="' | append: item.key | append: '"'
 -%}
 
 <div class="cart-line">
@@ -67,15 +69,11 @@
     {%- endif -%}
 
     {%- if item.unit_price_measurement -%}
-      {%- assign measurement = item.unit_price_measurement -%}
-      <p class="cart-line__note">
-        <span class="visually-hidden">{{ 'products.product.unit_price' | t }}</span>
-        {{ item.unit_price | money -}}
-        <span aria-hidden="true"> / </span>
-        <span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
-        {%- if measurement.reference_value != 1 %}{{ measurement.reference_value }}{% endif -%}
-        {{- measurement.reference_unit -}}
-      </p>
+      {% render 'unit-price',
+        price: item.unit_price,
+        measurement: item.unit_price_measurement,
+        class: 'cart-line__note'
+      %}
     {%- endif -%}
 
     {%- if item.line_level_discount_allocations.size > 0 -%}
@@ -94,15 +92,16 @@
         id: quantity_id,
         label: quantity_label,
         label_hidden: true,
-        name: 'updates[]',
+        name: update_name,
         value: item.quantity,
-        min: 0,
+        min: quantity_min,
         max: rule.max,
         step: rule.increment,
         size: 'sm',
-        skip_script: true
+        skip_script: true,
+        input_attributes: key_attribute
       %}
-      <a class="cart-line__remove" href="{{ item.url_to_remove }}">
+      <a class="cart-line__remove" href="{{ item.url_to_remove }}" {{ key_attribute }}>
         {{- 'cart.remove' | t -}}
         <span class="visually-hidden"> {{ item.title | escape }}</span>
       </a>

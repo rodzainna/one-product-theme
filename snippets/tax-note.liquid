@@ -1,0 +1,31 @@
+{% doc %}
+  Outputs the store's tax and duties wording as plain text, from cart.taxes_included and
+  cart.duties_included. The short form is blank when prices exclude both.
+
+  @param {boolean} [long] - The full sentence with shipping, for the ⓘ and the cart; default the short line
+
+  @example
+  {%- capture tax_line -%}{% render 'tax-note' %}{%- endcapture -%}
+{% enddoc %}
+
+{%- liquid
+  assign short = blank
+  if cart.duties_included and cart.taxes_included
+    assign short = 'products.product.duties_and_tax_included'
+    assign full = 'products.product.tax_info_duties_and_tax_included'
+  elsif cart.taxes_included
+    assign short = 'products.product.tax_included'
+    assign full = 'products.product.tax_info_included'
+  elsif cart.duties_included
+    assign short = 'products.product.duties_included'
+    assign full = 'products.product.tax_info_duties_included'
+  else
+    assign full = 'products.product.tax_info_excluded'
+  endif
+
+  if long
+    echo full | t
+  elsif short != blank
+    echo short | t
+  endif
+-%}

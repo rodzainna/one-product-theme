@@ -1,0 +1,124 @@
+{% comment %}
+  The cart drawer: a side <dialog> that opens when a product is added or the cart icon is
+  clicked, rendered from the layout when the Cart type setting is Drawer (not on /cart).
+  assets/cart.js adds to the cart and saves changes through the Cart Ajax API, then swaps in
+  this section's fresh markup from the Section Rendering API.
+
+  https://shopify.dev/docs/api/ajax/reference/cart
+{% endcomment %}
+
+{%- liquid
+  assign form_id = 'CartDrawerForm'
+  assign title = 'cart.title' | t
+  assign continue_label = 'cart.continue_shopping' | t
+-%}
+
+{%- capture lines -%}
+  <div class="cart-drawer__lines" id="CartDrawerLines" tabindex="-1" data-cart-region data-cart-focus>
+    {%- if cart.item_count == 0 -%}
+      <div class="cart-drawer__empty">
+        <p>{{ 'cart.empty' | t }}</p>
+        {% render 'button', label: continue_label, variant: 'secondary', attributes: 'data-dialog-close' %}
+      </div>
+    {%- else -%}
+      {% render 'cart-form', form_id: form_id, id_prefix: section.id %}
+    {%- endif -%}
+  </div>
+  <p class="visually-hidden" role="status" data-cart-status data-added="{{ 'cart.added' | t: title: '[title]' | escape }}"></p>
+{%- endcapture -%}
+
+{%- capture summary -%}
+  <div class="cart-drawer__summary" id="CartDrawerSummary" data-cart-region>
+    {%- if cart.item_count > 0 -%}
+      {%- if section.settings.show_note -%}
+        {%- liquid
+          assign note_label = 'cart.note' | t
+          assign note_id = 'CartNote-' | append: section.id
+          assign note_attributes = 'form="' | append: form_id | append: '" data-cart-note'
+        -%}
+        <details class="cart-drawer__note" id="CartDrawerNote" data-cart-keep {% if cart.note != blank %}open{% endif %}>
+          <summary>{{ 'cart.note_toggle' | t }}</summary>
+          {% render 'input',
+            id: note_id,
+            label: note_label,
+            label_hidden: true,
+            type: 'textarea',
+            name: 'note',
+            value: cart.note,
+            rows: 2,
+            attributes: note_attributes
+          %}
+        </details>
+      {%- endif -%}
+      {% render 'cart-summary', form_id: form_id, show_dynamic_checkout: section.settings.show_dynamic_checkout %}
+    {%- endif -%}
+  </div>
+{%- endcapture -%}
+
+{% render 'dialog',
+  id: 'CartDrawer',
+  title: title,
+  content: lines,
+  footer: summary,
+  class: 'dialog--drawer cart-drawer'
+%}
+<script src="{{ 'cart.js' | asset_url }}" type="module"></script>
+
+{% stylesheet %}
+  .cart-drawer .cart-form__lines {
+    border-top: 0;
+  }
+
+  .cart-drawer .cart-form__lines > li:first-child {
+    padding-block-start: 0;
+  }
+
+  .cart-drawer__empty {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .cart-drawer__empty p {
+    margin: 0;
+  }
+
+  .cart-drawer__summary {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .cart-drawer .dialog__foot:not(:has(.cart-summary)) {
+    display: none;
+  }
+
+  .cart-drawer__note summary {
+    min-height: var(--target-min);
+    cursor: pointer;
+    font-weight: var(--weight-ui);
+  }
+
+  .cart-drawer__note[open] summary {
+    margin-block-end: var(--space-xs);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.cart_drawer",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_note",
+      "label": "t:labels.show_cart_note",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dynamic_checkout",
+      "label": "t:labels.show_dynamic_checkout",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

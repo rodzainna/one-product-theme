@@ -36,7 +36,10 @@
     "update": "Update",
     "note": "Order note",
     "subtotal": "Subtotal",
-    "checkout": "Check out"
+    "checkout": "Check out",
+    "note_toggle": "Add a note",
+    "added": "{{ title }} added to your cart.",
+    "error": "Your cart couldn't be updated. Please try again."
   },
   "customers": {
     "login": {

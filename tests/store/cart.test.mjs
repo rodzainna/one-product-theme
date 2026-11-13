@@ -9,7 +9,7 @@ const text = (html) =>
     .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim();
-const cart = (html) => html.split('<div class="cart">')[1];
+const cart = (html) => html.split('<div class="cart" ')[1];
 const summary = (html) => text(html.split('<div class="cart__summary">')[1]);
 // Each line's markup, in cart order (newest first).
 const lines = (html) => html.split('<div class="cart-line">').slice(1);
@@ -42,7 +42,7 @@ describe("cart page", () => {
     const html = await get("/cart");
     expect(text(cart(html))).toContain(t.empty);
     expect(html).toContain(`>${t.continue_shopping}<`);
-    expect(html).not.toContain('class="cart__lines"');
+    expect(html).not.toContain('class="cart-form"');
   });
 
   describe("with a full cart", () => {
@@ -79,14 +79,16 @@ describe("cart page", () => {
       expect(line(html, "Test unit price")).not.toContain("<dl");
     });
 
-    test("each line has a small stepper posting updates[], from 0, and a Remove link", () => {
+    test("each line has a small stepper posting updates[<line key>], from 1, and a Remove link", () => {
       for (const part of lines(html)) {
         expect(part).toContain('class="quantity quantity--sm"');
-        expect(part).toMatch(/name="updates\[\]"\s+value="\d+"\s+min="0"/);
+        expect(part).toMatch(
+          /name="updates\[\d+:[0-9a-f]+\]"\s+value="\d+"\s+min="1"/,
+        );
         expect(part).toMatch(/href="\/cart\/change\?id=[^"]+&quantity=0"/);
       }
       expect(line(html, "Test two options")).toMatch(
-        /name="updates\[\]"\s+value="2"/,
+        /name="updates\[\d+:[0-9a-f]+\]"\s+value="2"/,
       );
     });
 
@@ -101,7 +103,7 @@ describe("cart page", () => {
     });
 
     test("the note and Check out belong to the cart form", () => {
-      const form = html.match(/<form class="cart__lines" id="([^"]+)"/)[1];
+      const form = html.match(/<form class="cart-form" id="([^"]+)"/)[1];
       expect(html).toMatch(
         new RegExp(
           `<textarea[^>]*name="note"[^>]*form="${form}"|<textarea[^>]*form="${form}"[^>]*name="note"`,

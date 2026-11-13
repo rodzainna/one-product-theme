@@ -9,6 +9,8 @@
   @param {string} content - The body HTML
   @param {string} [description] - Muted text at the top of the body, read with the title
   @param {boolean} [close_outside] - Default true; false keeps it open on an outside click
+  @param {string} [footer] - HTML pinned under the scrolling body, such as the cart totals
+  @param {string} [class] - Extra class: dialog--drawer slides in from the side at full height
 
   @example
   {% render 'dialog', id: dialog_id, title: block.settings.heading, content: block.settings.content %}
@@ -21,7 +23,7 @@
 -%}
 
 <dialog
-  class="dialog"
+  class="dialog{% if class != blank %} {{ class }}{% endif %}"
   id="{{ id }}"
   aria-labelledby="{{ title_id }}"
   {% if description != blank %}
@@ -41,6 +43,9 @@
     {%- endif -%}
     {{ content }}
   </div>
+  {%- if footer != blank -%}
+    <div class="dialog__foot">{{ footer }}</div>
+  {%- endif -%}
 </dialog>
 
 <script src="{{ 'dialog.js' | asset_url }}" type="module"></script>
@@ -102,6 +107,20 @@
   .dialog__body:focus-visible {
     outline: var(--focus-ring);
     outline-offset: calc(-1 * var(--focus-offset));
+  }
+
+  .dialog__foot {
+    flex: none;
+    padding: var(--space-m);
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  .dialog--drawer {
+    width: min(100%, var(--drawer-width));
+    height: 100dvh;
+    max-height: none;
+    margin: 0 0 0 auto;
+    border-radius: 0;
   }
 
   .dialog__description {

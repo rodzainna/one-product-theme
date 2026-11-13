@@ -21,7 +21,9 @@
         assign cart_label = 'header.cart_count' | t: count: cart.item_count
       endif
     -%}
-    {% render 'icon-button', icon: 'cart', label: cart_label, url: routes.cart_url, badge: cart.item_count %}
+    <span class="header__cart" id="CartIcon-{{ section.id }}" data-cart-region data-cart-icon>
+      {%- render 'icon-button', icon: 'cart', label: cart_label, url: routes.cart_url, badge: cart.item_count -%}
+    </span>
   </div>
 </header>
 

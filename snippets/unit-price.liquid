@@ -1,0 +1,19 @@
+{% doc %}
+  Renders a unit price such as "$8.80 / 100g", read as "per" by screen readers.
+
+  @param {number} price - The unit price, in cents
+  @param {object} measurement - The variant's or line's unit_price_measurement
+  @param {string} class - The paragraph's class
+
+  @example
+  {% render 'unit-price', price: item.unit_price, measurement: item.unit_price_measurement, class: 'cart-line__note' %}
+{% enddoc %}
+
+<p class="{{ class }}">
+  <span class="visually-hidden">{{ 'products.product.unit_price' | t }}</span>
+  {{ price | money -}}
+  <span aria-hidden="true"> / </span>
+  <span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+  {%- if measurement.reference_value != 1 %}{{ measurement.reference_value }}{% endif -%}
+  {{- measurement.reference_unit -}}
+</p>

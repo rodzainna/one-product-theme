@@ -51,35 +51,20 @@
   {%- if tax_info_id != blank -%}
     {%- liquid
       assign tax_label = 'products.product.tax_info_label' | t
-      assign tax_line = blank
-      if cart.duties_included and cart.taxes_included
-        assign tax_line = 'products.product.duties_and_tax_included' | t
-        assign tax_text = 'products.product.tax_info_duties_and_tax_included' | t
-      elsif cart.taxes_included
-        assign tax_line = 'products.product.tax_included' | t
-        assign tax_text = 'products.product.tax_info_included' | t
-      elsif cart.duties_included
-        assign tax_line = 'products.product.duties_included' | t
-        assign tax_text = 'products.product.tax_info_duties_included' | t
-      else
-        assign tax_text = 'products.product.tax_info_excluded' | t
-      endif
     -%}
+    {%- capture tax_line -%}{% render 'tax-note' %}{%- endcapture -%}
+    {%- capture tax_text -%}{% render 'tax-note', long: true %}{%- endcapture -%}
+    {%- assign tax_line = tax_line | strip -%}
+    {%- assign tax_text = tax_text | strip -%}
     {%- render 'tooltip', id: tax_info_id, label: tax_label, text: tax_text -%}
   {%- endif -%}
 
   {%- if variant.unit_price_measurement and price_range == false -%}
-    {%- assign measurement = variant.unit_price_measurement -%}
-    <p class="price__note">
-      <span class="visually-hidden">{{ 'products.product.unit_price' | t }}</span>
-      {{ source.unit_price | money -}}
-      {%- capture separator -%}
-        <span aria-hidden="true"> / </span><span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
-      {%- endcapture -%}
-      {{- separator -}}
-      {%- if measurement.reference_value != 1 %}{{ measurement.reference_value }}{% endif -%}
-      {{- measurement.reference_unit -}}
-    </p>
+    {% render 'unit-price',
+      price: source.unit_price,
+      measurement: variant.unit_price_measurement,
+      class: 'price__note'
+    %}
   {%- endif -%}
 
   {%- if tax_line != blank -%}

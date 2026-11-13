@@ -35,14 +35,17 @@ const onPointerDown = (event) => {
       : null;
 };
 
+/** Opens a <dialog> as a modal, keeping the page's width while its scrollbar is hidden. */
+export const openDialog = (dialog) => {
+  if (!dialog || dialog.open) return;
+  measureScrollbar();
+  dialog.showModal();
+};
+
 const onClick = (event) => {
   const opener = event.target.closest("[data-dialog-open]");
   if (opener) {
-    const dialog = document.getElementById(opener.dataset.dialogOpen);
-    if (dialog && !dialog.open) {
-      measureScrollbar();
-      dialog.showModal();
-    }
+    openDialog(document.getElementById(opener.dataset.dialogOpen));
     return;
   }
   const closer = event.target.closest("[data-dialog-close]");

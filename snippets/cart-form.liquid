@@ -1,0 +1,65 @@
+{% doc %}
+  Renders the cart lines in a form that posts to /cart, with an Update button for when
+  JavaScript is off. assets/cart.js saves each change live and hides the button.
+  Loads quantity-input.js once for all the lines.
+
+  @param {string} form_id - The form's id, also used by the note and Check out outside it
+  @param {string} id_prefix - The caller's section id, so the page and drawer don't share ids
+
+  @example
+  {% render 'cart-form', form_id: form_id, id_prefix: section.id %}
+{% enddoc %}
+
+{%- assign update_label = 'cart.update' | t -%}
+
+<script src="{{ 'quantity-input.js' | asset_url }}" type="module"></script>
+<form class="cart-form" id="{{ form_id }}" action="{{ routes.cart_url }}" method="post" data-cart-form>
+  <ul class="cart-form__lines">
+    {%- for item in cart.items -%}
+      <li>{% render 'cart-line', item: item, id_prefix: id_prefix %}</li>
+    {%- endfor -%}
+  </ul>
+  <p class="cart-form__error" role="alert" data-cart-error data-message="{{ 'cart.error' | t | escape }}"></p>
+  {% render 'button',
+    label: update_label,
+    type: 'submit',
+    variant: 'secondary',
+    size: 'sm',
+    attributes: 'data-cart-update'
+  %}
+</form>
+
+{% stylesheet %}
+  .cart-form {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .cart-form__lines {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--color-border);
+    list-style: none;
+  }
+
+  .cart-form__lines > li {
+    padding-block: var(--space-s);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .cart-form__error {
+    margin: 0;
+    color: var(--color-error);
+    font-size: var(--text-small);
+  }
+
+  .cart-form__error:empty {
+    display: none;
+  }
+
+  .cart-live [data-cart-update] {
+    display: none;
+  }
+{% endstylesheet %}

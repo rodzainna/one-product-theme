@@ -1,18 +1,15 @@
 {% comment %}
-  The /cart page. A plain form that works without JavaScript: the Update button saves
-  quantities and the note, Remove links drop a line, and Check out saves then goes to checkout.
+  The /cart page. Without JavaScript it's a plain form: Update saves quantities and the note,
+  Remove links drop a line, and Check out saves then goes to checkout. assets/cart.js saves
+  each change live instead and re-renders this section.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/cart
 {% endcomment %}
 
-{%- liquid
-  assign form_id = 'CartForm-' | append: section.id
-  assign update_label = 'cart.update' | t
-  assign checkout_label = 'cart.checkout' | t
--%}
+{%- assign form_id = 'CartForm-' | append: section.id -%}
 
-<div class="cart">
-  <h1 class="cart__title h2">{{ 'cart.title' | t }}</h1>
+<div class="cart" id="CartPage-{{ section.id }}" data-cart-region>
+  <h1 class="cart__title h2" tabindex="-1" data-cart-focus>{{ 'cart.title' | t }}</h1>
 
   {%- if cart.item_count == 0 -%}
     <div class="cart__empty">
@@ -21,22 +18,15 @@
       {% render 'button', label: continue_label, url: routes.root_url, variant: 'secondary' %}
     </div>
   {%- else -%}
-    <script src="{{ 'quantity-input.js' | asset_url }}" type="module"></script>
-
-    <form class="cart__lines" id="{{ form_id }}" action="{{ routes.cart_url }}" method="post">
-      <ul>
-        {%- for item in cart.items -%}
-          <li>{% render 'cart-line', item: item, id_prefix: section.id, index: forloop.index %}</li>
-        {%- endfor -%}
-      </ul>
-      {% render 'button', label: update_label, type: 'submit', variant: 'secondary', size: 'sm' %}
-    </form>
+    {% render 'cart-form', form_id: form_id, id_prefix: section.id %}
 
     <div class="cart__summary">
       {%- if section.settings.show_note -%}
-        {%- assign note_label = 'cart.note' | t -%}
-        {%- assign note_id = 'CartNote-' | append: section.id -%}
-        {%- capture note_attributes -%}form="{{ form_id }}"{%- endcapture -%}
+        {%- liquid
+          assign note_label = 'cart.note' | t
+          assign note_id = 'CartNote-' | append: section.id
+          assign note_attributes = 'form="' | append: form_id | append: '" data-cart-note data-cart-keep'
+        -%}
         {% render 'input',
           id: note_id,
           label: note_label,
@@ -47,41 +37,12 @@
           attributes: note_attributes
         %}
       {%- endif -%}
-
-      <dl class="cart__totals">
-        {%- for discount in cart.cart_level_discount_applications -%}
-          <div class="cart__total-row">
-            <dt>{{ discount.title | escape }}</dt>
-            <dd>−{{ discount.total_allocated_amount | money }}</dd>
-          </div>
-        {%- endfor -%}
-        <div class="cart__total-row cart__total-row--main">
-          <dt>{{ 'cart.subtotal' | t }}</dt>
-          <dd>{{ cart.total_price | money_with_currency }}</dd>
-        </div>
-      </dl>
-
-      <p class="cart__tax">
-        {%- if cart.duties_included and cart.taxes_included -%}
-          {{ 'products.product.tax_info_duties_and_tax_included' | t }}
-        {%- elsif cart.taxes_included -%}
-          {{ 'products.product.tax_info_included' | t }}
-        {%- elsif cart.duties_included -%}
-          {{ 'products.product.tax_info_duties_included' | t }}
-        {%- else -%}
-          {{ 'products.product.tax_info_excluded' | t }}
-        {%- endif -%}
-      </p>
-
-      {%- capture checkout_attributes -%}form="{{ form_id }}"{%- endcapture -%}
-      {% render 'button', label: checkout_label, type: 'submit', name: 'checkout', attributes: checkout_attributes %}
-
-      {%- if additional_checkout_buttons and section.settings.show_dynamic_checkout -%}
-        <div class="cart__accelerated">{{ content_for_additional_checkout_buttons }}</div>
-      {%- endif -%}
+      {% render 'cart-summary', form_id: form_id, show_dynamic_checkout: section.settings.show_dynamic_checkout %}
     </div>
   {%- endif -%}
 </div>
+
+<script src="{{ 'cart.js' | asset_url }}" type="module"></script>
 
 {% stylesheet %}
   .cart {
@@ -107,61 +68,12 @@
     margin: 0;
   }
 
-  .cart__lines {
-    display: grid;
-    gap: var(--space-s);
-    justify-items: start;
-  }
-
-  .cart__lines > ul {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    border-top: 1px solid var(--color-border);
-    list-style: none;
-  }
-
-  .cart__lines > ul > li {
-    padding-block: var(--space-s);
-    border-bottom: 1px solid var(--color-border);
-  }
-
   .cart__summary {
     display: grid;
     gap: var(--space-s);
     padding: var(--space-m);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-card);
-  }
-
-  .cart__summary .button {
-    width: 100%;
-  }
-
-  .cart__totals {
-    display: grid;
-    gap: var(--space-2xs);
-    margin: 0;
-  }
-
-  .cart__total-row {
-    display: flex;
-    gap: var(--space-s);
-    justify-content: space-between;
-  }
-
-  .cart__total-row dd {
-    margin: 0;
-  }
-
-  .cart__total-row--main {
-    font-weight: var(--weight-ui);
-  }
-
-  .cart__tax {
-    margin: 0;
-    color: var(--color-foreground-muted);
-    font-size: var(--text-small);
   }
 
   @media (min-width: 900px) {

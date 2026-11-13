@@ -187,6 +187,7 @@
         attributes: add_attributes
       %}
     </div>
+    <p class="buy-buttons__error" role="alert" data-cart-error data-message="{{ 'cart.error' | t | escape }}"></p>
     <p class="buy-buttons__rules" id="{{ rules_id }}" data-variant-region>
       {%- if quantity_rule.min > 1 or quantity_rule.increment > 1 or quantity_rule.max != blank -%}
         {%- liquid
@@ -327,6 +328,16 @@
     .sticky-bar__price {
       display: none;
     }
+  }
+
+  .buy-buttons__error {
+    margin: 0;
+    color: var(--color-error);
+    font-size: var(--text-small);
+  }
+
+  .buy-buttons__error:empty {
+    display: none;
   }
 
   .buy-buttons__form {

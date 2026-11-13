@@ -21,6 +21,7 @@ export default defineConfig({
               "./tests/browser/stubs/shopify-events.mjs",
               import.meta.url,
             ).pathname,
+            dialog: new URL("./assets/dialog.js", import.meta.url).pathname,
           },
         },
         test: {
