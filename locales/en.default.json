@@ -75,6 +75,10 @@
     "play_video": "Play background video",
     "scroll_cue": "Scroll to the next section"
   },
+  "link_tiles": {
+    "heading": "Explore",
+    "read_more": "Read more"
+  },
   "password": {
     "title": "This shop is private",
     "password": "Password",

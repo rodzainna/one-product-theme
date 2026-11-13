@@ -46,7 +46,17 @@
       },
       "block_order": ["feature_1", "feature_2", "feature_3", "feature_4"],
       "settings": { "color_scheme": "scheme-3" }
+    },
+    "link_tiles": {
+      "type": "link-tiles",
+      "blocks": {
+        "tile_1": { "type": "_tile", "settings": { "title": "First tile", "tags": "#hashtag #another", "link": "/collections/all" } },
+        "tile_2": { "type": "_tile", "settings": { "title": "Second tile", "tags": "#hashtag", "link": "/search" } },
+        "tile_3": { "type": "_tile", "settings": { "title": "Third tile", "tags": "#hashtag", "link": "/cart" } }
+      },
+      "block_order": ["tile_1", "tile_2", "tile_3"],
+      "settings": {}
     }
   },
-  "order": ["hero", "main", "featured_product", "features"]
+  "order": ["hero", "main", "featured_product", "features", "link_tiles"]
 }

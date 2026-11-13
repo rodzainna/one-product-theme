@@ -61,7 +61,9 @@
 
     --radius-button: {{ settings.button_radius }}px;
     --radius-card: {{ settings.card_radius }}px;
-    --color-overlay: rgb(20 12 8 / 0.6);
+    --color-scrim: rgb(20 12 8);
+    --color-overlay: color-mix(in srgb, var(--color-scrim) 60%, transparent);
+    --color-on-scrim: #fff;
     --scrollbar-width: 0px;
     --sticky-bar-h: 0px;
     --radius-xs: 4px;
@@ -90,6 +92,7 @@
     --duration: 0.2s;
     --duration-spin: 0.8s;
     --duration-cue: 1.6s;
+    --duration-zoom: 0.6s;
     --duration-settle: 1.2s;
     --ease: ease;
     --ease-linear: linear;
