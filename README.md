@@ -25,11 +25,11 @@ pnpm format                     # Prettier (Liquid, CSS, JS, JSON)
 `pnpm test:store` fetches rendered sections from the preview of a test store, because Liquid only renders on Shopify. It expects the products in `tests/store/products.mjs` (for example `test-size-sold-out`, with size S out of stock). Create any that are missing with your own Shopify CLI login for that store:
 
 ```sh
-shopify store auth --store <test-store>.myshopify.com --scopes write_products,write_inventory,read_locations,write_files,write_publications,write_purchase_options
+shopify store auth --store <test-store>.myshopify.com --scopes write_products,write_inventory,read_locations,write_files,write_publications,write_purchase_options,write_discounts
 pnpm test:store:setup <test-store>.myshopify.com
 ```
 
-The pickup tests also need local pickup turned on for the store's location, with an address (Settings → Locations). The gift card product needs gift cards activated (Products → Gift cards). The recommendation tests need the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app installed first; the setup script then sets test-two-options' related and complementary products.
+The pickup tests also need local pickup turned on for the store's location, with an address (Settings → Locations). The gift card product needs gift cards activated (Products → Gift cards). The recommendation tests need the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app installed first; the setup script then sets test-two-options' related and complementary products. The cart tests need two automatic discounts, which the setup script creates (named "Test …").
 
 Existing products are left as they are, so to apply a change in `products.mjs`, delete that product on the store and run the setup again.
 

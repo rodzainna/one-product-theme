@@ -225,3 +225,17 @@ export const products = [
     })),
   },
 ];
+
+// Automatic discounts for the cart: one on a product's lines, one on the order. Created by title.
+export const discounts = [
+  {
+    title: "Test 10% off test-regular",
+    products: ["test-regular"],
+    value: { percentage: 0.1 },
+  },
+  {
+    title: "Test $5 off orders over $100",
+    minimumSubtotal: "100.00",
+    value: { discountAmount: { amount: "5.00", appliesOnEachItem: false } },
+  },
+];

@@ -1,0 +1,221 @@
+{% doc %}
+  Renders one cart line: thumbnail, title, options, selling plan, properties, unit price,
+  discounts, a small quantity stepper, Remove, and the line price. Renders quantity-input
+  without its script, so the file that renders the lines loads quantity-input.js once.
+
+  @param {line_item} item - The cart line
+  @param {string} id_prefix - The caller's section id, so the page and drawer don't share ids
+  @param {number} index - The line's position, from 1, for unique ids
+
+  @example
+  {% render 'cart-line', item: item, id_prefix: section.id, index: forloop.index %}
+{% enddoc %}
+
+{%- liquid
+  assign rule = item.variant.quantity_rule
+  assign quantity_id = 'CartQuantity-' | append: id_prefix | append: '-' | append: index
+  assign quantity_label = 'cart.quantity_label' | t: title: item.title
+-%}
+
+<div class="cart-line">
+  <div class="cart-line__media">
+    {%- if item.image -%}
+      {% render 'image', image: item.image, alt: '', sizes: '5rem', width: 240, aspect_ratio: '1' %}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'cart-line__placeholder' }}
+    {%- endif -%}
+  </div>
+
+  <div class="cart-line__details">
+    <h2 class="cart-line__title">
+      <a href="{{ item.url }}">{{ item.product.title | escape }}</a>
+    </h2>
+
+    {%- capture meta -%}
+      {%- unless item.product.has_only_default_variant -%}
+        {%- for option in item.options_with_values -%}
+          <div>
+            <dt>{{ option.name | escape }}:</dt>
+            <dd>{{ option.value | escape }}</dd>
+          </div>
+        {%- endfor -%}
+      {%- endunless -%}
+      {%- if item.selling_plan_allocation -%}
+        <div>
+          <dt class="visually-hidden">{{ 'cart.selling_plan' | t }}:</dt>
+          <dd>{{ item.selling_plan_allocation.selling_plan.name | escape }}</dd>
+        </div>
+      {%- endif -%}
+      {%- for property in item.properties -%}
+        {%- assign first = property.first | slice: 0 -%}
+        {%- if first != '_' and property.last != blank -%}
+          <div>
+            <dt>{{ property.first | escape }}:</dt>
+            <dd>
+              {%- if property.last contains '/uploads/' -%}
+                <a href="{{ property.last | escape }}">{{ property.last | split: '/' | last | escape }}</a>
+              {%- else -%}
+                {{ property.last | escape }}
+              {%- endif -%}
+            </dd>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+    {%- if meta != blank -%}
+      <dl class="cart-line__meta">{{ meta }}</dl>
+    {%- endif -%}
+
+    {%- if item.unit_price_measurement -%}
+      {%- assign measurement = item.unit_price_measurement -%}
+      <p class="cart-line__note">
+        <span class="visually-hidden">{{ 'products.product.unit_price' | t }}</span>
+        {{ item.unit_price | money -}}
+        <span aria-hidden="true"> / </span>
+        <span class="visually-hidden">&nbsp;{{ 'accessibility.unit_price_separator' | t }}&nbsp;</span>
+        {%- if measurement.reference_value != 1 %}{{ measurement.reference_value }}{% endif -%}
+        {{- measurement.reference_unit -}}
+      </p>
+    {%- endif -%}
+
+    {%- if item.line_level_discount_allocations.size > 0 -%}
+      <ul class="cart-line__discounts">
+        {%- for allocation in item.line_level_discount_allocations -%}
+          <li>
+            {{ allocation.discount_application.title | escape }}
+            (−{{ allocation.amount | money }})
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    <div class="cart-line__actions">
+      {% render 'quantity-input',
+        id: quantity_id,
+        label: quantity_label,
+        label_hidden: true,
+        name: 'updates[]',
+        value: item.quantity,
+        min: 0,
+        max: rule.max,
+        step: rule.increment,
+        size: 'sm',
+        skip_script: true
+      %}
+      <a class="cart-line__remove" href="{{ item.url_to_remove }}">
+        {{- 'cart.remove' | t -}}
+        <span class="visually-hidden"> {{ item.title | escape }}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="cart-line__price">
+    {%- if item.original_line_price > item.final_line_price -%}
+      <span class="visually-hidden">{{ 'products.product.sale_price' | t }}</span>
+      <span>{{ item.final_line_price | money }}</span>
+      <span class="visually-hidden">{{ 'products.product.regular_price' | t }}</span>
+      <s class="cart-line__compare">{{ item.original_line_price | money }}</s>
+    {%- else -%}
+      <span>{{ item.final_line_price | money }}</span>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .cart-line {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr) auto;
+    gap: var(--space-s);
+    align-items: start;
+  }
+
+  .cart-line__media {
+    width: 5rem;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background: var(--color-hover);
+    aspect-ratio: 1;
+  }
+
+  .cart-line__placeholder {
+    width: 100%;
+    height: 100%;
+    fill: var(--color-foreground-muted);
+  }
+
+  .cart-line__details {
+    display: grid;
+    gap: var(--space-2xs);
+    justify-items: start;
+  }
+
+  .cart-line__title {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-style: var(--font-body-style);
+    font-weight: var(--weight-ui);
+    line-height: 1.4;
+  }
+
+  .cart-line__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .cart-line__title a:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .cart-line__meta,
+  .cart-line__discounts,
+  .cart-line__note {
+    margin: 0;
+    padding: 0;
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+    list-style: none;
+  }
+
+  .cart-line__meta div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.25em;
+  }
+
+  .cart-line__meta dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .cart-line__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-s);
+    align-items: center;
+    margin-top: var(--space-2xs);
+  }
+
+  .cart-line__remove {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+
+  .cart-line__price {
+    display: grid;
+    justify-items: end;
+    font-weight: var(--weight-ui);
+    text-align: end;
+  }
+
+  .cart-line__compare {
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+    font-weight: var(--weight-body);
+  }
+{% endstylesheet %}

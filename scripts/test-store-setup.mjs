@@ -1,9 +1,9 @@
-// Creates the missing products in tests/store/products.mjs on a test store; existing ones are kept.
+// Creates the missing products and discounts in tests/store/products.mjs on a test store; existing ones are kept.
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { products } from "../tests/store/products.mjs";
+import { discounts, products } from "../tests/store/products.mjs";
 
 const API_VERSION = "2026-10";
 const store = process.argv[2];
@@ -209,6 +209,47 @@ try {
       );
     }
     console.log(`set      ${product.handle} recommendations`);
+  }
+
+  const { automaticDiscountNodes } = execute(
+    "{ automaticDiscountNodes(first: 100) { nodes { automaticDiscount { ... on DiscountAutomaticBasic { title } } } } }",
+  );
+  const titles = automaticDiscountNodes.nodes.map(
+    (n) => n.automaticDiscount.title,
+  );
+  for (const discount of discounts) {
+    if (titles.includes(discount.title)) {
+      console.log(`kept     ${discount.title}`);
+      continue;
+    }
+    const items = discount.products
+      ? { products: { productsToAdd: discount.products.map((h) => ids[h]) } }
+      : { all: true };
+    const { discountAutomaticBasicCreate } = execute(
+      "mutation ($discount: DiscountAutomaticBasicInput!) { discountAutomaticBasicCreate(automaticBasicDiscount: $discount) { userErrors { message } } }",
+      {
+        discount: {
+          title: discount.title,
+          startsAt: "2026-01-01T00:00:00Z",
+          customerGets: { value: discount.value, items },
+          ...(discount.minimumSubtotal && {
+            minimumRequirement: {
+              subtotal: {
+                greaterThanOrEqualToSubtotal: discount.minimumSubtotal,
+              },
+            },
+          }),
+          combinesWith: { productDiscounts: true, orderDiscounts: true },
+        },
+      },
+      { mutation: true },
+    );
+    if (discountAutomaticBasicCreate.userErrors.length) {
+      throw new Error(
+        `${discount.title}: ${JSON.stringify(discountAutomaticBasicCreate.userErrors)}`,
+      );
+    }
+    console.log(`created  ${discount.title}`);
   }
 } catch (error) {
   const reason = String(error.stderr ?? "").trim();

@@ -12,6 +12,7 @@
   @param {string} [alt] - Overrides the alt text; without it, the admin alt (for product images Shopify falls back to the product title). Pass '' for a decorative image
   @param {string} [url] - Wraps the image in a link
   @param {string} [class] - Extra class on the wrapper
+  @param {number} [width] - For small images such as thumbnails: the widest file needed (3x the CSS width), giving a srcset of thirds up to it
 
   @example
   {% render 'image', image: product.featured_media, sizes: '(min-width: 900px) 50vw, 100vw', preload: true %}
@@ -34,6 +35,13 @@
   assign original_width = image.width | default: image.preview_image.width
   assign max_width = original_width | default: 3840 | at_most: 3840
   assign image_sizes = sizes | default: '100vw'
+  assign image_widths = null
+  if width != blank
+    assign max_width = width | at_most: max_width
+    assign third = max_width | divided_by: 3
+    assign two_thirds = third | times: 2
+    assign image_widths = third | append: ',' | append: two_thirds | append: ',' | append: max_width
+  endif
 
   assign alt_text = image.alt | default: ''
   if alt != null
@@ -63,6 +71,7 @@
       | image_url: width: max_width
       | image_tag:
         sizes: image_sizes,
+        widths: image_widths,
         alt: alt_text,
         preload: preload,
         loading: image_loading,

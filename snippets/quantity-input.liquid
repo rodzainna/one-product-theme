@@ -12,6 +12,8 @@
   @param {number} [max] - Highest value, if any
   @param {number} [step] - Increment, default 1
   @param {boolean} [disabled] - Disables the input and both buttons
+  @param {string} [size] - sm for cart lines, or blank for the default
+  @param {boolean} [skip_script] - Leaves out the script tag, for a caller that renders many and loads quantity-input.js once
   @param {string} [input_attributes] - Extra attributes for the input, e.g. data-variant-attributes="min max step"
 
   @example
@@ -29,7 +31,7 @@
   <label class="field__label{% if label_hidden %} visually-hidden{% endif %}" for="{{ id }}">
     {{- label | escape_once -}}
   </label>
-  <quantity-input class="quantity">
+  <quantity-input class="quantity{% if size == 'sm' %} quantity--sm{% endif %}">
     {%- render 'icon-button',
       icon: 'minus',
       label: decrease_label,
@@ -59,7 +61,9 @@
   </quantity-input>
 </div>
 
-<script src="{{ 'quantity-input.js' | asset_url }}" type="module"></script>
+{%- unless skip_script -%}
+  <script src="{{ 'quantity-input.js' | asset_url }}" type="module"></script>
+{%- endunless -%}
 
 {% stylesheet %}
   .quantity {
@@ -112,6 +116,18 @@
     font-size: var(--text-body);
     text-align: center;
     appearance: textfield;
+  }
+
+  .quantity--sm {
+    height: var(--control-h-sm);
+  }
+
+  .quantity--sm .icon-button {
+    width: var(--control-h-sm);
+  }
+
+  .quantity--sm .quantity__input {
+    width: 4ch;
   }
 
   .quantity__input::-webkit-inner-spin-button,

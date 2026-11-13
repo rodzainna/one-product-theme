@@ -110,6 +110,7 @@
     "scroll_snap": "Snap to sections",
     "secondary_button_style": "Secondary button style",
     "section_dots": "Show section dots",
+    "show_cart_note": "Show cart note",
     "show_dynamic_checkout": "Show dynamic checkout buttons",
     "show_payment_icons": "Show payment icons",
     "show_sticky_bar": "Show sticky add-to-cart bar",

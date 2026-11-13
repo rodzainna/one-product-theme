@@ -27,10 +27,16 @@
     "comment_posted_moderated": "Thanks. Your comment will show once it's approved."
   },
   "cart": {
-    "checkout": "Checkout",
-    "title": "Cart",
+    "title": "Your cart",
+    "empty": "Your cart is empty.",
+    "continue_shopping": "Continue shopping",
+    "quantity_label": "Quantity for {{ title }}",
+    "remove": "Remove",
+    "selling_plan": "Purchase option",
     "update": "Update",
-    "remove": "Remove"
+    "note": "Order note",
+    "subtotal": "Subtotal",
+    "checkout": "Check out"
   },
   "customers": {
     "login": {
