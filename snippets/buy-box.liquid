@@ -14,7 +14,7 @@
 
 {%- assign gallery_id = 'Gallery-' | append: section_id -%}
 
-<div class="buy-box">
+<div class="buy-box section-full">
   {% render 'product-gallery', product: product, id: gallery_id, square: square, preload: preload %}
 
   <div class="buy-box__info">
@@ -28,6 +28,7 @@
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-xl);
     align-items: start;
+    align-content: center;
     padding-block: var(--space-xl);
   }
 
