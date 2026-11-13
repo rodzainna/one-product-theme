@@ -37,7 +37,7 @@ const headerSection = (count = 0) => `
 const productForm = `
   <form action="/cart/add" method="post" id="ProductForm">
     <input type="hidden" name="id" value="99">
-    <button type="submit" name="add">Add to cart</button>
+    <button type="submit" name="add" id="Product-add-1">Add to cart</button>
     <p role="alert" data-cart-error data-message="Your cart couldn't be updated."></p>
   </form>`;
 
@@ -117,6 +117,39 @@ describe("add to cart", () => {
       .poll(() => drawer.querySelector("[data-cart-status]").textContent)
       .toBe("Test regular added to your cart.");
     expect(button.hasAttribute("aria-busy")).toBe(false);
+  });
+
+  test("closing the drawer focuses Add to cart again, even after the buy box was re-rendered", async () => {
+    render();
+    mockFetch(async () =>
+      json({ title: "Test regular", sections: sections(line(KEY, 1), 1) }),
+    );
+    const button = page.getByRole("button", { name: "Add to cart" }).element();
+    button.focus();
+    submit(document.getElementById("ProductForm"), button);
+    const drawer = document.getElementById("CartDrawer");
+    await expect.poll(() => drawer.open).toBe(true);
+
+    button.replaceWith(button.cloneNode(true));
+    drawer.close();
+    await expect.poll(() => document.activeElement?.id).toBe("Product-add-1");
+    expect(document.activeElement).not.toBe(button);
+  });
+
+  test("closing the drawer leaves focus alone when the browser already returned it", async () => {
+    render();
+    mockFetch(async () =>
+      json({ title: "Test regular", sections: sections(line(KEY, 1), 1) }),
+    );
+    const button = page.getByRole("button", { name: "Add to cart" }).element();
+    button.focus();
+    submit(document.getElementById("ProductForm"), button);
+    const drawer = document.getElementById("CartDrawer");
+    await expect.poll(() => drawer.open).toBe(true);
+
+    drawer.close();
+    await expect.poll(() => drawer.open).toBe(false);
+    expect(document.activeElement).toBe(button);
   });
 
   test("shows Shopify's reason and leaves the drawer closed when the add fails", async () => {

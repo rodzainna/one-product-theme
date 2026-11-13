@@ -261,6 +261,21 @@ const announce = (title) => {
   });
 };
 
+// The buy box re-renders after an add, so the browser's own focus return can miss the new button.
+const returnFocusToButton = (button) => {
+  if (!button?.id) return;
+  const dialog = drawer();
+  dialog.addEventListener(
+    "close",
+    () => {
+      const active = document.activeElement;
+      if (active === document.body || dialog.contains(active))
+        document.getElementById(button.id)?.focus();
+    },
+    { once: true },
+  );
+};
+
 async function addToCart(form, button) {
   const error = form.querySelector("[data-cart-error]");
   const body = new FormData(form);
@@ -297,6 +312,7 @@ async function addToCart(form, button) {
     if (error) error.textContent = "";
     applySections(data.sections);
     openDialog(drawer());
+    returnFocusToButton(button);
     announce(data.title ?? data.product_title ?? "");
   } catch {
     if (error) error.textContent = error.dataset.message;
