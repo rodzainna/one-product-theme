@@ -97,7 +97,7 @@ body {
   font-style: var(--font-body-style);
   font-size: var(--text-body);
   font-weight: var(--weight-body);
-  line-height: 1.6;
+  line-height: var(--leading-body);
 }
 
 button,
@@ -151,7 +151,7 @@ h6,
   font-family: var(--font-heading);
   font-style: var(--font-heading-style);
   font-weight: var(--weight-heading);
-  line-height: 1.15;
+  line-height: var(--leading-heading);
   text-wrap: balance;
 }
 
@@ -210,7 +210,7 @@ h6,
   font-family: var(--font-body);
   font-size: var(--text-body);
   font-weight: var(--weight-body);
-  line-height: 1.25;
+  line-height: var(--leading-tight);
   appearance: none;
 }
 
@@ -231,7 +231,7 @@ h6,
   min-height: var(--control-h);
   padding: var(--control-pad-y) 0;
   font-weight: var(--weight-body);
-  line-height: 1.25;
+  line-height: var(--leading-tight);
   cursor: pointer;
 }
 

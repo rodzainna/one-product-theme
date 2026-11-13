@@ -123,14 +123,15 @@
 
 {% stylesheet %}
   .cart-line {
+    --cart-thumb: 5rem; /* the image's sizes attribute matches this */
     display: grid;
-    grid-template-columns: 5rem minmax(0, 1fr) auto;
+    grid-template-columns: var(--cart-thumb) minmax(0, 1fr) auto;
     gap: var(--space-s);
     align-items: start;
   }
 
   .cart-line__media {
-    width: 5rem;
+    width: var(--cart-thumb);
     overflow: hidden;
     border-radius: var(--radius-card);
     background: var(--color-hover);
@@ -155,7 +156,7 @@
     font-size: var(--text-body);
     font-style: var(--font-body-style);
     font-weight: var(--weight-ui);
-    line-height: 1.4;
+    line-height: var(--leading-snug);
   }
 
   .cart-line__title a {
@@ -182,7 +183,7 @@
   .cart-line__meta div {
     display: flex;
     flex-wrap: wrap;
-    gap: 0 0.25em;
+    gap: 0 var(--space-2xs);
   }
 
   .cart-line__meta dd {

@@ -85,6 +85,8 @@
 
 {% stylesheet %}
   .cart {
+    --cart-summary-min: 18rem;
+    --cart-summary-max: 24rem;
     display: grid;
     gap: var(--space-m);
     align-items: start;
@@ -164,7 +166,7 @@
 
   @media (min-width: 900px) {
     .cart {
-      grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+      grid-template-columns: minmax(0, 1fr) minmax(var(--cart-summary-min), var(--cart-summary-max));
       column-gap: var(--space-xl);
     }
 

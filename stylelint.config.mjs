@@ -29,6 +29,7 @@ export default {
       "font-size": [only("|inherit")],
       "font-weight": [only("|inherit")],
       "font-family": [only("|inherit")],
+      "line-height": [only("|inherit")],
       "/^border(-[a-z]+)*-radius$/": [list("|0")],
       "z-index": [only("|auto")],
       "/^padding/": [list("|0")],
