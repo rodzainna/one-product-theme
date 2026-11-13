@@ -4,6 +4,7 @@
     "article": "Article",
     "block": "Block",
     "blog": "Blog",
+    "button": "Button",
     "buttons": "Buttons",
     "buy_buttons": "Buy buttons",
     "cards_and_media": "Cards and media",
@@ -101,6 +102,7 @@
     "button_label": "Button label",
     "button_link": "Button link",
     "button_radius": "Corner radius",
+    "button_style": "Style",
     "button_text": "Button text",
     "cart_type": "Cart type",
     "color_scheme": "Color scheme",
@@ -164,6 +166,10 @@
     "button_style": {
       "outline": "Outline",
       "solid": "Solid"
+    },
+    "button_block_style": {
+      "primary": "Primary",
+      "secondary": "Secondary"
     },
     "cart_type": {
       "drawer": "Drawer",

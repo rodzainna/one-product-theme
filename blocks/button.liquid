@@ -1,0 +1,56 @@
+{% doc %}
+  Renders a button link. Shows nothing until it has both a label and a link.
+
+  @example
+  {% content_for 'block', type: 'button', id: 'button' %}
+{% enddoc %}
+
+{%- if block.settings.label != blank and block.settings.link != blank -%}
+  <div class="button-block" {{ block.shopify_attributes }}>
+    {%- liquid
+      assign variant = 'primary'
+      if block.settings.style == 'secondary'
+        assign variant = 'secondary'
+      endif
+    -%}
+    {% render 'button', label: block.settings.label, url: block.settings.link, variant: variant %}
+  </div>
+{%- elsif request.design_mode -%}
+  <div class="button-block" {{ block.shopify_attributes }}></div>
+{%- endif -%}
+
+{% stylesheet %}
+  .button-block {
+    margin-block: var(--space-s) 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.button",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:labels.button_label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:labels.button_link"
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "t:labels.button_style",
+      "options": [
+        { "value": "primary", "label": "t:options.button_block_style.primary" },
+        { "value": "secondary", "label": "t:options.button_block_style.secondary" }
+      ],
+      "default": "primary"
+    }
+  ],
+  "presets": [{ "name": "t:general.button" }]
+}
+{% endschema %}
