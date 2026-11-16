@@ -58,6 +58,15 @@ describe("reviews page", () => {
     expect(dialog).toMatch(/Rated 5 out of 5/);
   });
 
+  test("hides the Read review button when scripting is off", async () => {
+    const href = page.match(
+      /href="([^"]*compiled_assets\/styles\.css[^"]*)"/,
+    )[1];
+    expect(await get(href)).toMatch(
+      /@media\s*\(scripting:\s*none\)\s*\{\s*\.review__more\s*\{\s*display:\s*none/,
+    );
+  });
+
   test("loads the script that spreads the cards", () => {
     expect(wall).toMatch(/<review-wall class="review-wall__grid">/);
     expect(wall).toMatch(/review-wall\.js/);

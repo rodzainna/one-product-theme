@@ -167,6 +167,7 @@
 
   .review__body > * {
     margin: 0;
+    overflow-wrap: anywhere;
   }
 
   .review__rating {
@@ -201,6 +202,13 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     cursor: pointer;
+  }
+
+  /* It opens a dialog, so it does nothing without scripting. */
+  @media (scripting: none) {
+    .review__more {
+      display: none;
+    }
   }
 
   .review__more::after {

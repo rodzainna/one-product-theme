@@ -16,12 +16,14 @@ const render = async ({
   single = false,
   width = 1200,
   height = 800,
+  title = "Title",
 } = {}) => {
   await page.viewport(width, height);
   document.body.innerHTML = `
     <style>
       :root { --space-xl: 32px; --space-m: 16px; --text-small: 14px;
         --text-lg: 18px; --radius-card: 8px; --content-grid: minmax(16px, 1fr) minmax(0, 1000px) minmax(16px, 1fr); }
+      ${criticalCss}
       body { margin: 0; }
       ${css(sectionLiquid)}
       /* As on the page, the image snippet's rules come after the section's. */
@@ -32,7 +34,7 @@ const render = async ({
         <div class="image-text__frame">
           <div class="image-text__media"><div class="image"><img alt="" src="${pixel}" width="1800" height="1200"></div></div>
         </div>
-        ${single ? "" : '<div class="image-text__copy"><h2>Title</h2><p>Text</p></div>'}
+        ${single ? "" : `<div class="image-text__copy"><p class="image-text__eyebrow">${title}</p><h2 class="image-text__heading">${title}</h2><div class="image-text__text"><p>${title}</p></div></div>`}
       </div>
     </div>`;
   const rect = (selector) =>
@@ -109,5 +111,22 @@ describe("first section", () => {
       .getBoundingClientRect();
     expect(Math.round(section.height)).toBe(800 - 80);
     document.documentElement.removeAttribute("style");
+  });
+});
+
+describe("a long unbroken word in the copy", () => {
+  test("wraps inside the column on a phone, in the eyebrow, heading and text", async () => {
+    const { grid, rect } = await render({
+      width: 360,
+      title: "Supercalifragilisticexpialidocious".repeat(3),
+    });
+    for (const selector of [
+      ".image-text__eyebrow",
+      ".image-text__heading",
+      ".image-text__text p",
+    ]) {
+      expect(rect(selector).right, selector).toBeLessThanOrEqual(grid.right);
+    }
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(360);
   });
 });

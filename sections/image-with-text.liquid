@@ -92,11 +92,15 @@
   }
   .image-text__copy {
     display: grid;
-    justify-items: start;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-m);
   }
   .image-text__copy > * {
     margin: 0;
+  }
+  /* Everything else fills the column, so a long word wraps instead of widening it. */
+  .image-text__copy > .button {
+    justify-self: start;
   }
   .image-text__eyebrow {
     font-size: var(--text-small);

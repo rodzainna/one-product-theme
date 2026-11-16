@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { page, userEvent } from "vitest/browser";
 import "../../assets/accordion.js";
+import criticalCss from "../../assets/critical.css?raw";
+import itemLiquid from "../../snippets/accordion-item.liquid?raw";
+
+const itemCss =
+  itemLiquid.match(
+    /{%-?\s*stylesheet\s*-?%}([\s\S]*?){%-?\s*endstylesheet\s*-?%}/,
+  )?.[1] ?? "";
 
 // Shopify wraps each theme block in a div, and the editor fires its events on that div.
 const item = (question, { group = "faq", open = false } = {}) => `
@@ -63,5 +70,28 @@ describe("accordion items", () => {
     const [first] = render(item("First") + "<div id='other'></div>");
     select(document.getElementById("other"));
     expect(first.open).toBe(false);
+  });
+});
+
+describe("a long unbroken word in a question", () => {
+  test("wraps beside the icon instead of pushing it off the screen", () => {
+    document.body.innerHTML = `
+      <style>${criticalCss} body { margin: 0 } ${itemCss}</style>
+      <div id="list" style="width: 300px">
+        <details class="accordion__item">
+          <summary class="accordion__trigger">
+            <h3 class="accordion__heading">${"Supercalifragilisticexpialidocious".repeat(3)}</h3>
+            <span class="accordion__icon"><svg width="16" height="16"></svg></span>
+          </summary>
+        </details>
+      </div>`;
+    const list = document.getElementById("list").getBoundingClientRect();
+    const icon = document
+      .querySelector(".accordion__icon")
+      .getBoundingClientRect();
+    expect(icon.right).toBeLessThanOrEqual(list.right);
+    expect(document.getElementById("list").scrollWidth).toBeLessThanOrEqual(
+      300,
+    );
   });
 });

@@ -126,6 +126,7 @@
   .contact__heading,
   .contact__text {
     margin: 0;
+    overflow-wrap: anywhere;
   }
   .contact__text {
     margin-top: var(--space-s);
@@ -154,6 +155,10 @@
     gap: var(--space-s);
     padding: var(--space-l);
     border-radius: var(--radius-card);
+  }
+  /* Headings and links set their own overflow-wrap, so the text blocks need it directly. */
+  .contact__aside .text {
+    overflow-wrap: anywhere;
   }
   .contact__aside > * {
     min-width: 0;
