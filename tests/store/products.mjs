@@ -255,6 +255,12 @@ export const pages = [
     body: "<p>Test page for the FAQ template.</p>",
   },
   {
+    handle: "test-compare",
+    title: "Test compare",
+    templateSuffix: "compare",
+    body: "<p>Test page for the Compare template.</p>",
+  },
+  {
     handle: "test-reviews",
     title: "Test reviews",
     templateSuffix: "reviews",

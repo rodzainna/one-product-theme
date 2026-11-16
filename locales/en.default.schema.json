@@ -16,6 +16,8 @@
     "collections_grid": "Collections grid",
     "colors": "Colors",
     "column": "Column",
+    "compare_row": "Comparison row",
+    "compare_table": "Comparison table",
     "content": "Content",
     "custom_liquid": "Custom Liquid",
     "custom_section": "Custom section",
@@ -68,6 +70,9 @@
     "background_gradient": "Optional. Shows instead of the background color. Keep it close to that color so text stays readable.",
     "byline": "Optional. A place or a role, shown under the name.",
     "cart_type": "Drawer opens a side panel when a product is added. Page goes to the cart page. The cart page always works, also without JavaScript.",
+    "cell_text": "Leave empty to show Yes or No for those styles.",
+    "column_1": "Your product. Its column is highlighted.",
+    "column_other": "Leave empty to hide this column.",
     "custom_icon": "Optional. Replaces the icon above. A square PNG or JPG works best.",
     "custom_liquid": "Add app snippets or other Liquid code.",
     "details_content": "Shown in a dialog from the button. Leave empty to hide the button. Connect a product metafield to give each product its own.",
@@ -122,8 +127,18 @@
     "button_text": "Button text",
     "byline": "Byline",
     "cart_type": "Cart type",
+    "cell_style": "Style",
     "closing": "Closing block",
     "color_scheme": "Color scheme",
+    "column_1": "First column",
+    "column_1_cells": "First column (yours)",
+    "column_2": "Second column",
+    "column_2_cells": "Second column",
+    "column_3": "Third column",
+    "column_3_cells": "Third column",
+    "column_4": "Fourth column",
+    "column_4_cells": "Fourth column",
+    "columns": "Columns",
     "content": "Content",
     "corner_radius": "Corner radius",
     "custom_icon": "Custom icon",
@@ -174,6 +189,7 @@
     "review_style": "Style",
     "review_video": "Video",
     "reviews_link": "Reviews link",
+    "row_name": "Row name",
     "scroll_cue": "Scroll cue",
     "scroll_snap": "Snap to sections",
     "secondary_button_style": "Secondary button style",
@@ -269,6 +285,11 @@
     "photo_shape": {
       "landscape": "Landscape",
       "portrait": "Portrait"
+    },
+    "cell_style": {
+      "plain": "Plain text",
+      "yes": "Yes, with a tick",
+      "no": "No, with a cross"
     }
   }
 }

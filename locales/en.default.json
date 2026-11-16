@@ -175,5 +175,13 @@
     "review": "Review",
     "review_by": "Review by {{ name }}",
     "watch_review": "Watch review"
+  },
+  "compare": {
+    "compare_with": "Compare {{ name }} with",
+    "feature": "Feature",
+    "heading": "How we compare",
+    "no": "No",
+    "ours": "Ours",
+    "yes": "Yes"
   }
 }

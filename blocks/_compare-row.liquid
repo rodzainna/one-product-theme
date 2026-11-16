@@ -1,0 +1,152 @@
+{% doc %}
+  One row of the comparison table: a name and a cell for each column the section names. A cell can
+  be plain text, or Yes or No with a tick or a cross. Nothing shows until the row has a name.
+  Shopify wraps each block in a div, so the table uses ARIA roles, not table tags.
+
+  @example
+  {% content_for 'block', type: '_compare-row', id: 'row' %}
+{% enddoc %}
+
+{%- if block.settings.label != blank -%}
+  <div class="compare__row" role="row" {{ block.shopify_attributes }}>
+    <div class="compare__cell compare__cell--label" role="rowheader">{{ block.settings.label | escape }}</div>
+    {%- for column in (1..4) -%}
+      {%- liquid
+        assign column_key = 'column_' | append: column
+        assign text_key = 'cell_' | append: column
+        assign style_key = text_key | append: '_style'
+        assign column_name = section.settings[column_key]
+        assign cell_text = block.settings[text_key]
+        assign cell_style = block.settings[style_key]
+        assign shown = false
+        if column == 1 or column_name != blank
+          assign shown = true
+        endif
+      -%}
+      {%- if shown -%}
+        <div class="compare__cell" role="cell" data-column="{{ column }}">
+          {%- if cell_style == 'yes' or cell_style == 'no' -%}
+            {%- liquid
+              assign mark_icon = 'check'
+              assign fallback_text = 'compare.yes' | t
+              if cell_style == 'no'
+                assign mark_icon = 'close'
+                assign fallback_text = 'compare.no' | t
+              endif
+            -%}
+            <span class="compare__mark compare__mark--{{ cell_style }}">
+              {%- render 'icon', name: mark_icon, size: 'sm' -%}
+            </span>
+            {%- if cell_text != blank -%}
+              {{- cell_text | escape -}}
+            {%- else -%}
+              {{- fallback_text -}}
+            {%- endif -%}
+          {%- else -%}
+            {{- cell_text | escape -}}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+{%- elsif request.design_mode -%}
+  <div class="compare__empty" {{ block.shopify_attributes }}></div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:general.compare_row",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:labels.row_name",
+      "default": "Feature"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.column_1_cells"
+    },
+    {
+      "type": "text",
+      "id": "cell_1",
+      "label": "t:labels.text",
+      "info": "t:info.cell_text"
+    },
+    {
+      "type": "select",
+      "id": "cell_1_style",
+      "label": "t:labels.cell_style",
+      "options": [
+        { "value": "plain", "label": "t:options.cell_style.plain" },
+        { "value": "yes", "label": "t:options.cell_style.yes" },
+        { "value": "no", "label": "t:options.cell_style.no" }
+      ],
+      "default": "yes"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.column_2_cells"
+    },
+    {
+      "type": "text",
+      "id": "cell_2",
+      "label": "t:labels.text",
+      "info": "t:info.cell_text"
+    },
+    {
+      "type": "select",
+      "id": "cell_2_style",
+      "label": "t:labels.cell_style",
+      "options": [
+        { "value": "plain", "label": "t:options.cell_style.plain" },
+        { "value": "yes", "label": "t:options.cell_style.yes" },
+        { "value": "no", "label": "t:options.cell_style.no" }
+      ],
+      "default": "no"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.column_3_cells"
+    },
+    {
+      "type": "text",
+      "id": "cell_3",
+      "label": "t:labels.text",
+      "info": "t:info.cell_text"
+    },
+    {
+      "type": "select",
+      "id": "cell_3_style",
+      "label": "t:labels.cell_style",
+      "options": [
+        { "value": "plain", "label": "t:options.cell_style.plain" },
+        { "value": "yes", "label": "t:options.cell_style.yes" },
+        { "value": "no", "label": "t:options.cell_style.no" }
+      ],
+      "default": "plain"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.column_4_cells"
+    },
+    {
+      "type": "text",
+      "id": "cell_4",
+      "label": "t:labels.text",
+      "info": "t:info.cell_text"
+    },
+    {
+      "type": "select",
+      "id": "cell_4_style",
+      "label": "t:labels.cell_style",
+      "options": [
+        { "value": "plain", "label": "t:options.cell_style.plain" },
+        { "value": "yes", "label": "t:options.cell_style.yes" },
+        { "value": "no", "label": "t:options.cell_style.no" }
+      ],
+      "default": "plain"
+    }
+  ]
+}
+{% endschema %}
