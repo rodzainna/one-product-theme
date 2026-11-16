@@ -239,3 +239,13 @@ export const discounts = [
     value: { discountAmount: { amount: "5.00", appliesOnEachItem: false } },
   },
 ];
+
+// Pages that use a page.<suffix>.json template. Created by handle.
+export const pages = [
+  {
+    handle: "test-about",
+    title: "Test about",
+    templateSuffix: "about",
+    body: "<p>Test page for the About template.</p>",
+  },
+];

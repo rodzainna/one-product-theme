@@ -1,0 +1,177 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "color_scheme": "scheme-3",
+        "eyebrow": "Our story",
+        "heading": "",
+        "text": "A short line about who you are and why you make this product.",
+        "scroll_cue": true
+      }
+    },
+    "origin": {
+      "type": "custom-section",
+      "blocks": {
+        "eyebrow": {
+          "type": "text",
+          "settings": {
+            "text": "The origin",
+            "text_style": "text--eyebrow",
+            "element": "div"
+          }
+        },
+        "heading": {
+          "type": "text",
+          "settings": {
+            "text": "Where it comes from",
+            "text_style": "text--title",
+            "element": "h2"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "Tell the story of where your product is made, and what makes the place special.",
+            "text_style": "text--normal",
+            "element": "div"
+          }
+        }
+      },
+      "block_order": [
+        "eyebrow",
+        "heading",
+        "text"
+      ],
+      "settings": {
+        "color_scheme": "scheme-3",
+        "full_screen": true,
+        "overlay": 50
+      }
+    },
+    "craft": {
+      "type": "image-with-text",
+      "settings": {
+        "color_scheme": "scheme-2",
+        "eyebrow": "The craft",
+        "heading": "Made with care",
+        "text": "<p>Explain how it is made, step by step, in a few lines.</p>"
+      }
+    },
+    "delivery": {
+      "type": "image-with-text",
+      "settings": {
+        "color_scheme": "scheme-1",
+        "image_right": true,
+        "eyebrow": "The promise",
+        "heading": "Delivered at its best",
+        "text": "<p>Say what the customer can count on, from order to delivery.</p>"
+      }
+    },
+    "name": {
+      "type": "custom-section",
+      "blocks": {
+        "eyebrow": {
+          "type": "text",
+          "settings": {
+            "text": "The name",
+            "text_style": "text--eyebrow",
+            "element": "div"
+          }
+        },
+        "heading": {
+          "type": "text",
+          "settings": {
+            "text": "What our name means",
+            "text_style": "text--title",
+            "element": "h2"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "Share the meaning behind your name or your brand.",
+            "text_style": "text--normal",
+            "element": "div"
+          }
+        }
+      },
+      "block_order": [
+        "eyebrow",
+        "heading",
+        "text"
+      ],
+      "settings": {
+        "color_scheme": "scheme-3",
+        "full_screen": true,
+        "overlay": 50
+      }
+    },
+    "cta": {
+      "type": "custom-section",
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "settings": {
+            "text": "Try it for yourself",
+            "text_style": "text--title",
+            "element": "h2",
+            "alignment": "center"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "One line that invites the visitor to take the next step.",
+            "text_style": "text--normal",
+            "element": "div",
+            "alignment": "center"
+          }
+        },
+        "shop": {
+          "type": "button",
+          "settings": {
+            "label": "Shop now",
+            "link": "/collections/all",
+            "style": "primary"
+          }
+        },
+        "reviews": {
+          "type": "button",
+          "settings": {
+            "label": "Read reviews",
+            "link": "/search",
+            "style": "secondary"
+          }
+        }
+      },
+      "block_order": [
+        "heading",
+        "text",
+        "shop",
+        "reviews"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "full_screen": true
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "origin",
+    "craft",
+    "delivery",
+    "name",
+    "cta"
+  ]
+}

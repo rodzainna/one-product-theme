@@ -22,7 +22,10 @@
         assign preload_background = true
       endif
     -%}
-    <div class="custom-section__background{% if parallax %} parallax__media{% endif %}">
+    <div
+      class="custom-section__background{% if parallax %} parallax__media{% endif %}"
+      style="--custom-section-overlay: {{ section.settings.overlay }}%;"
+    >
       {% render 'image',
         image: section.settings.background_image,
         alt: '',
@@ -49,6 +52,12 @@
     inset: 0;
     overflow: hidden;
   }
+  .custom-section__background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--color-background) var(--custom-section-overlay), transparent);
+  }
   .custom-section__image,
   .custom-section__background .image > img {
     height: 100%;
@@ -61,6 +70,35 @@
   }
   .custom-section__content > * {
     grid-column: 2;
+  }
+  /* A full-screen section centres its content, clear of the sticky bar. */
+  .custom-section.section-full {
+    display: grid;
+    align-content: center;
+  }
+  .custom-section.section-full .custom-section__content {
+    --custom-section-clearance: calc(var(--space-2xl) + var(--sticky-bar-h, 0px));
+    --custom-section-copy-max: 45rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    gap: var(--space-m) var(--space-s);
+    width: min(var(--custom-section-copy-max), var(--content-width));
+    margin-inline: auto;
+    padding-block: var(--space-2xl) var(--custom-section-clearance);
+  }
+  .custom-section.section-full .custom-section__content > * {
+    flex: 1 0 100%;
+  }
+  /* Buttons share a row and follow the text alignment. */
+  .custom-section.section-full .custom-section__content > :has(.button-block) {
+    flex: 0 0 auto;
+  }
+  .custom-section.section-full .custom-section__content:has([data-align='center']) {
+    justify-content: center;
+  }
+  .custom-section.section-full .custom-section__content:has([data-align='right']) {
+    justify-content: flex-end;
   }
 {% endstylesheet %}
 
@@ -86,6 +124,18 @@
       "label": "t:labels.full_screen",
       "info": "t:info.full_screen",
       "default": false
+    },
+    {
+      "type": "range",
+      "id": "overlay",
+      "label": "t:labels.overlay",
+      "info": "t:info.overlay",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "visible_if": "{{ section.settings.background_image != blank }}"
     },
     {
       "type": "checkbox",

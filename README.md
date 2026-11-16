@@ -25,7 +25,7 @@ pnpm format                     # Prettier (Liquid, CSS, JS, JSON)
 `pnpm test:store` fetches rendered sections from the preview of a test store, because Liquid only renders on Shopify. It expects the products in `tests/store/products.mjs` (for example `test-size-sold-out`, with size S out of stock). Create any that are missing with your own Shopify CLI login for that store:
 
 ```sh
-shopify store auth --store <test-store>.myshopify.com --scopes write_products,write_inventory,read_locations,write_files,write_publications,write_purchase_options,write_discounts
+shopify store auth --store <test-store>.myshopify.com --scopes write_products,write_inventory,read_locations,write_files,write_publications,write_purchase_options,write_discounts,write_content
 pnpm test:store:setup <test-store>.myshopify.com
 ```
 

@@ -62,6 +62,7 @@
     "custom_icon": "Optional. Replaces the icon above. A square PNG or JPG works best.",
     "custom_liquid": "Add app snippets or other Liquid code.",
     "details_content": "Shown in a dialog from the button. Leave empty to hide the button. Connect a product metafield to give each product its own.",
+    "element": "Use Heading 2 for text that titles a section, so screen readers and the section dots can find it. Heading 3 is for a smaller heading inside it.",
     "favicon": "Use a square image at least 180 × 180px.",
     "full_screen": "Makes the section at least as tall as the screen.",
     "gradient": "How dark the fade behind the text is. The text is always light, so keep it high on bright photos.",
@@ -110,6 +111,7 @@
     "corner_radius": "Corner radius",
     "custom_icon": "Custom icon",
     "custom_liquid": "Custom Liquid",
+    "element": "Element",
     "eyebrow": "Eyebrow",
     "full_screen": "Full screen",
     "gradient": "Gradient strength",
@@ -199,7 +201,13 @@
       "large": "Large",
       "small": "Small"
     },
+    "element": {
+      "paragraph": "Paragraph",
+      "heading_2": "Heading 2",
+      "heading_3": "Heading 3"
+    },
     "text_style": {
+      "eyebrow": "Eyebrow",
       "title": "Title",
       "subtitle": "Subtitle",
       "normal": "Normal text"

@@ -1,9 +1,9 @@
-// Creates the missing products and discounts in tests/store/products.mjs on a test store; existing ones are kept.
+// Creates the missing products, discounts and pages from tests/store/products.mjs.
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { discounts, products } from "../tests/store/products.mjs";
+import { discounts, pages, products } from "../tests/store/products.mjs";
 
 const API_VERSION = "2026-10";
 const store = process.argv[2];
@@ -250,6 +250,36 @@ try {
       );
     }
     console.log(`created  ${discount.title}`);
+  }
+
+  for (const page of pages) {
+    const { pages: found } = execute(
+      "query ($query: String!) { pages(first: 1, query: $query) { nodes { id } } }",
+      { query: `handle:${page.handle}` },
+    );
+    if (found.nodes.length) {
+      console.log(`kept     page ${page.handle}`);
+      continue;
+    }
+    const { pageCreate } = execute(
+      "mutation ($page: PageCreateInput!) { pageCreate(page: $page) { userErrors { message } } }",
+      {
+        page: {
+          handle: page.handle,
+          title: page.title,
+          body: page.body,
+          templateSuffix: page.templateSuffix,
+          isPublished: true,
+        },
+      },
+      { mutation: true },
+    );
+    if (pageCreate.userErrors.length) {
+      throw new Error(
+        `${page.handle}: ${JSON.stringify(pageCreate.userErrors)}`,
+      );
+    }
+    console.log(`created  page ${page.handle}`);
   }
 } catch (error) {
   const reason = String(error.stderr ?? "").trim();

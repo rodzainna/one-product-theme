@@ -5,17 +5,43 @@
   {% content_for 'block', type: 'text', id: 'text' %}
 {% enddoc %}
 
-<div
+{%- liquid
+  assign tag = block.settings.element
+  if tag != 'h2' and tag != 'h3'
+    assign tag = 'div'
+  endif
+-%}
+<{{ tag }}
   class="text {{ block.settings.text_style }}"
   style="--text-align: {{ block.settings.alignment }}"
+  data-align="{{ block.settings.alignment }}"
   {{ block.shopify_attributes }}
 >
   {{ block.settings.text }}
-</div>
+</{{ tag }}>
 
 {% stylesheet %}
   .text {
+    margin: 0;
     text-align: var(--text-align);
+  }
+  /* The element only sets the semantics; these styles keep the body look under an h2 or h3. */
+  .text--eyebrow,
+  .text--subtitle,
+  .text--normal {
+    font-family: var(--font-body);
+    font-style: var(--font-body-style);
+    font-weight: var(--weight-body);
+    line-height: inherit;
+    text-wrap: wrap;
+  }
+  .text--normal {
+    font-size: inherit;
+  }
+  .text--eyebrow {
+    font-size: var(--text-small);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
   .text--title {
     font-size: var(--text-h2);
@@ -40,11 +66,24 @@
       "id": "text_style",
       "label": "t:labels.text_style",
       "options": [
+        { "value": "text--eyebrow", "label": "t:options.text_style.eyebrow" },
         { "value": "text--title", "label": "t:options.text_style.title" },
         { "value": "text--subtitle", "label": "t:options.text_style.subtitle" },
         { "value": "text--normal", "label": "t:options.text_style.normal" }
       ],
       "default": "text--title"
+    },
+    {
+      "type": "select",
+      "id": "element",
+      "label": "t:labels.element",
+      "info": "t:info.element",
+      "options": [
+        { "value": "div", "label": "t:options.element.paragraph" },
+        { "value": "h2", "label": "t:options.element.heading_2" },
+        { "value": "h3", "label": "t:options.element.heading_3" }
+      ],
+      "default": "div"
     },
     {
       "type": "text_alignment",
