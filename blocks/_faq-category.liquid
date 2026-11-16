@@ -1,0 +1,64 @@
+{% doc %}
+  One category in the FAQ page: a heading and its questions. The section reads data-faq-cat (the
+  id and the title) from this markup to build the category links, because a section can't read its
+  theme blocks' settings. Nothing shows until the category has a title.
+
+  @example
+  {% content_for 'block', type: '_faq-category', id: 'category' %}
+{% enddoc %}
+
+{%- if block.settings.title != blank -%}
+  <section
+    class="faq-group"
+    id="faq-{{ block.id }}"
+    data-faq-cat="{{ block.id }}|||{{ block.settings.title | escape }}"
+    aria-labelledby="faq-{{ block.id }}-title"
+    {{ block.shopify_attributes }}
+  >
+    <h2 class="faq-group__title" id="faq-{{ block.id }}-title">{{ block.settings.title | escape }}</h2>
+    <div class="faq-group__list">
+      {% content_for 'blocks' %}
+    </div>
+  </section>
+{%- elsif request.design_mode -%}
+  <div {{ block.shopify_attributes }}></div>
+{%- endif -%}
+
+{% stylesheet %}
+  .faq-group__title {
+    margin: 0 0 var(--space-m);
+    font-size: var(--text-h3);
+  }
+  .faq-group__list {
+    display: flex;
+    flex-direction: column;
+  }
+  /* Shopify wraps each block in a div, so the last item is found through its wrapper. */
+  .faq-group__list > :last-child .accordion__item {
+    border-bottom: 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.faq_category",
+  "blocks": [{ "type": "_question" }],
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:labels.title",
+      "default": "Category"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.faq_category",
+      "blocks": [
+        { "type": "_question", "settings": { "question": "First question" } },
+        { "type": "_question", "settings": { "question": "Second question" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

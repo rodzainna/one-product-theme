@@ -1,0 +1,130 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "faq-page",
+      "blocks": {
+        "about": {
+          "type": "_faq-category",
+          "settings": {
+            "title": "About the product"
+          },
+          "blocks": {
+            "about_q1": {
+              "type": "_question",
+              "settings": {
+                "question": "What is it made of?",
+                "answer": "<p>Describe what it is and what goes into it.</p>"
+              }
+            },
+            "about_q2": {
+              "type": "_question",
+              "settings": {
+                "question": "Who is it for?",
+                "answer": "<p>Say who gets the most out of it.</p>"
+              }
+            },
+            "about_q3": {
+              "type": "_question",
+              "settings": {
+                "question": "How do I use it?",
+                "answer": "<p>Explain how to get started, step by step.</p>"
+              }
+            }
+          },
+          "block_order": [
+            "about_q1",
+            "about_q2",
+            "about_q3"
+          ]
+        },
+        "delivery": {
+          "type": "_faq-category",
+          "settings": {
+            "title": "Delivery"
+          },
+          "blocks": {
+            "delivery_q1": {
+              "type": "_question",
+              "settings": {
+                "question": "How long does delivery take?",
+                "answer": "<p>Say how long orders take to arrive, and where you ship to.</p>"
+              }
+            },
+            "delivery_q2": {
+              "type": "_question",
+              "settings": {
+                "question": "How much does delivery cost?",
+                "answer": "<p>Explain your rates, and any free delivery threshold.</p>"
+              }
+            },
+            "delivery_q3": {
+              "type": "_question",
+              "settings": {
+                "question": "How do I track my order?",
+                "answer": "<p>Say how and when customers get tracking details.</p>"
+              }
+            }
+          },
+          "block_order": [
+            "delivery_q1",
+            "delivery_q2",
+            "delivery_q3"
+          ]
+        },
+        "returns": {
+          "type": "_faq-category",
+          "settings": {
+            "title": "Orders and returns"
+          },
+          "blocks": {
+            "returns_q1": {
+              "type": "_question",
+              "settings": {
+                "question": "What is your returns policy?",
+                "answer": "<p>Explain your returns, in plain words.</p>"
+              }
+            },
+            "returns_q2": {
+              "type": "_question",
+              "settings": {
+                "question": "Can I change my order?",
+                "answer": "<p>Say how long customers have to make changes.</p>"
+              }
+            }
+          },
+          "block_order": [
+            "returns_q1",
+            "returns_q2"
+          ]
+        }
+      },
+      "block_order": [
+        "about",
+        "delivery",
+        "returns"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "FAQ",
+        "heading": "",
+        "text": "A short line about what you can find answered here.",
+        "closing_heading": "Still have a question?",
+        "closing_text": "A short line about when you reply.",
+        "closing_label": "Get in touch",
+        "closing_link": "/pages/contact"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

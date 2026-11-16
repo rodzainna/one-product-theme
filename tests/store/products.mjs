@@ -248,4 +248,10 @@ export const pages = [
     templateSuffix: "about",
     body: "<p>Test page for the About template.</p>",
   },
+  {
+    handle: "test-faq",
+    title: "Test FAQ",
+    templateSuffix: "faq",
+    body: "<p>Test page for the FAQ template.</p>",
+  },
 ];

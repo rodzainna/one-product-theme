@@ -51,6 +51,14 @@ describe("accordion items", () => {
     expect(first.open).toBe(false);
   });
 
+  test("selecting a block that only contains items, such as a category, opens none of them", () => {
+    const [first] = render(
+      `<div class="shopify-block" id="category"><section>${item("First")}</section></div>`,
+    );
+    select(document.getElementById("category"));
+    expect(first.open).toBe(false);
+  });
+
   test("selecting a block that isn't an accordion item changes nothing", () => {
     const [first] = render(item("First") + "<div id='other'></div>");
     select(document.getElementById("other"));

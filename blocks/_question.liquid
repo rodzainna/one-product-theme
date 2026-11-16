@@ -1,6 +1,6 @@
 {% doc %}
-  One question and its answer in the FAQ section, shown as an accordion item. The first question
-  starts open when the section's "Open the first question" is on. Nothing shows until the
+  One question and its answer, shown as an accordion item. The section's "Open one question at a
+  time" and "Open the first question" settings apply when it has them. Nothing shows until the
   question has text.
 
   @example
@@ -9,6 +9,10 @@
 
 {%- if block.settings.question != blank -%}
   {%- liquid
+    assign group = ''
+    if section.settings.one_at_a_time
+      assign group = section.id
+    endif
     assign is_open = false
     if section.settings.open_first and section.blocks.first.id == block.id
       assign is_open = true
@@ -17,7 +21,7 @@
   {% render 'accordion-item',
     summary: block.settings.question,
     content: block.settings.answer,
-    group: section.id,
+    group: group,
     open: is_open,
     shopify_attributes: block.shopify_attributes
   %}
