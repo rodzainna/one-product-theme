@@ -15,12 +15,8 @@
         "heading": "Your product, front and centre",
         "text": "One product, one page. Add an image or a short video and say why it is worth buying.",
         "button_label": "Shop now",
-        "button_link": "/products/test-two-options"
+        "button_link": "/collections/all"
       }
-    },
-    "main": {
-      "type": "custom-section",
-      "settings": {}
     },
     "featured_product": {
       "type": "featured-product",
@@ -34,7 +30,7 @@
         "pickup": { "type": "_pickup-availability", "settings": {} }
       },
       "block_order": ["title", "rating", "price", "description", "variant_picker", "buy_buttons", "pickup"],
-      "settings": { "product": "test-two-options" }
+      "settings": {}
     },
     "features": {
       "type": "features",
@@ -133,5 +129,5 @@
       }
     }
   },
-  "order": ["hero", "main", "featured_product", "features", "link_tiles", "testimonials", "faq"]
+  "order": ["hero", "featured_product", "features", "link_tiles", "testimonials", "faq"]
 }

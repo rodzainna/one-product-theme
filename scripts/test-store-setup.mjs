@@ -1,6 +1,12 @@
 // Creates the missing products, discounts and pages from tests/store/products.mjs.
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { discounts, pages, products } from "../tests/store/products.mjs";
@@ -82,6 +88,15 @@ const publish = (id, publicationId) => {
 };
 
 try {
+  // The featured product tests need this home template; git ignores the copy so it never ships.
+  const template = "templates/index.featured-test.json";
+  if (existsSync(template)) {
+    console.log(`kept     ${template}`);
+  } else {
+    copyFileSync("tests/store/fixtures/index.featured-test.json", template);
+    console.log(`created  ${template}`);
+  }
+
   const { locations, publications } = execute(
     "{ locations(first: 50) { nodes { id fulfillsOnlineOrders } } publications(first: 50, catalogType: APP) { nodes { id catalog { ... on AppCatalog { apps(first: 1) { nodes { handle } } } } } } }",
   );

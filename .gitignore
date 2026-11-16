@@ -31,3 +31,6 @@ tasks/todo.md
 .mcp.json
 CLAUDE.md
 AGENTS.md
+
+# Test-only home template, copied from tests/store/fixtures by pnpm test:store:setup
+templates/index.featured-test.json

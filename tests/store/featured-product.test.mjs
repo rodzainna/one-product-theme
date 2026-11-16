@@ -1,7 +1,9 @@
 import { beforeAll, describe, expect, test } from "vitest";
 import { get, product, section, sectionId, variantId } from "./store.mjs";
 
-// templates/index.json features test-two-options in the "featured_product" section.
+// The home page picks no product. This one is picked by templates/index.featured-test.json,
+// served at /?view=featured-test; pnpm test:store:setup copies it from tests/store/fixtures.
+const home_path = "/?view=featured-test";
 const handle = "test-two-options";
 const picker = (html) => html.match(/<variant-picker[^>]*>/)?.[0] ?? "";
 const cartVariant = (html) =>
@@ -13,9 +15,15 @@ const currentMedia = (html) =>
 
 let id, json, home;
 beforeAll(async () => {
-  id = await sectionId("/", "featured_product");
+  const page = await get(home_path);
+  if (!page.includes("product-title__heading")) {
+    throw new Error(
+      `${home_path} shows no featured product. Run pnpm test:store:setup so templates/index.featured-test.json exists, and wait for the preview to sync it.`,
+    );
+  }
+  id = await sectionId(home_path, "featured_product");
   json = await product(handle);
-  home = await section("/", id);
+  home = await section(home_path, id);
 });
 
 describe("featured product", () => {
@@ -30,7 +38,7 @@ describe("featured product", () => {
 
   test("below the first section, its media doesn't take the page's high priority", async () => {
     // section.index is only set in a full page render, not the Section Rendering API.
-    const page = await get("/");
+    const page = await get(home_path);
     expect(page.indexOf(`id="shopify-section-${id}"`)).toBeGreaterThan(0);
     expect(page).not.toMatch(/<img[^>]*fetchpriority="high"/);
   });

@@ -1,0 +1,70 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "heading": "Your product, front and centre",
+        "text": "One product, one page. Add an image or a short video and say why it is worth buying.",
+        "button_label": "Shop now",
+        "button_link": "/collections/all"
+      }
+    },
+    "featured_product": {
+      "type": "featured-product",
+      "blocks": {
+        "title": {
+          "type": "_product-title",
+          "settings": {
+            "show_vendor": true
+          }
+        },
+        "rating": {
+          "type": "_product-rating",
+          "settings": {}
+        },
+        "price": {
+          "type": "_product-price",
+          "settings": {}
+        },
+        "description": {
+          "type": "_product-description",
+          "settings": {}
+        },
+        "variant_picker": {
+          "type": "_variant-picker",
+          "settings": {}
+        },
+        "buy_buttons": {
+          "type": "_buy-buttons",
+          "settings": {}
+        },
+        "pickup": {
+          "type": "_pickup-availability",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "title",
+        "rating",
+        "price",
+        "description",
+        "variant_picker",
+        "buy_buttons",
+        "pickup"
+      ],
+      "settings": {
+        "product": "test-two-options"
+      }
+    }
+  },
+  "order": ["hero", "featured_product"]
+}
