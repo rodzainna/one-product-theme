@@ -1,0 +1,46 @@
+{% doc %}
+  One link in the contact page's side card, such as a policy or an email address. Nothing shows
+  until the link has a label and an address.
+
+  @example
+  {% content_for 'block', type: '_contact-link', id: 'link' %}
+{% enddoc %}
+
+{%- if block.settings.label != blank and block.settings.link != blank -%}
+  <p class="contact-link" {{ block.shopify_attributes }}>
+    <a href="{{ block.settings.link | escape }}">{{ block.settings.label | escape }}</a>
+  </p>
+{%- elsif request.design_mode -%}
+  <div class="contact-link" {{ block.shopify_attributes }}></div>
+{%- endif -%}
+
+{% stylesheet %}
+  .contact-link {
+    margin: 0;
+  }
+  .contact-link a {
+    display: inline-block;
+    min-height: var(--target-min);
+    color: var(--color-foreground);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.contact_link",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:labels.link_label",
+      "default": "A helpful link"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:labels.link",
+      "info": "t:info.contact_link"
+    }
+  ]
+}
+{% endschema %}

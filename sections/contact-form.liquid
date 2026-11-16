@@ -1,0 +1,263 @@
+{% comment %}
+  The contact page: a heading, the contact form and a side card made of blocks.
+  https://shopify.dev/themes/customer-engagement/add-contact-form
+{% endcomment %}
+
+{%- liquid
+  assign heading = section.settings.heading
+  if heading == blank
+    assign heading = page.title
+  endif
+  assign form_id = 'ContactForm'
+  assign name_label = 'contact.name' | t
+  assign email_label = 'contact.email' | t
+  assign order_label = 'contact.order_number' | t
+  assign order_placeholder = 'contact.order_placeholder' | t
+  assign message_label = 'contact.message' | t
+  assign button_label = section.settings.button_label
+  if button_label == blank
+    assign button_label = 'contact.send' | t
+  endif
+  assign success_text = section.settings.success_text
+  if success_text == blank
+    assign success_text = 'contact.success' | t
+  endif
+-%}
+<div class="contact full-width color-{{ section.settings.color_scheme }}">
+  <div class="contact__inner">
+    <div class="contact__head">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="contact__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      <h1 class="contact__heading">{{ heading | escape }}</h1>
+      {%- if section.settings.text != blank -%}
+        <p class="contact__text">{{ section.settings.text | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="contact__layout">
+      {% form 'contact', id: form_id, class: 'contact__form' %}
+        {%- liquid
+          # A sent message leaves the form empty; a failed one keeps the email and message.
+          assign email_value = ''
+          assign body_value = ''
+          if form.errors
+            assign email_value = form.email
+            assign body_value = form.body
+          endif
+        -%}
+        {%- if form.posted_successfully? -%}
+          {% render 'message', type: 'success', text: success_text, focus: true %}
+        {%- endif -%}
+        {%- if form.errors -%}
+          {% render 'message', type: 'error', errors: form.errors, id_prefix: form_id %}
+        {%- endif -%}
+
+        <div class="contact__row">
+          {% render 'input', id: 'ContactForm-name', label: name_label, name: 'contact[Name]', autocomplete: 'name' %}
+          {% render 'input',
+            id: 'ContactForm-email',
+            label: email_label,
+            type: 'email',
+            name: 'contact[email]',
+            value: email_value,
+            autocomplete: 'email',
+            required: true,
+            errors: form.errors,
+            field: 'email'
+          %}
+        </div>
+        {%- if section.settings.show_order_number -%}
+          {% render 'input',
+            id: 'ContactForm-order',
+            label: order_label,
+            name: 'contact[Order number]',
+            placeholder: order_placeholder
+          %}
+        {%- endif -%}
+        {% render 'input',
+          id: 'ContactForm-body',
+          label: message_label,
+          type: 'textarea',
+          name: 'contact[body]',
+          value: body_value,
+          rows: 6,
+          required: true,
+          errors: form.errors,
+          field: 'body'
+        %}
+        <div class="contact__submit">
+          {% render 'button', label: button_label, type: 'submit' %}
+        </div>
+      {% endform %}
+
+      {%- if section.blocks.size > 0 -%}
+        <aside
+          class="contact__aside color-{{ section.settings.aside_color_scheme }}"
+          aria-label="{{ 'contact.side_card' | t }}"
+        >
+          {% content_for 'blocks' %}
+        </aside>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .contact {
+    display: grid;
+    grid-template-columns: var(--content-grid);
+    width: 100%;
+  }
+  .contact__inner {
+    grid-column: 2;
+    padding-block: var(--space-xl) var(--space-2xl);
+  }
+  .contact__head {
+    max-width: 40rem;
+    margin-bottom: var(--space-l);
+  }
+  .contact__eyebrow {
+    margin: 0 0 var(--space-xs);
+    font-size: var(--text-small);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .contact__heading,
+  .contact__text {
+    margin: 0;
+  }
+  .contact__text {
+    margin-top: var(--space-s);
+    color: var(--color-foreground-muted);
+  }
+  .contact__layout {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+  .contact__form {
+    display: grid;
+    gap: var(--space-m);
+  }
+  .contact__row {
+    display: grid;
+    gap: var(--space-m);
+    /* An error under one field mustn't stretch its neighbour. */
+    align-items: start;
+  }
+  .contact__submit {
+    justify-self: start;
+  }
+  .contact__aside {
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-l);
+    border-radius: var(--radius-card);
+  }
+  .contact__aside > * {
+    min-width: 0;
+  }
+  /* The side card's headings keep the heading font; the text block resets it to the body font. */
+  .contact__aside .text--subtitle {
+    font-family: var(--font-heading);
+    font-style: var(--font-heading-style);
+    font-weight: var(--weight-heading);
+    font-size: var(--text-h4);
+  }
+  @media (min-width: 600px) {
+    .contact__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 900px) {
+    .contact__layout {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.contact_form",
+  "blocks": [{ "type": "text" }, { "type": "_contact-link" }],
+  "max_blocks": 12,
+  "limit": 1,
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:labels.eyebrow",
+      "default": "Contact"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "info": "t:info.page_title_heading"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "t:labels.text"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.form"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "t:labels.button_label",
+      "default": "Send message"
+    },
+    {
+      "type": "text",
+      "id": "success_text",
+      "label": "t:labels.success_text",
+      "default": "Thanks for writing. We'll reply as soon as we can."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_order_number",
+      "label": "t:labels.show_order_number",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:labels.side_card"
+    },
+    {
+      "type": "color_scheme",
+      "id": "aside_color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-2"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.contact_form",
+      "blocks": [
+        {
+          "type": "text",
+          "settings": { "text": "Before you write", "text_style": "text--subtitle", "element": "h2" }
+        },
+        { "type": "_contact-link" }
+      ]
+    }
+  ]
+}
+{% endschema %}

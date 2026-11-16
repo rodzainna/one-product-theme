@@ -183,5 +183,15 @@
     "no": "No",
     "ours": "Ours",
     "yes": "Yes"
+  },
+  "contact": {
+    "email": "Email",
+    "message": "Message",
+    "name": "Name (optional)",
+    "order_number": "Order number (optional)",
+    "order_placeholder": "e.g. #1042",
+    "send": "Send message",
+    "side_card": "Help and contact details",
+    "success": "Thanks for writing. We'll reply as soon as we can."
   }
 }

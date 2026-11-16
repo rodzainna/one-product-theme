@@ -1,0 +1,101 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "contact": {
+      "type": "contact-form",
+      "blocks": {
+        "before": {
+          "type": "text",
+          "settings": {
+            "text": "Before you write",
+            "text_style": "text--subtitle",
+            "element": "h2"
+          }
+        },
+        "intro": {
+          "type": "text",
+          "settings": {
+            "text": "Most answers are already here:",
+            "text_style": "text--normal",
+            "element": "div"
+          }
+        },
+        "faq": {
+          "type": "_contact-link",
+          "settings": {
+            "label": "Frequently asked questions",
+            "link": "/pages/faq"
+          }
+        },
+        "shipping": {
+          "type": "_contact-link",
+          "settings": {
+            "label": "Shipping policy",
+            "link": "/policies/shipping-policy"
+          }
+        },
+        "refund": {
+          "type": "_contact-link",
+          "settings": {
+            "label": "Refund policy",
+            "link": "/policies/refund-policy"
+          }
+        },
+        "other": {
+          "type": "text",
+          "settings": {
+            "text": "Other ways to reach us",
+            "text_style": "text--subtitle",
+            "element": "h2"
+          }
+        },
+        "email": {
+          "type": "_contact-link",
+          "settings": {
+            "label": "hello@example.com",
+            "link": "mailto:hello@example.com"
+          }
+        },
+        "hours": {
+          "type": "text",
+          "settings": {
+            "text": "Mon to Fri, 9am to 5pm",
+            "text_style": "text--normal",
+            "element": "div"
+          }
+        }
+      },
+      "block_order": [
+        "before",
+        "intro",
+        "faq",
+        "shipping",
+        "refund",
+        "other",
+        "email",
+        "hours"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "eyebrow": "Contact",
+        "heading": "Get in touch",
+        "text": "Questions about an order or the product? Write to us and we'll reply as soon as we can.",
+        "button_label": "Send message",
+        "success_text": "Thanks for writing. We'll reply as soon as we can.",
+        "show_order_number": true,
+        "aside_color_scheme": "scheme-2"
+      }
+    }
+  },
+  "order": [
+    "contact"
+  ]
+}
