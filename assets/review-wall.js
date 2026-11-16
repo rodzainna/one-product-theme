@@ -1,7 +1,4 @@
-/**
- * The reviews wall: spreads its cards over rows 8px tall so the columns stay even, loads a
- * review's video when its dialog opens, and pauses it when the dialog closes.
- */
+// The reviews wall: even columns from 8px rows, and each review's video loads when its dialog opens.
 class ReviewWall extends HTMLElement {
   #frame = 0;
   #resizer = new ResizeObserver(() => this.#schedule());

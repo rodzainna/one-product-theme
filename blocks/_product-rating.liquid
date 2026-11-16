@@ -30,7 +30,7 @@
   <{{ wrapper }}
     class="product-rating"
     {% if wrapper == 'a' %}
-      href="{{ block.settings.reviews_url }}"
+      href="{{ block.settings.reviews_url | escape }}"
     {% endif %}
     {{ block.shopify_attributes }}
   >

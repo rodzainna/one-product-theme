@@ -40,6 +40,10 @@ read -s SHOPIFY_FLAG_STORE_PASSWORD && export SHOPIFY_FLAG_STORE_PASSWORD
 pnpm dev --store <test-store> --port 9293
 ```
 
+`pnpm test:store:setup` also copies `tests/store/fixtures/index.featured-test.json` to `templates/`, where the featured product tests read it at `/?view=featured-test`. Git ignores that copy, and it names a test product, so delete it before pushing this theme to a real store.
+
+The browser tests include WebKit, which drops mouse clicks while the Mac's screen is locked or asleep. If `pnpm test` fails in WebKit only, wake the screen and run it again.
+
 Git hooks: commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (commitlint), staged files are formatted on commit, and `pnpm check`, `pnpm test` and a format check run before each push. The CSS guard (Stylelint, `stylelint.config.mjs`) checks `assets/*.css` and every `{% stylesheet %}` block, and fails on colours, font sizes, weights, radii, z-index, padding or timings that bypass the design tokens.
 
 JSON templates, section groups and `config/settings_data.json` are left unformatted because the theme editor rewrites them.
