@@ -1,0 +1,110 @@
+{% doc %}
+  One testimonial in the testimonials section: a quote with the person's name, and optionally a
+  byline, a star rating and a photo. Nothing shows until the quote has text.
+
+  @example
+  {% content_for 'block', type: '_testimonial', id: 'testimonial' %}
+{% enddoc %}
+
+{%- if block.settings.quote != blank -%}
+  {%- liquid
+    assign rating = block.settings.rating
+    assign percent = rating | divided_by: 5.0 | times: 100 | round: 1
+    assign rating_label = 'products.product.rating' | t: score: rating, max: 5
+  -%}
+  {%- capture body -%}
+    {%- if rating > 0 -%}
+      <p class="testimonial__rating">
+        {% render 'rating-stars', percent: percent %}
+        <span class="visually-hidden">{{ rating_label }}</span>
+      </p>
+    {%- endif -%}
+    <blockquote class="testimonial__quote">{{ block.settings.quote | escape | newline_to_br }}</blockquote>
+    {%- if block.settings.name != blank -%}
+      <p class="testimonial__author">
+        <span class="testimonial__name">{{ block.settings.name | escape }}</span>
+        {%- if block.settings.byline != blank -%}
+          <span class="testimonial__byline">{{ block.settings.byline | escape }}</span>
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+  {%- endcapture -%}
+  {% render 'card',
+    content: body,
+    image: block.settings.image,
+    sizes: '(min-width: 900px) 33vw, (min-width: 700px) 50vw, 100vw',
+    tag: 'div',
+    role: 'listitem',
+    class: 'testimonial',
+    shopify_attributes: block.shopify_attributes
+  %}
+{%- elsif request.design_mode -%}
+  <div role="listitem" {{ block.shopify_attributes }}></div>
+{%- endif -%}
+
+{% stylesheet %}
+  .testimonial__rating {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0 0 var(--space-s);
+    font-size: var(--text-small);
+  }
+  .testimonial__quote {
+    margin: 0 0 var(--space-m);
+    font-size: var(--text-lg);
+  }
+  .testimonial__author {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+  }
+  .testimonial__name {
+    font-weight: var(--weight-ui);
+  }
+  .testimonial__byline {
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.testimonial",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "t:labels.quote",
+      "default": "A short quote from a happy customer."
+    },
+    {
+      "type": "text",
+      "id": "name",
+      "label": "t:labels.name",
+      "default": "Customer name"
+    },
+    {
+      "type": "text",
+      "id": "byline",
+      "label": "t:labels.byline",
+      "info": "t:info.byline"
+    },
+    {
+      "type": "range",
+      "id": "rating",
+      "label": "t:labels.rating",
+      "info": "t:info.testimonial_rating",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "default": 5
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:labels.image"
+    }
+  ]
+}
+{% endschema %}

@@ -57,6 +57,46 @@
       "block_order": ["tile_1", "tile_2", "tile_3"],
       "settings": {}
     },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "t1": {
+          "type": "_testimonial",
+          "settings": {
+            "quote": "A short, honest line about what you liked most.",
+            "name": "First customer",
+            "byline": "Sydney",
+            "rating": 5
+          }
+        },
+        "t2": {
+          "type": "_testimonial",
+          "settings": {
+            "quote": "Another line, maybe about how it arrived or how you use it.",
+            "name": "Second customer",
+            "byline": "Brisbane",
+            "rating": 4.5
+          }
+        },
+        "t3": {
+          "type": "_testimonial",
+          "settings": {
+            "quote": "A third voice, to show that more than one person agrees.",
+            "name": "Third customer",
+            "byline": "Melbourne",
+            "rating": 0
+          }
+        }
+      },
+      "block_order": ["t1", "t2", "t3"],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "heading": "What people say",
+        "text": "Sample reviews for this demo store.",
+        "link_label": "Read all reviews",
+        "link": "/pages/reviews"
+      }
+    },
     "faq": {
       "type": "faq",
       "blocks": {
@@ -93,5 +133,5 @@
       }
     }
   },
-  "order": ["hero", "main", "featured_product", "features", "link_tiles", "faq"]
+  "order": ["hero", "main", "featured_product", "features", "link_tiles", "testimonials", "faq"]
 }

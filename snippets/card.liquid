@@ -1,0 +1,52 @@
+{% doc %}
+  A bordered, rounded card with an optional photo on top and a body you pass in as HTML. Reviews,
+  notes and other short content share it. The corner radius is the theme's Card setting.
+  Liquid snippets can't wrap other content, so build the body with capture first.
+
+  @param {string} content - The body HTML, already escaped
+  @param {object} [image] - An image or media item shown on top, cropped to 3 / 2
+  @param {string} [sizes] - The img sizes attribute for the photo
+  @param {string} [tag] - article (default) or div; use div with role listitem, which an article can't take
+  @param {string} [role] - An ARIA role such as listitem, when the card sits in a list
+  @param {string} [class] - Extra class on the card
+  @param {string} [shopify_attributes] - The block's editor attributes
+
+  @example
+  {% capture body %}<p>Good coffee.</p>{% endcapture %}
+  {% render 'card', content: body, image: block.settings.image, shopify_attributes: block.shopify_attributes %}
+{% enddoc %}
+
+{%- liquid
+  assign card_tag = 'article'
+  if tag == 'div'
+    assign card_tag = 'div'
+  endif
+-%}
+<{{ card_tag }}
+  class="card{% if class != blank %} {{ class }}{% endif %}"
+  {% if role != blank %}
+    role="{{ role | escape }}"
+  {% endif %}
+  {{ shopify_attributes }}
+>
+  {%- if image != blank -%}
+    {% render 'image', image: image, aspect_ratio: '3 / 2', sizes: sizes, class: 'card__image' %}
+  {%- endif -%}
+  <div class="card__body">
+    {{ content }}
+  </div>
+</{{ card_tag }}>
+
+{% stylesheet %}
+  .card {
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+  .card__body {
+    padding: var(--space-m);
+  }
+  .card__body > :last-child {
+    margin-bottom: 0;
+  }
+{% endstylesheet %}
