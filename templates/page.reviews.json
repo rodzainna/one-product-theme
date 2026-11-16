@@ -1,0 +1,160 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "color_scheme": "scheme-3",
+        "eyebrow": "Reviews",
+        "heading": "",
+        "text": "What people say about it, in their own words.",
+        "scroll_cue": true
+      }
+    },
+    "wall": {
+      "type": "review-wall",
+      "blocks": {
+        "review_1": {
+          "type": "_review",
+          "settings": {
+            "style": "quote",
+            "size": "wide",
+            "rating": 5,
+            "title": "\"A short quote that sums up the review.\"",
+            "excerpt": "One or two sentences from the customer, in their own words.",
+            "name": "Customer name",
+            "color_scheme": "scheme-2",
+            "text": "<p>The full review opens in a dialog. Add a photo and a few paragraphs here.</p>"
+          }
+        },
+        "review_2": {
+          "type": "_review",
+          "settings": {
+            "style": "story",
+            "size": "narrow",
+            "rating": 5,
+            "title": "A short headline",
+            "excerpt": "Two lines from the review that make a good first impression.",
+            "name": "Customer name",
+            "tint": "#a8410f",
+            "text": "<p>The full review opens in a dialog from the card.</p>"
+          }
+        },
+        "review_3": {
+          "type": "_review",
+          "settings": {
+            "style": "story",
+            "size": "narrow",
+            "rating": 4,
+            "title": "Another headline",
+            "excerpt": "A short review that already says it all.",
+            "name": "Customer name",
+            "tint": "#e3d3b0"
+          }
+        },
+        "review_4": {
+          "type": "_review",
+          "settings": {
+            "style": "story",
+            "size": "wide",
+            "rating": 5,
+            "title": "A wide card",
+            "excerpt": "A wide card puts the text beside the photo on larger screens.",
+            "name": "Customer name",
+            "tint": "#6b4a2b"
+          }
+        },
+        "review_5": {
+          "type": "_review",
+          "settings": {
+            "style": "story",
+            "size": "narrow",
+            "rating": 4.5,
+            "title": "One more headline",
+            "excerpt": "What they liked, and what they would tell a friend.",
+            "name": "Customer name",
+            "tint": "#2c3e50"
+          }
+        },
+        "review_6": {
+          "type": "_review",
+          "settings": {
+            "style": "quote",
+            "size": "narrow",
+            "rating": 5,
+            "title": "\"Another short quote.\"",
+            "excerpt": "A line of context under the quote.",
+            "name": "Customer name",
+            "color_scheme": "scheme-1"
+          }
+        }
+      },
+      "block_order": [
+        "review_1",
+        "review_2",
+        "review_3",
+        "review_5",
+        "review_4",
+        "review_6"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "heading": "What people are saying",
+        "text": "Placeholder reviews. Replace them with your own."
+      }
+    },
+    "cta": {
+      "type": "custom-section",
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "settings": {
+            "text": "Ready to try it?",
+            "text_style": "text--title",
+            "element": "h2",
+            "alignment": "center"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "One line that invites the visitor to take the next step.",
+            "text_style": "text--normal",
+            "element": "div",
+            "alignment": "center"
+          }
+        },
+        "shop": {
+          "type": "button",
+          "settings": {
+            "label": "Shop now",
+            "link": "/collections/all",
+            "style": "primary"
+          }
+        }
+      },
+      "block_order": [
+        "heading",
+        "text",
+        "shop"
+      ],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "full_screen": true
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "wall",
+    "cta"
+  ]
+}

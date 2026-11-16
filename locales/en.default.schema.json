@@ -46,6 +46,8 @@
     "product_title": "Product title",
     "question": "Question",
     "rating": "Rating",
+    "review": "Review",
+    "review_wall": "Review wall",
     "row": "Row",
     "scrolling": "Scrolling",
     "search": "Search",
@@ -71,6 +73,7 @@
     "details_content": "Shown in a dialog from the button. Leave empty to hide the button. Connect a product metafield to give each product its own.",
     "element": "Use Heading 2 for text that titles a section, so screen readers and the section dots can find it. Heading 3 is for a smaller heading inside it.",
     "favicon": "Use a square image at least 180 × 180px.",
+    "full_review": "Shown in a dialog from the card. Leave empty to show the excerpt there instead.",
     "full_screen": "Makes the section at least as tall as the screen.",
     "gradient": "How dark the fade behind the text is. The text is always light, so keep it high on bright photos.",
     "hero_video": "Optional. Plays muted behind the text. Visitors who reduce motion or save data see the image only.",
@@ -88,6 +91,7 @@
     "rating": "Shows the product's reviews.rating and reviews.rating_count metafields, filled in by most review apps. Hidden when a product has no rating.",
     "recommendations_heading": "Leave empty for \"You may also like\" or \"Pairs well with\".",
     "recommendations_product": "Leave empty to use the product of the page.",
+    "review_video": "Optional. Plays in the dialog, not on the card. Upload it in Content, Files.",
     "reviews_link": "Optional. The rating links here, for example a reviews page.",
     "scroll_cue": "A link to the next section at the bottom of the hero.",
     "scroll_snap": "Home and story pages scroll one section at a time on screens 900px and wider with a mouse or trackpad.",
@@ -99,7 +103,8 @@
     "size_guide_option": "The option name the link sits next to, such as Size.",
     "stack_sections": "On home and story pages, each section pins and the next slides over it. Screens 900px and wider with a mouse or trackpad.",
     "testimonial_rating": "Stars shown above the quote. Set to 0 to hide them.",
-    "tile_tags": "Optional short line under the title, such as #hashtags."
+    "tile_tags": "Optional short line under the title, such as #hashtags.",
+    "tint": "The card color behind the photo. The text turns light or dark to stay readable."
   },
   "labels": {
     "accent": "Accent",
@@ -124,7 +129,9 @@
     "custom_icon": "Custom icon",
     "custom_liquid": "Custom Liquid",
     "element": "Element",
+    "excerpt": "Excerpt",
     "eyebrow": "Eyebrow",
+    "full_review": "Full review",
     "full_screen": "Full screen",
     "gradient": "Gradient strength",
     "grid_gap": "Grid spacing",
@@ -143,6 +150,7 @@
     "layout_direction": "Layout direction",
     "link": "Link",
     "link_label": "Link label",
+    "media": "Media",
     "media_ratio": "Media shape",
     "menu": "Menu",
     "name": "Name",
@@ -157,10 +165,14 @@
     "page_width": "Page width",
     "parallax": "Parallax",
     "parallax_strength": "Parallax strength",
+    "photo_shape": "Photo shape",
     "products_to_show": "Products to show",
     "question": "Question",
     "quote": "Quote",
     "rating": "Rating",
+    "review_size": "Size",
+    "review_style": "Style",
+    "review_video": "Video",
     "reviews_link": "Reviews link",
     "scroll_cue": "Scroll cue",
     "scroll_snap": "Snap to sections",
@@ -176,6 +188,7 @@
     "tags": "Tagline",
     "text": "Text",
     "text_style": "Text style",
+    "tint": "Tint",
     "title": "Title",
     "video": "Background video"
   },
@@ -244,6 +257,18 @@
       "clock": "Clock",
       "gift": "Gift",
       "box": "Box"
+    },
+    "review_style": {
+      "story": "Story: photo fades into a tint",
+      "quote": "Quote: large quote with a photo"
+    },
+    "review_size": {
+      "narrow": "One column",
+      "wide": "Two columns"
+    },
+    "photo_shape": {
+      "landscape": "Landscape",
+      "portrait": "Portrait"
     }
   }
 }

@@ -168,5 +168,12 @@
   },
   "testimonials": {
     "heading": "What people say"
+  },
+  "reviews": {
+    "heading": "What people are saying",
+    "read_review": "Read review",
+    "review": "Review",
+    "review_by": "Review by {{ name }}",
+    "watch_review": "Watch review"
   }
 }

@@ -1,0 +1,456 @@
+{% doc %}
+  One review on the reviews wall: a photo, a title, an excerpt and a name, as a story card (the photo
+  fades into a tint) or a quote card. When it has a full review or a video, the whole card opens
+  them in a dialog. Nothing shows until the review has a title or an excerpt.
+
+  @example
+  {% content_for 'block', type: '_review', id: 'review' %}
+{% enddoc %}
+
+{%- liquid
+  assign settings = block.settings
+  assign has_content = false
+  if settings.title != blank or settings.excerpt != blank
+    assign has_content = true
+  endif
+-%}
+{%- if has_content -%}
+  {%- liquid
+    assign is_quote = false
+    if settings.style == 'quote'
+      assign is_quote = true
+    endif
+
+    assign has_more = false
+    if settings.text != blank or settings.video != blank
+      assign has_more = true
+    endif
+
+    assign rating = settings.rating
+    assign percent = rating | divided_by: 5.0 | times: 100 | round: 1
+    assign rating_label = 'products.product.rating' | t: score: rating, max: 5
+
+    assign classes = 'review review--' | append: settings.style
+    if settings.size == 'wide'
+      assign classes = classes | append: ' review--wide'
+    endif
+    if settings.photo_shape == 'portrait'
+      assign classes = classes | append: ' review--portrait'
+    endif
+    if settings.image != blank
+      assign classes = classes | append: ' review--photo'
+    endif
+    if is_quote
+      assign classes = classes | append: ' color-' | append: settings.color_scheme
+    endif
+
+    # The text on a tint is light or dark, whichever contrasts more (the dark value is --color-scrim)
+    assign tint = 'var(--color-scrim)'
+    if settings.tint != blank
+      assign tint = settings.tint
+      assign against_light = settings.tint | color_contrast: '#ffffff'
+      assign against_dark = settings.tint | color_contrast: '#140c08'
+      if against_dark > against_light
+        assign classes = classes | append: ' review--dark-text'
+      endif
+    endif
+
+    assign dialog_id = 'review-' | append: block.id
+    assign more_label = 'reviews.read_review' | t
+    if settings.video != blank
+      assign more_label = 'reviews.watch_review' | t
+    endif
+    assign dialog_title = 'reviews.review' | t
+    if settings.name != blank
+      assign dialog_title = 'reviews.review_by' | t: name: settings.name
+    endif
+  -%}
+
+  {%- capture rating_html -%}
+    {%- if rating > 0 -%}
+      <p class="review__rating">
+        {% render 'rating-stars', percent: percent %}
+        <span class="visually-hidden">{{ rating_label }}</span>
+      </p>
+    {%- endif -%}
+  {%- endcapture -%}
+
+  <article
+    class="{{ classes }}"
+    {% unless is_quote %}
+      style="--review-tint: {{ tint }}"
+    {% endunless %}
+    {{ block.shopify_attributes }}
+  >
+    {%- if settings.image != blank and is_quote == false -%}
+      <div class="review__media">
+        {% render 'image',
+          image: settings.image,
+          class: 'review__image',
+          sizes: '(min-width: 1100px) 33vw, (min-width: 700px) 50vw, 100vw'
+        %}
+        {%- if settings.video != blank -%}
+          <span class="review__badge">{% render 'icon', name: 'play' %}</span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+    <div class="review__body">
+      {{ rating_html }}
+      {%- if settings.title != blank -%}
+        <h3 class="review__title">{{ settings.title | escape }}</h3>
+      {%- endif -%}
+      {%- if settings.excerpt != blank -%}
+        <p class="review__excerpt">{{ settings.excerpt | escape | newline_to_br }}</p>
+      {%- endif -%}
+      {%- if settings.name != blank -%}
+        <p class="review__name">{{ settings.name | escape }}</p>
+      {%- endif -%}
+      {%- if has_more -%}
+        <button class="review__more" type="button" data-dialog-open="{{ dialog_id }}">
+          {{- more_label -}}
+          {%- assign more_for = settings.title | default: settings.name -%}
+          {%- if more_for != blank -%}
+            <span class="visually-hidden">: {{ more_for | escape }}</span>
+          {%- endif -%}
+          <span aria-hidden="true"> ›</span>
+        </button>
+      {%- endif -%}
+    </div>
+    {%- if settings.image != blank and is_quote -%}
+      {% render 'image', image: settings.image, class: 'review__photo', sizes: '(min-width: 700px) 25vw, 100vw' %}
+    {%- endif -%}
+  </article>
+
+  {%- if has_more -%}
+    {%- capture dialog_body -%}
+      {%- if settings.video != blank -%}
+        {% # The video loads when the dialog opens (review-wall.js), not with the page %}
+        <template data-review-video>
+          {{- settings.video | video_tag: image_size: '1600x', controls: true, playsinline: true, class: 'review-dialog__video' -}}
+        </template>
+      {%- elsif settings.image != blank -%}
+        {% render 'image', image: settings.image, class: 'review-dialog__image', sizes: '(min-width: 760px) 720px, 100vw' %}
+      {%- endif -%}
+      {{ rating_html }}
+      {%- if settings.title != blank -%}
+        <h3 class="review-dialog__title">{{ settings.title | escape }}</h3>
+      {%- endif -%}
+      {%- if settings.text != blank -%}
+        {% render 'rte', content: settings.text %}
+      {%- elsif settings.excerpt != blank -%}
+        <p>{{ settings.excerpt | escape | newline_to_br }}</p>
+      {%- endif -%}
+      {%- if settings.name != blank -%}
+        <p class="review__name">{{ settings.name | escape }}</p>
+      {%- endif -%}
+    {%- endcapture -%}
+    {% render 'dialog', id: dialog_id, title: dialog_title, content: dialog_body, class: 'review-dialog' %}
+  {%- endif -%}
+{%- elsif request.design_mode -%}
+  <div class="review-empty" {{ block.shopify_attributes }}></div>
+{%- endif -%}
+
+{% stylesheet %}
+  .review {
+    --review-gap: var(--space-xs);
+
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+  }
+
+  .review__body {
+    display: grid;
+    gap: var(--review-gap);
+    padding: var(--space-l);
+  }
+
+  .review__body > * {
+    margin: 0;
+  }
+
+  .review__rating {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    font-size: var(--text-small);
+  }
+
+  .review__title {
+    font-size: var(--text-h3);
+    line-height: var(--leading-tight);
+  }
+
+  .review__name {
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+
+  /* The button's label is the card's whole click target. */
+  .review__more {
+    justify-self: start;
+    min-height: var(--target-min);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: var(--text-small);
+    font-weight: var(--weight-ui);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .review__more::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  /* The card shows the ring: its own overflow would clip one drawn inside. */
+  .review__more:focus-visible {
+    outline: none;
+  }
+
+  .review:has(.review__more:focus-visible) {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .review--story {
+    --color-background: var(--review-tint);
+    --color-foreground: var(--color-on-scrim);
+    --color-foreground-muted: color-mix(in srgb, var(--color-foreground) 85%, var(--color-background));
+    --color-control-border: color-mix(in srgb, var(--color-foreground) 45%, var(--color-background));
+
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .review--story.review--dark-text {
+    --color-foreground: var(--color-scrim);
+  }
+
+  .review__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+  }
+
+  .review--portrait .review__media {
+    aspect-ratio: 3 / 4;
+  }
+
+  .review__media .review__image,
+  .review__media .review__image > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .review__media::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 35%, var(--review-tint));
+  }
+
+  .review__badge {
+    position: absolute;
+    inset: var(--space-s) var(--space-s) auto auto;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-full);
+    background: var(--color-on-scrim);
+    color: var(--color-scrim);
+  }
+
+  .review--quote {
+    border: 1px solid var(--color-border);
+  }
+
+  .review--quote .review__title {
+    color: var(--color-accent);
+    font-family: var(--font-heading);
+    font-style: italic;
+  }
+
+  .review--quote .review__photo {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+
+  .review--quote .review__photo > img {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (min-width: 700px) {
+    .review--wide.review--photo.review--story,
+    .review--wide.review--photo.review--quote {
+      display: grid;
+    }
+
+    .review--wide.review--photo.review--story {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .review--wide.review--photo.review--story .review__media {
+      order: 2;
+      aspect-ratio: auto;
+      min-height: 100%;
+    }
+
+    .review--wide.review--photo.review--story .review__media::before {
+      background: linear-gradient(90deg, var(--review-tint), transparent 45%);
+    }
+
+    .review--wide.review--photo.review--story .review__body {
+      align-content: center;
+    }
+
+    .review--wide.review--photo.review--quote {
+      grid-template-columns: 1.6fr 1fr;
+    }
+
+    .review--wide.review--photo.review--quote .review__photo {
+      height: 100%;
+      aspect-ratio: auto;
+    }
+  }
+
+  .dialog.review-dialog {
+    width: min(100% - 2rem, 45rem);
+  }
+
+  .review-dialog .dialog__body > * + * {
+    margin-block-start: var(--space-s);
+  }
+
+  .review-dialog__image,
+  .review-dialog__video {
+    width: 100%;
+    max-height: 50svh;
+    border-radius: var(--radius-card);
+  }
+
+  .review-dialog .review-dialog__image > img {
+    max-height: 50svh;
+    object-fit: cover;
+  }
+
+  .review-dialog__title {
+    margin: 0;
+    font-size: var(--text-h3);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.review",
+  "settings": [
+    {
+      "type": "select",
+      "id": "style",
+      "label": "t:labels.review_style",
+      "options": [
+        { "value": "story", "label": "t:options.review_style.story" },
+        { "value": "quote", "label": "t:options.review_style.quote" }
+      ],
+      "default": "story"
+    },
+    {
+      "type": "select",
+      "id": "size",
+      "label": "t:labels.review_size",
+      "options": [
+        { "value": "narrow", "label": "t:options.review_size.narrow" },
+        { "value": "wide", "label": "t:options.review_size.wide" }
+      ],
+      "default": "narrow"
+    },
+    {
+      "type": "color",
+      "id": "tint",
+      "label": "t:labels.tint",
+      "info": "t:info.tint",
+      "default": "#2a1d15",
+      "visible_if": "{{ block.settings.style == 'story' }}"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-1",
+      "visible_if": "{{ block.settings.style == 'quote' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.content"
+    },
+    {
+      "type": "range",
+      "id": "rating",
+      "label": "t:labels.rating",
+      "info": "t:info.testimonial_rating",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "t:labels.title",
+      "default": "A short headline"
+    },
+    {
+      "type": "textarea",
+      "id": "excerpt",
+      "label": "t:labels.excerpt",
+      "default": "A sentence or two from the review."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:labels.full_review",
+      "info": "t:info.full_review"
+    },
+    {
+      "type": "text",
+      "id": "name",
+      "label": "t:labels.name",
+      "default": "Customer name"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.media"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:labels.image"
+    },
+    {
+      "type": "select",
+      "id": "photo_shape",
+      "label": "t:labels.photo_shape",
+      "options": [
+        { "value": "landscape", "label": "t:options.photo_shape.landscape" },
+        { "value": "portrait", "label": "t:options.photo_shape.portrait" }
+      ],
+      "default": "landscape",
+      "visible_if": "{{ block.settings.style == 'story' }}"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "t:labels.review_video",
+      "info": "t:info.review_video"
+    }
+  ]
+}
+{% endschema %}
