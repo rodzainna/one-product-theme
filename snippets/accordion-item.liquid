@@ -1,0 +1,110 @@
+{% doc %}
+  One item of an accordion: a native <details>, so it works without JavaScript and the browser can
+  find text in a closed answer. Items given the same group open one at a time. The question is a
+  real heading inside the summary, so screen reader users can jump between questions.
+  The section that renders the items stacks them in a column.
+
+  @param {string} summary - The question, plain text
+  @param {string} content - The answer, rich text HTML
+  @param {string} [group] - Items with the same group open one at a time
+  @param {boolean} [open] - Starts open
+  @param {number} [heading_level] - 2 to 6, default 3
+  @param {string} [shopify_attributes] - The block's editor attributes
+
+  @example
+  {% render 'accordion-item', summary: block.settings.question, content: block.settings.answer, group: section.id, shopify_attributes: block.shopify_attributes %}
+{% enddoc %}
+
+{%- liquid
+  assign level = heading_level | default: 3 | plus: 0
+  if level < 2 or level > 6
+    assign level = 3
+  endif
+  assign heading_tag = 'h' | append: level
+-%}
+<details
+  class="accordion__item"
+  {% if group != blank %}
+    name="{{ group | escape }}"
+  {% endif %}
+  {% if open %}
+    open
+  {% endif %}
+  {{ shopify_attributes }}
+>
+  <summary class="accordion__trigger">
+    <{{ heading_tag }} class="accordion__heading">{{ summary | escape }}</{{ heading_tag }}>
+    <span class="accordion__icon">{% render 'icon', name: 'chevron-down', size: 'sm' %}</span>
+  </summary>
+  <div class="accordion__content">
+    {% render 'rte', content: content %}
+  </div>
+</details>
+
+{%- if request.design_mode -%}
+  <script src="{{ 'accordion.js' | asset_url }}" type="module"></script>
+{%- endif -%}
+
+{% stylesheet %}
+  .accordion__item {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .accordion__trigger {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--control-pad-m);
+    padding: var(--control-pad-m) 0;
+    border-radius: var(--radius-xs);
+    font-weight: var(--weight-ui);
+    line-height: var(--leading-tight);
+    list-style: none;
+    cursor: pointer;
+  }
+  .accordion__trigger::-webkit-details-marker {
+    display: none;
+  }
+  .accordion__trigger:hover {
+    text-decoration: underline;
+  }
+  .accordion__heading {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-ui);
+    line-height: inherit;
+    text-wrap: wrap;
+  }
+  .accordion__icon {
+    flex: none;
+    margin-top: 0.125rem;
+    color: var(--color-foreground-muted);
+    transition: rotate var(--duration) var(--ease);
+  }
+  .accordion__item[open] .accordion__icon {
+    rotate: 180deg;
+  }
+  .accordion__content {
+    padding-bottom: var(--control-pad-m);
+  }
+  .accordion__content > :last-child {
+    margin-bottom: 0;
+  }
+  /* Height animation is an extra: other browsers just open instantly. */
+  @supports (interpolate-size: allow-keywords) {
+    .accordion__item {
+      interpolate-size: allow-keywords;
+    }
+    .accordion__item::details-content {
+      height: 0;
+      overflow: clip;
+      overflow-clip-margin: var(--control-pad-xs);
+      transition:
+        height var(--duration) var(--ease),
+        content-visibility var(--duration) allow-discrete;
+    }
+    .accordion__item[open]::details-content {
+      height: auto;
+    }
+  }
+{% endstylesheet %}

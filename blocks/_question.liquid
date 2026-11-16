@@ -1,0 +1,46 @@
+{% doc %}
+  One question and its answer in the FAQ section, shown as an accordion item. The first question
+  starts open when the section's "Open the first question" is on. Nothing shows until the
+  question has text.
+
+  @example
+  {% content_for 'block', type: '_question', id: 'question' %}
+{% enddoc %}
+
+{%- if block.settings.question != blank -%}
+  {%- liquid
+    assign is_open = false
+    if section.settings.open_first and section.blocks.first.id == block.id
+      assign is_open = true
+    endif
+  -%}
+  {% render 'accordion-item',
+    summary: block.settings.question,
+    content: block.settings.answer,
+    group: section.id,
+    open: is_open,
+    shopify_attributes: block.shopify_attributes
+  %}
+{%- elsif request.design_mode -%}
+  <div {{ block.shopify_attributes }}></div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:general.question",
+  "settings": [
+    {
+      "type": "text",
+      "id": "question",
+      "label": "t:labels.question",
+      "default": "Your question"
+    },
+    {
+      "type": "richtext",
+      "id": "answer",
+      "label": "t:labels.answer",
+      "default": "<p>A short, clear answer.</p>"
+    }
+  ]
+}
+{% endschema %}

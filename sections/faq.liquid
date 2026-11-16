@@ -1,0 +1,148 @@
+{% comment %}
+  A full-screen list of up to five questions as an accordion, with the heading beside it on wide
+  screens and an optional help line with a link to the full FAQ.
+  https://shopify.dev/docs/storefronts/themes/architecture/blocks/theme-blocks
+{% endcomment %}
+
+{%- if section.blocks.size == 0 -%}
+  <div data-empty></div>
+{%- else -%}
+  <div class="faq full-width section-full color-{{ section.settings.color_scheme }}">
+    <div class="faq__layout">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="faq__heading">{{ section.settings.heading | escape }}</h2>
+      {%- else -%}
+        <h2 class="faq__heading visually-hidden">{{ 'faq.heading' | t }}</h2>
+      {%- endif -%}
+      <div class="faq__list">
+        {% content_for 'blocks' %}
+      </div>
+      {%- liquid
+        assign has_link = false
+        if section.settings.link != blank and section.settings.link_label != blank
+          assign has_link = true
+        endif
+      -%}
+      {%- if section.settings.text != blank or has_link -%}
+        <p class="faq__help">
+          {%- if section.settings.text != blank -%}
+            {{ section.settings.text | escape }}
+          {%- endif -%}
+          {%- if has_link -%}
+            <a class="faq__link" href="{{ section.settings.link | escape }}">
+              {{- section.settings.link_label | escape -}}
+            </a>
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .faq {
+    display: grid;
+    grid-template-columns: var(--content-grid);
+    align-items: center;
+    width: 100%;
+  }
+  .faq__layout {
+    --faq-clearance: calc(var(--space-xl) + var(--sticky-bar-h, 0px));
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-m);
+    padding-block: var(--space-xl) var(--faq-clearance);
+  }
+  .faq__list {
+    display: flex;
+    flex-direction: column;
+  }
+  /* Shopify wraps each block in a div, so the last item is found through its wrapper. */
+  .faq__list > :last-child .accordion__item {
+    border-bottom: 0;
+  }
+  .faq__heading,
+  .faq__help {
+    margin: 0;
+  }
+  .faq__help {
+    color: var(--color-foreground-muted);
+  }
+  .faq__link {
+    display: block;
+    width: fit-content;
+    min-height: var(--target-min);
+    color: var(--color-foreground);
+    font-weight: var(--weight-ui);
+  }
+  @media (min-width: 900px) {
+    .faq__layout {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+      grid-template-rows: auto 1fr;
+      column-gap: var(--space-xl);
+    }
+    .faq__list {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.faq",
+  "blocks": [{ "type": "_question" }],
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_first",
+      "label": "t:labels.open_first",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:labels.content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Questions"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "t:labels.help_text"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "t:labels.link_label",
+      "default": "See all questions"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:labels.link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.faq",
+      "blocks": [
+        { "type": "_question", "settings": { "question": "First question" } },
+        { "type": "_question", "settings": { "question": "Second question" } },
+        { "type": "_question", "settings": { "question": "Third question" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

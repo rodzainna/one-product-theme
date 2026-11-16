@@ -52,6 +52,9 @@
   "collections": {
     "title": "Collections"
   },
+  "faq": {
+    "heading": "Questions"
+  },
   "features": {
     "heading": "Features"
   },

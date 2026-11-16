@@ -56,7 +56,42 @@
       },
       "block_order": ["tile_1", "tile_2", "tile_3"],
       "settings": {}
+    },
+    "faq": {
+      "type": "faq",
+      "blocks": {
+        "q1": {
+          "type": "_question",
+          "settings": {
+            "question": "What is your first common question?",
+            "answer": "<p>Answer it in a sentence or two, so a visitor can decide quickly.</p>"
+          }
+        },
+        "q2": {
+          "type": "_question",
+          "settings": {
+            "question": "How long does delivery take?",
+            "answer": "<p>Say how long orders take to arrive, and where you ship to.</p>"
+          }
+        },
+        "q3": {
+          "type": "_question",
+          "settings": {
+            "question": "What if I change my mind?",
+            "answer": "<p>Explain your returns, in plain words.</p>"
+          }
+        }
+      },
+      "block_order": ["q1", "q2", "q3"],
+      "settings": {
+        "color_scheme": "scheme-1",
+        "open_first": true,
+        "heading": "Questions",
+        "text": "More on how it works and how it ships.",
+        "link_label": "See all questions",
+        "link": "/pages/faq"
+      }
     }
   },
-  "order": ["hero", "main", "featured_product", "features", "link_tiles"]
+  "order": ["hero", "main", "featured_product", "features", "link_tiles", "faq"]
 }
