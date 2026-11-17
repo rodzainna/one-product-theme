@@ -52,10 +52,13 @@ test("scrolling to an anchor leaves it clear of the header", () => {
   );
 });
 
-test("the header sits above the sections that stack under it", () => {
-  render("header-sticky");
-  document.documentElement.style.setProperty("--layer-header", "10");
-  expect(getComputedStyle(group()).zIndex).toBe("10");
+test("the header sits above the sections that stack under it, sticky or not", () => {
+  for (const classes of ["header-sticky", ""]) {
+    render(classes);
+    document.documentElement.style.setProperty("--layer-header", "10");
+    expect(getComputedStyle(group()).zIndex).toBe("10");
+    expect(getComputedStyle(group()).position).not.toBe("static");
+  }
 });
 
 test("snapping rests at the very top through a point of its own, not the sticky group", () => {

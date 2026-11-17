@@ -384,10 +384,14 @@ h6,
   scroll-padding-top: var(--header-offset);
 }
 
+.header-group {
+  position: relative;
+  z-index: var(--layer-header);
+}
+
 .header-sticky .header-group {
   position: sticky;
   top: calc(var(--header-above-h, 0px) * -1);
-  z-index: var(--layer-header);
 }
 
 /** Section layout utilities */

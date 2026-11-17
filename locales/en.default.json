@@ -74,7 +74,10 @@
       "one": "Cart, {{ count }} item",
       "other": "Cart, {{ count }} items"
     },
-    "menu": "Main menu"
+    "drawer_title": "Menu",
+    "menu": "Main menu",
+    "open_menu": "Open menu",
+    "submenu": "{{ title }} submenu"
   },
   "hero": {
     "pause_video": "Pause background video",

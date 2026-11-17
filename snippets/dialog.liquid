@@ -10,7 +10,7 @@
   @param {string} [description] - Muted text at the top of the body, read with the title
   @param {boolean} [close_outside] - Default true; false keeps it open on an outside click
   @param {string} [footer] - HTML pinned under the scrolling body, such as the cart totals
-  @param {string} [class] - Extra class: dialog--drawer slides in from the side at full height
+  @param {string} [class] - Extra class: dialog--drawer slides in from the right at full height; add dialog--drawer-start for the left
 
   @example
   {% render 'dialog', id: dialog_id, title: block.settings.heading, content: block.settings.content %}
@@ -121,6 +121,10 @@
     max-height: none;
     margin: 0 0 0 auto;
     border-radius: 0;
+  }
+
+  .dialog--drawer-start {
+    margin: 0 auto 0 0;
   }
 
   .dialog__description {

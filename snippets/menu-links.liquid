@@ -1,0 +1,203 @@
+{% doc %}
+  The links of a navigation menu, up to the three levels Shopify allows. A link with children gets a
+  button that opens them (assets/header-menu.js); its own link still goes to its page. The second level
+  is a panel under the link, or an expanding list in the drawer; the third level is an indented list.
+  Without scripting the panels open on hover and focus.
+
+  @param {object} links - The links of a linklist, such as section.settings.menu.links
+  @param {string} id_prefix - Unique on the page; the panels' ids start with it
+  @param {string} [variant] - bar (default) for the header row, drawer for the phone menu
+
+  @example
+  {% render 'menu-links', links: section.settings.menu.links, id_prefix: 'Bar', variant: 'bar' %}
+{% enddoc %}
+
+<ul class="menu menu--{{ variant | default: 'bar' }}">
+  {%- for link in links -%}
+    <li
+      class="menu__item"
+      {% if link.links.size > 0 %}
+        data-submenu
+      {% endif %}
+    >
+      {%- render 'menu-link', link: link, class: 'menu__link' -%}
+      {%- if link.links.size > 0 -%}
+        {%- assign panel_id = id_prefix | append: '-' | append: forloop.index -%}
+        {%- assign toggle_label = 'header.submenu' | t: title: link.title -%}
+        <button
+          class="menu__toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="{{ panel_id }}"
+          aria-label="{{ toggle_label | escape_once }}"
+        >
+          {%- render 'icon', name: 'chevron-down', size: 'sm' -%}
+        </button>
+        <ul class="menu__submenu" id="{{ panel_id }}">
+          {%- for child in link.links -%}
+            <li>
+              {%- render 'menu-link', link: child, class: 'menu__link' -%}
+              {%- if child.links.size > 0 -%}
+                <ul class="menu__sublist">
+                  {%- for grandchild in child.links -%}
+                    <li>{%- render 'menu-link', link: grandchild, class: 'menu__link' -%}</li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </li>
+  {%- endfor -%}
+</ul>
+
+{% stylesheet %}
+  .menu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .menu__link {
+    display: inline-block;
+    padding-block: var(--space-xs);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  .menu__link:hover,
+  .menu__link[aria-current] {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .menu__toggle {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--target-min);
+    height: var(--target-min);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  @media (hover: hover) {
+    .menu__toggle:hover {
+      background: var(--color-hover);
+    }
+  }
+
+  .menu__toggle .icon {
+    transition: rotate var(--duration) var(--ease);
+  }
+
+  .menu__toggle[aria-expanded='true'] .icon {
+    rotate: 180deg;
+  }
+
+  .menu__toggle + .menu__submenu {
+    display: none;
+  }
+
+  .menu__toggle[aria-expanded='true'] + .menu__submenu {
+    display: block;
+  }
+
+  .menu__submenu,
+  .menu__sublist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .menu__sublist {
+    padding-inline-start: var(--space-s);
+  }
+
+  .menu__submenu .menu__link {
+    display: block;
+  }
+
+  .menu__sublist .menu__link {
+    color: var(--color-foreground-muted);
+  }
+
+  /* The header row: sub-menus are panels under their link. */
+  .menu--bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 var(--space-m);
+  }
+
+  .menu--bar .menu__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .menu--bar .menu__link {
+    font-weight: var(--weight-ui);
+  }
+
+  .menu--bar .menu__submenu {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-start: 0;
+    box-sizing: border-box;
+    min-inline-size: 14rem;
+    padding: var(--space-xs) var(--space-s);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-background);
+    color: var(--color-foreground);
+    /* A long menu scrolls inside the panel, since the sticky header can't scroll away. */
+    max-block-size: calc(100svh - var(--header-group-h, 0px) - var(--space-m));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* The last panel opens inwards, so it stays on screen. */
+  .menu--bar .menu__item:last-child .menu__submenu {
+    inset-inline: auto 0;
+  }
+
+  /* The phone menu: one column, sub-menus expand in place. */
+  .menu--drawer .menu__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .menu--drawer .menu__item > .menu__link {
+    flex: 1;
+    font-family: var(--font-heading);
+    font-size: var(--text-h3);
+    font-weight: var(--weight-heading);
+    line-height: var(--leading-tight);
+  }
+
+  .menu--drawer .menu__submenu {
+    flex-basis: 100%;
+    padding-inline-start: var(--space-s);
+  }
+
+  /* Without scripting there's no button; the panels open on hover and focus. */
+  @media (scripting: none) {
+    .menu__toggle {
+      display: none;
+    }
+
+    .menu--bar .menu__item:hover .menu__submenu,
+    .menu--bar .menu__item:focus-within .menu__submenu {
+      display: block;
+    }
+  }
+{% endstylesheet %}

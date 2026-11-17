@@ -1,0 +1,19 @@
+{% doc %}
+  One link of a navigation menu, marked as the current page when its URL matches.
+
+  @param {object} link - A link from a linklist
+  @param {string} [class] - Extra class
+
+  @example
+  {% render 'menu-link', link: link, class: 'menu__link' %}
+{% enddoc %}
+
+<a
+  class="{{ class }}"
+  href="{{ link.url | escape }}"
+  {% if link.current %}
+    aria-current="page"
+  {% endif %}
+>
+  {{- link.title | escape -}}
+</a>

@@ -1,7 +1,7 @@
 {% doc %}
   Renders a decorative Lucide-style icon in the current text colour.
 
-  @param {string} name - account, alert, box, cart, check, chevron-down, clock, close, droplet, flame, gift, heart, info, leaf, minus, pause, play, plus, shield-check, star or truck
+  @param {string} name - account, alert, box, cart, check, chevron-down, clock, close, droplet, flame, gift, heart, info, leaf, menu, minus, pause, play, plus, shield-check, star or truck
   @param {string} [size] - sm, or blank for the default
 
   @example
@@ -19,6 +19,8 @@
       <path d="M6 6l12 12M18 6 6 18"/>
     {%- when 'chevron-down' -%}
       <path d="m6 9 6 6 6-6"/>
+    {%- when 'menu' -%}
+      <path d="M4 7h16M4 12h16M4 17h16"/>
     {%- when 'alert' -%}
       <path d="M12 4 2.5 20h19L12 4Z"/><path d="M12 10v4M12 17h.01"/>
     {%- when 'check' -%}

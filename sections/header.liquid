@@ -6,6 +6,17 @@
 
 <header class="site-header full-width color-{{ section.settings.color_scheme }}">
   <div class="site-header__inner">
+    {%- if section.settings.menu.links.size > 0 -%}
+      <span class="site-header__menu-button">
+        {%- assign menu_label = 'header.open_menu' | t -%}
+        {%- render 'icon-button',
+          icon: 'menu',
+          label: menu_label,
+          attributes: 'data-dialog-open="MenuDrawer" aria-haspopup="dialog"'
+        -%}
+      </span>
+    {%- endif -%}
+
     {%- if section.settings.logo != blank -%}
       {%- assign logo_file_width = section.settings.logo_width | times: 3 -%}
       {%- assign logo_sizes = section.settings.logo_width | append: 'px' -%}
@@ -24,22 +35,9 @@
     {%- endif -%}
 
     {%- if section.settings.menu.links.size > 0 -%}
+      {%- assign bar_prefix = 'Menu-' | append: section.id -%}
       <nav class="site-header__nav" aria-label="{{ 'header.menu' | t }}">
-        <ul class="site-header__menu">
-          {%- for link in section.settings.menu.links -%}
-            <li>
-              <a
-                class="site-header__link"
-                href="{{ link.url | escape }}"
-                {% if link.current %}
-                  aria-current="page"
-                {% endif %}
-              >
-                {{- link.title | escape -}}
-              </a>
-            </li>
-          {%- endfor -%}
-        </ul>
+        {%- render 'menu-links', links: section.settings.menu.links, id_prefix: bar_prefix, variant: 'bar' -%}
       </nav>
     {%- endif -%}
 
@@ -61,6 +59,23 @@
     </div>
   </div>
 </header>
+
+{%- if section.settings.menu.links.size > 0 -%}
+  {%- capture drawer_menu -%}
+    <nav aria-label="{{ 'header.menu' | t }}">
+      {%- assign drawer_prefix = 'Drawer-' | append: section.id -%}
+      {%- render 'menu-links', links: section.settings.menu.links, id_prefix: drawer_prefix, variant: 'drawer' -%}
+    </nav>
+  {%- endcapture -%}
+  {%- assign drawer_title = 'header.drawer_title' | t -%}
+  {%- render 'dialog',
+    id: 'MenuDrawer',
+    title: drawer_title,
+    content: drawer_menu,
+    class: 'dialog--drawer dialog--drawer-start'
+  -%}
+  <script src="{{ 'header-menu.js' | asset_url }}" type="module"></script>
+{%- endif -%}
 
 {% stylesheet %}
   .site-header {
@@ -94,40 +109,46 @@
   .site-header__nav {
     flex: 1 1 auto;
   }
-  .site-header__menu {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0 var(--space-m);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .site-header__link {
-    display: inline-block;
-    padding-block: var(--space-xs);
-    font-weight: var(--weight-ui);
-    text-decoration: none;
-    overflow-wrap: anywhere;
-  }
-  .site-header__link:hover,
-  .site-header__link[aria-current] {
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
-  }
   .site-header__tools {
     display: flex;
     align-items: center;
     gap: var(--space-2xs);
     margin-inline-start: auto;
   }
-  /* Until the phone menu, the links drop to a row of their own below the logo. */
-  @media (max-width: 899px) {
+  /* Phones: the menu button opens the drawer instead of the row of links. */
+  .site-header__menu-button {
+    margin-inline-start: calc(var(--space-xs) * -1);
+  }
+  @media (min-width: 900px) {
+    .site-header__menu-button {
+      display: none;
+    }
+  }
+  @media (max-width: 899.98px) {
+    .site-header__inner {
+      flex-wrap: nowrap;
+    }
+    .site-header__logo {
+      max-inline-size: 55%;
+    }
     .site-header__nav {
+      display: none;
+    }
+  }
+  /* Without scripting the drawer can't open, so the links wrap onto a row below the logo. */
+  @media (max-width: 899.98px) and (scripting: none) {
+    .site-header__inner {
+      flex-wrap: wrap;
+    }
+    .site-header__menu-button {
+      display: none;
+    }
+    .site-header__nav {
+      display: block;
       order: 3;
       flex-basis: 100%;
     }
-    .site-header__menu {
+    .site-header__nav .menu--bar {
       justify-content: flex-start;
     }
   }
