@@ -42,9 +42,21 @@
     {%- endif -%}
 
     <div class="site-header__tools">
-      {%- if shop.customer_accounts_enabled -%}
+      {%- if shop.customer_accounts_enabled and section.settings.show_account -%}
         {%- assign account_label = 'header.account' | t -%}
-        {% render 'icon-button', icon: 'account', label: account_label, url: routes.account_url %}
+        {%- assign account_menu = section.settings.customer_account_menu.handle
+          | default: 'customer-account-main-menu'
+        -%}
+        <shopify-account class="site-header__account" menu="{{ account_menu | escape }}">
+          <span slot="signed-out-avatar" class="site-header__account-avatar">
+            {%- render 'icon', name: 'account' -%}
+            <span class="visually-hidden">{{ account_label }}</span>
+          </span>
+        </shopify-account>
+        {%- comment -%} A plain link to the account page shows until the component has loaded, and stays if it never does. {%- endcomment -%}
+        <span class="site-header__account-link">
+          {%- render 'icon-button', icon: 'account', label: account_label, url: routes.account_url -%}
+        </span>
       {%- endif -%}
 
       {%- liquid
@@ -115,6 +127,33 @@
     gap: var(--space-2xs);
     margin-inline-start: auto;
   }
+  .site-header__account {
+    --shopify-account-avatar-size: var(--control-h);
+    --shopify-account-color-background: var(--color-background);
+    --shopify-account-color-text: var(--color-foreground);
+    --shopify-account-color-accent: var(--color-accent);
+    --shopify-account-font-body: var(--font-body);
+    --shopify-account-font-heading: var(--font-heading);
+    --shopify-account-radius-base: var(--radius-card);
+  }
+  .site-header__account::part(signed-out-avatar) {
+    padding: 0;
+    border-radius: var(--radius-full);
+  }
+  .site-header__account::part(signed-out-avatar):focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+  .site-header__account-avatar {
+    display: grid;
+    place-items: center;
+    width: var(--control-h);
+    height: var(--control-h);
+  }
+  .site-header__account:not(:defined),
+  .site-header__account:defined + .site-header__account-link {
+    display: none;
+  }
   /* Phones: the menu button opens the drawer instead of the row of links. */
   .site-header__menu-button {
     margin-inline-start: calc(var(--space-xs) * -1);
@@ -181,6 +220,20 @@
       "id": "logo",
       "label": "t:labels.logo",
       "info": "t:info.logo"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "t:labels.show_account",
+      "info": "t:info.show_account",
+      "default": true
+    },
+    {
+      "type": "link_list",
+      "id": "customer_account_menu",
+      "label": "t:labels.customer_account_menu",
+      "default": "customer-account-main-menu",
+      "visible_if": "{{ section.settings.show_account }}"
     },
     {
       "type": "range",

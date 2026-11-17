@@ -66,6 +66,17 @@ describe("header group", () => {
     }
   });
 
+  test("shows the account component with the customer account menu, and a plain link for no scripting", () => {
+    const html = group(home);
+    expect(html).toMatch(
+      /<shopify-account\s+class="site-header__account"\s+menu="customer-account-main-menu"/,
+    );
+    expect(html).toMatch(/<span\s+slot="signed-out-avatar"/);
+    expect(html).toMatch(
+      /class="site-header__account-link"[\s\S]*?href="\/account"/,
+    );
+  });
+
   test("keeps the cart icon region the cart script updates", () => {
     expect(group(home)).toMatch(
       /id="CartIcon-[^"]+" data-cart-region data-cart-icon/,
