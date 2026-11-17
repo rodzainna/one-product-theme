@@ -1,6 +1,7 @@
 {
   "general": {
     "404": "Not found",
+    "announcement_bar": "Announcement bar",
     "article": "Article",
     "block": "Block",
     "blog": "Blog",
@@ -81,6 +82,7 @@
     "details_content": "Shown in a dialog from the button. Leave empty to hide the button. Connect a product metafield to give each product its own.",
     "element": "Use Heading 2 for text that titles a section, so screen readers and the section dots can find it. Heading 3 is for a smaller heading inside it.",
     "favicon": "Use a square image at least 180 × 180px.",
+    "logo": "Optional. Shows the store name when empty.",
     "full_review": "Shown in a dialog from the card. Leave empty to show the excerpt there instead.",
     "full_screen": "Makes the section at least as tall as the screen.",
     "gradient": "How dark the fade behind the text is. The text is always light, so keep it high on bright photos.",
@@ -110,6 +112,7 @@
     "size_guide_content": "Shown in a dialog from a link on the option named above. Leave empty to hide the link. Connect a product metafield to give each product its own chart.",
     "size_guide_option": "The option name the link sits next to, such as Size.",
     "stack_sections": "On home and story pages, each section pins and the next slides over it. Screens 900px and wider with a mouse or trackpad.",
+    "sticky_header": "Keeps the header at the top of the screen while scrolling. The announcement bar scrolls away.",
     "testimonial_rating": "Stars shown above the quote. Set to 0 to hide them.",
     "tile_tags": "Optional short line under the title, such as #hashtags.",
     "tint": "The card color behind the photo. The text turns light or dark to stay readable."
@@ -169,6 +172,8 @@
     "layout_direction": "Layout direction",
     "link": "Link",
     "link_label": "Link label",
+    "logo": "Logo",
+    "logo_width": "Logo width",
     "media": "Media",
     "media_ratio": "Media shape",
     "menu": "Menu",
@@ -207,6 +212,7 @@
     "side_card": "Side card",
     "size_guide_option": "Option",
     "stack_sections": "Stack sections",
+    "sticky_header": "Sticky header",
     "success_text": "Success message",
     "tags": "Tagline",
     "text": "Text",

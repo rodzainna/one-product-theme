@@ -8,12 +8,12 @@ let storage;
 // The marker styles live in critical.css, which the test page doesn't load.
 const markerStyles = `<style>.snap-marker { position: absolute; inset-inline-start: 0; width: 1px; visibility: hidden; }</style>`;
 
-// sticky: pin sections as critical.css does; footer: page content after main.
-const render = (sections, { sticky = false, footer = 0 } = {}) => {
+// sticky: pin sections as critical.css does; footer: page content after main; above: the header group before it.
+const render = (sections, { sticky = false, footer = 0, above = 0 } = {}) => {
   const pinned = sticky
     ? `<style>.shopify-section { position: sticky; top: 0; background: white; }</style>`
     : "";
-  document.body.innerHTML = `${markerStyles}${pinned}<main id="MainContent" style="position:relative">${sections
+  document.body.innerHTML = `${markerStyles}${pinned}<div style="height:${above}px"></div><main id="MainContent" style="position:relative">${sections
     .map(
       ({ height, full = true, id = "", empty = false }) =>
         `<div class="shopify-section" style="height:${height}px"><div ${full ? 'class="section-full"' : ""} ${id ? `id="${id}"` : ""} ${empty ? "data-empty" : ""}>x</div></div>`,
@@ -40,6 +40,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   cleanup?.();
+  document.documentElement.style.removeProperty("--header-offset");
   document.body.innerHTML = "";
   history.replaceState(null, "", location.pathname + location.search);
   scrollTo(0, 0);
@@ -86,6 +87,57 @@ test("a tall section sticks by its bottom edge", () => {
     s.style.getPropertyValue("--stick-top"),
   );
   expect(stickTops).toEqual(["0px", `${innerHeight - 1800}px`]);
+});
+
+test("sections pin below a sticky header, and a tall one by its bottom edge", () => {
+  document.documentElement.style.setProperty("--header-offset", "80px");
+  render([{ height: 720 }, { height: 1800 }]);
+  expect(
+    sections().map((s) => s.style.getPropertyValue("--stick-top")),
+  ).toEqual(["80px", `${innerHeight - 1800}px`]);
+});
+
+test("an anchor link rests its section below a sticky header", async () => {
+  document.documentElement.style.setProperty("--header-offset", "80px");
+  render([{ height: 720 }, { height: 720, id: "two" }, { height: 720 }]);
+  await userEvent.click(page.getByRole("link", { name: "jump" }));
+  await expect.poll(() => Math.round(scrollY)).toBe(640);
+});
+
+test("a section almost as tall as the screen rests below a sticky header, not by its end", async () => {
+  document.documentElement.style.setProperty("--header-offset", "80px");
+  render([
+    { height: 720 },
+    { height: 720 },
+    { height: 750, full: false, id: "two" },
+    { height: 720 },
+  ]);
+  expect(markers()[2].className).not.toContain("snap-marker--end");
+  await userEvent.click(page.getByRole("link", { name: "jump" }));
+  await expect.poll(() => Math.round(scrollY)).toBe(1440 - 80);
+});
+
+test("a short section still rests by its end under a sticky header", async () => {
+  document.documentElement.style.setProperty("--header-offset", "80px");
+  render([
+    { height: 720 },
+    { height: 720 },
+    { height: 300, full: false, id: "two" },
+    { height: 720 },
+  ]);
+  expect(markers()[2].className).toContain("snap-marker--end");
+  await userEvent.click(page.getByRole("link", { name: "jump" }));
+  await expect.poll(() => Math.round(scrollY)).toBe(1440 - (800 - 300));
+});
+
+test("an anchor to the first section rests at the very top of the page", async () => {
+  document.documentElement.style.setProperty("--header-offset", "80px");
+  render([{ height: 720, id: "two" }, { height: 720 }, { height: 720 }], {
+    above: 120,
+  });
+  scrollTo(0, 640);
+  await userEvent.click(page.getByRole("link", { name: "jump" }));
+  await expect.poll(() => Math.round(scrollY)).toBe(0);
 });
 
 test("snapping starts after the markers are placed", async () => {

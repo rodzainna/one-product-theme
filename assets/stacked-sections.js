@@ -39,6 +39,7 @@ const targetOf = (hash) => {
 
 export function stackSections({
   main = document.querySelector("#MainContent"),
+  header = document.querySelector(".header-group"),
   root = document.documentElement,
   storage = sessionStore(),
 } = {}) {
@@ -59,9 +60,14 @@ export function stackSections({
 
   const shown = () => sections.filter((_, index) => filled[index]);
 
+  // A sticky header covers the top of the screen; sections pin and rest below it.
+  const headerOffset = () =>
+    parseFloat(getComputedStyle(root).getPropertyValue("--header-offset")) || 0;
+
   // offsetTop reports the pinned position of a sticky box, so add up heights instead.
   const place = () => {
     if (!desktop.matches) return;
+    const covered = headerOffset();
     const heights = sections.map((section) => section.offsetHeight);
     const before = filled;
     filled = heights.map((height) => height > 0);
@@ -70,15 +76,19 @@ export function stackSections({
       // A tall section scrolls to its bottom before it pins.
       section.style.setProperty(
         "--stick-top",
-        `${Math.min(0, innerHeight - heights[index])}px`,
+        `${Math.min(covered, innerHeight - heights[index])}px`,
       );
       const marker = markers[index];
       marker.style.top = `${top}px`;
       marker.style.height = `${heights[index]}px`;
       marker.classList.toggle("snap-marker--empty", !filled[index]);
+      // A section too tall for the room under the header pins by its bottom and rests at its top, like a full one.
       marker.classList.toggle(
         "snap-marker--end",
-        index !== first && filled[index] && !full[index],
+        index !== first &&
+          filled[index] &&
+          !full[index] &&
+          heights[index] <= innerHeight - covered,
       );
       top += heights[index];
     });
@@ -114,6 +124,7 @@ export function stackSections({
       return marker;
     });
     sections.forEach((section) => observer.observe(section));
+    if (header) observer.observe(header);
     place();
   };
 
@@ -125,12 +136,17 @@ export function stackSections({
     // An empty section has no place of its own, so go to the next one that does.
     const next = filled.findIndex((isFilled, n) => n >= index && isFilled);
     const marker = markers[next >= 0 ? next : index];
+    if (marker.classList.contains("snap-marker--first")) {
+      // The first section rests with the whole header group above it.
+      scrollTo({ top: 0, behavior });
+      return;
+    }
     const { top, height } = marker.getBoundingClientRect();
     // A short section rests with its bottom at the bottom of the screen, as it snaps.
-    const offset = marker.classList.contains("snap-marker--end")
-      ? Math.min(0, height - innerHeight)
-      : 0;
-    scrollTo({ top: top + offset + scrollY, behavior });
+    const gap = marker.classList.contains("snap-marker--end")
+      ? innerHeight - height
+      : headerOffset();
+    scrollTo({ top: top + scrollY - gap, behavior });
   };
 
   // The last section past the middle of the screen, or a short one that has fully arrived.

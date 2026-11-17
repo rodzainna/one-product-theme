@@ -1,0 +1,81 @@
+{% comment %}
+  A one-line message above the header, with an optional link. In the header group it scrolls away
+  while the header stays.
+  https://shopify.dev/docs/storefronts/themes/architecture/section-groups
+{% endcomment %}
+
+{%- if section.settings.text != blank -%}
+  <div
+    class="announcement full-width color-{{ section.settings.color_scheme }}"
+    role="region"
+    aria-label="{{ 'header.announcement' | t }}"
+  >
+    <p class="announcement__text">
+      {%- if section.settings.link != blank -%}
+        <a class="announcement__link" href="{{ section.settings.link | escape }}">
+          {{- section.settings.text | escape -}}
+        </a>
+      {%- else -%}
+        {{- section.settings.text | escape -}}
+      {%- endif -%}
+    </p>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .announcement__text {
+    margin: 0;
+    padding: var(--space-xs) var(--page-margin);
+    font-size: var(--text-caption);
+    line-height: var(--leading-body);
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  /* The link fills the bar, so the whole strip is the target. */
+  .announcement__link {
+    display: block;
+    margin: calc(var(--space-xs) * -1) calc(var(--page-margin) * -1);
+    padding: var(--space-xs) var(--page-margin);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  /* Short desktop windows give the page back some height. */
+  @media (min-width: 900px) and (max-height: 800px) {
+    .announcement__text {
+      padding-block: var(--space-2xs);
+    }
+    .announcement__link {
+      margin-block: calc(var(--space-2xs) * -1);
+      padding-block: var(--space-2xs);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.announcement_bar",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "limit": 1,
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-3"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "t:labels.text",
+      "default": "Welcome to our store"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:labels.link"
+    }
+  ]
+}
+{% endschema %}

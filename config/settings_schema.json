@@ -77,6 +77,13 @@
         "unit": "px",
         "label": "t:labels.page_margin",
         "default": 20
+      },
+      {
+        "type": "checkbox",
+        "id": "sticky_header",
+        "label": "t:labels.sticky_header",
+        "info": "t:info.sticky_header",
+        "default": true
       }
     ]
   },

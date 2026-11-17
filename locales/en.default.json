@@ -68,11 +68,13 @@
   },
   "header": {
     "account": "Account",
+    "announcement": "Announcement",
     "cart": "Cart",
     "cart_count": {
       "one": "Cart, {{ count }} item",
       "other": "Cart, {{ count }} items"
-    }
+    },
+    "menu": "Main menu"
   },
   "hero": {
     "pause_video": "Pause background video",

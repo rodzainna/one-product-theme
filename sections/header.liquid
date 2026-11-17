@@ -1,47 +1,141 @@
-<header>
-  <h2 class="header__title">
-    {{ shop.name | link_to: routes.root_url }}
-  </h2>
+{% comment %}
+  The site header: logo or store name, the menu, and the account and cart icons. The header
+  group makes it sticky (the Sticky header theme setting).
+  https://shopify.dev/docs/storefronts/themes/architecture/section-groups
+{% endcomment %}
 
-  <div class="header__menu">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
-  </div>
-
-  <div class="header__icons">
-    {%- if shop.customer_accounts_enabled -%}
-      {%- assign account_label = 'header.account' | t -%}
-      {% render 'icon-button', icon: 'account', label: account_label, url: routes.account_url %}
+<header class="site-header full-width color-{{ section.settings.color_scheme }}">
+  <div class="site-header__inner">
+    {%- if section.settings.logo != blank -%}
+      {%- assign logo_file_width = section.settings.logo_width | times: 3 -%}
+      {%- assign logo_sizes = section.settings.logo_width | append: 'px' -%}
+      <div class="site-header__logo-image" style="--logo-width: {{ section.settings.logo_width }}px">
+        {%- render 'image',
+          image: section.settings.logo,
+          url: routes.root_url,
+          alt: shop.name,
+          width: logo_file_width,
+          sizes: logo_sizes,
+          loading: 'eager'
+        -%}
+      </div>
+    {%- else -%}
+      <a class="site-header__logo site-header__name" href="{{ routes.root_url }}">{{ shop.name | escape }}</a>
     {%- endif -%}
 
-    {%- liquid
-      assign cart_label = 'header.cart' | t
-      if cart.item_count > 0
-        assign cart_label = 'header.cart_count' | t: count: cart.item_count
-      endif
-    -%}
-    <span class="header__cart" id="CartIcon-{{ section.id }}" data-cart-region data-cart-icon>
-      {%- render 'icon-button', icon: 'cart', label: cart_label, url: routes.cart_url, badge: cart.item_count -%}
-    </span>
+    {%- if section.settings.menu.links.size > 0 -%}
+      <nav class="site-header__nav" aria-label="{{ 'header.menu' | t }}">
+        <ul class="site-header__menu">
+          {%- for link in section.settings.menu.links -%}
+            <li>
+              <a
+                class="site-header__link"
+                href="{{ link.url | escape }}"
+                {% if link.current %}
+                  aria-current="page"
+                {% endif %}
+              >
+                {{- link.title | escape -}}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+
+    <div class="site-header__tools">
+      {%- if shop.customer_accounts_enabled -%}
+        {%- assign account_label = 'header.account' | t -%}
+        {% render 'icon-button', icon: 'account', label: account_label, url: routes.account_url %}
+      {%- endif -%}
+
+      {%- liquid
+        assign cart_label = 'header.cart' | t
+        if cart.item_count > 0
+          assign cart_label = 'header.cart_count' | t: count: cart.item_count
+        endif
+      -%}
+      <span id="CartIcon-{{ section.id }}" data-cart-region data-cart-icon>
+        {%- render 'icon-button', icon: 'cart', label: cart_label, url: routes.cart_url, badge: cart.item_count -%}
+      </span>
+    </div>
   </div>
 </header>
 
 {% stylesheet %}
-  header {
-    height: 5rem;
+  .site-header {
+    display: grid;
+    grid-template-columns: var(--content-grid);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .site-header__inner {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-m);
+    min-block-size: 4rem;
+  }
+  .site-header__logo {
+    max-inline-size: 40%;
+    color: inherit;
+    text-decoration: none;
+  }
+  .site-header__logo-image {
+    inline-size: var(--logo-width);
+  }
+  .site-header__name {
+    font-family: var(--font-heading);
+    font-size: var(--text-h4);
+    font-weight: var(--weight-heading);
+    line-height: var(--leading-none);
+    overflow-wrap: anywhere;
+  }
+  .site-header__nav {
+    flex: 1 1 auto;
+  }
+  .site-header__menu {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .site-header__link {
+    display: inline-block;
+    padding-block: var(--space-xs);
+    font-weight: var(--weight-ui);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  .site-header__link:hover,
+  .site-header__link[aria-current] {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .site-header__tools {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: var(--space-2xs);
+    margin-inline-start: auto;
   }
-  header a {
-    text-decoration: none;
-    color: var(--color-foreground);
+  /* Until the phone menu, the links drop to a row of their own below the logo. */
+  @media (max-width: 899px) {
+    .site-header__nav {
+      order: 3;
+      flex-basis: 100%;
+    }
+    .site-header__menu {
+      justify-content: flex-start;
+    }
   }
-  header .header__menu,
-  header .header__icons {
-    display: flex;
-    gap: 1rem;
+  /* Short desktop windows give the page back some height. */
+  @media (min-width: 900px) and (max-height: 800px) {
+    .site-header__inner {
+      min-block-size: 3.375rem;
+    }
   }
 {% endstylesheet %}
 
@@ -50,9 +144,33 @@
   "name": "t:general.header",
   "settings": [
     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-1"
+    },
+    {
       "type": "link_list",
       "id": "menu",
-      "label": "t:labels.menu"
+      "label": "t:labels.menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "t:labels.logo",
+      "info": "t:info.logo"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 40,
+      "max": 240,
+      "step": 10,
+      "unit": "px",
+      "label": "t:labels.logo_width",
+      "default": 120,
+      "visible_if": "{{ section.settings.logo != blank }}"
     }
   ]
 }

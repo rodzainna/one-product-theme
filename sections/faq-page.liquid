@@ -138,7 +138,7 @@
     .faq-nav {
       --faq-gutter: var(--page-gutter, var(--page-margin));
       position: sticky;
-      top: 0;
+      top: var(--header-offset, 0px);
       z-index: var(--layer-sticky);
       margin-inline: calc(var(--faq-gutter) * -1);
       margin-bottom: var(--space-l);
@@ -178,7 +178,7 @@
     }
     .faq-nav {
       position: sticky;
-      top: var(--space-l);
+      top: calc(var(--header-offset, 0px) + var(--space-l));
       align-self: start;
     }
     .faq-nav a {

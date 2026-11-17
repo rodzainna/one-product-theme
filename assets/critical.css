@@ -377,10 +377,23 @@ h6,
   text-align: start;
 }
 
+/** Sticky header: whatever sits above the header (the announcement bar) scrolls away and the header stays. */
+
+.header-sticky {
+  --header-offset: var(--header-h, 0px);
+  scroll-padding-top: var(--header-offset);
+}
+
+.header-sticky .header-group {
+  position: sticky;
+  top: calc(var(--header-above-h, 0px) * -1);
+  z-index: var(--layer-header);
+}
+
 /** Section layout utilities */
 
 .section-full {
-  min-height: 100svh;
+  min-height: calc(100svh - var(--header-offset, 0px));
 }
 
 /* The header and the first section with content share the first screen. */
@@ -397,6 +410,19 @@ main
   }
 
   .snap .header-group {
+    scroll-snap-align: start;
+  }
+
+  /* A sticky header moves with the page, so a point at the very top stands in for it. */
+  .snap.header-sticky .header-group {
+    scroll-snap-align: none;
+  }
+
+  /* It sits one header down, so its snap position (minus the scroll padding) is 0, a point Firefox keeps. */
+  .snap.header-sticky body::before {
+    content: "";
+    block-size: 1px;
+    margin-block: var(--header-offset) calc(var(--header-offset) * -1 - 1px);
     scroll-snap-align: start;
   }
 

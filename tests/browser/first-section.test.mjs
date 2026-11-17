@@ -35,6 +35,22 @@ test("the first full-screen section shares the first screen with the header", ()
   expect(sections().map(minHeight)).toEqual([720, 800]);
 });
 
+test("a sticky header leaves every later section the screen below it", () => {
+  render([{}, {}]);
+  document.documentElement.className = "snap header-sticky";
+  document.documentElement.style.setProperty("--header-group-h", "120px");
+  document.documentElement.style.setProperty("--header-h", "80px");
+  // The first screen also shows the announcement bar above the header.
+  expect(sections().map(minHeight)).toEqual([680, 720]);
+});
+
+test("without a sticky header later sections fill the whole screen", () => {
+  render([{}, {}]);
+  document.documentElement.style.setProperty("--header-group-h", "120px");
+  document.documentElement.style.setProperty("--header-h", "80px");
+  expect(sections().map(minHeight)).toEqual([680, 800]);
+});
+
 test("an empty first section doesn't take the first section's place", () => {
   render([{ full: false, empty: true }, {}, {}]);
   expect(sections().slice(1).map(minHeight)).toEqual([720, 800]);

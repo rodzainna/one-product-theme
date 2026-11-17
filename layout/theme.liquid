@@ -5,28 +5,31 @@
     assign template_name = template_name | append: '.' | append: template.suffix
   endif
   assign scroll_templates = 'index,page.about,page.reviews,page.compare' | split: ','
-  assign scroll_classes = ''
+  assign html_classes = ''
   assign stack = false
   assign dots = false
   if scroll_templates contains template_name
     if settings.scroll_snap
-      assign scroll_classes = scroll_classes | append: ' snap'
+      assign html_classes = html_classes | append: ' snap'
     endif
     if settings.stack_sections
-      assign scroll_classes = scroll_classes | append: ' stack'
+      assign html_classes = html_classes | append: ' stack'
       assign stack = true
       if settings.section_dots
-        assign scroll_classes = scroll_classes | append: ' dots'
+        assign html_classes = html_classes | append: ' dots'
         assign dots = true
       endif
     endif
   endif
-  assign scroll_classes = scroll_classes | strip
+  if settings.sticky_header
+    assign html_classes = html_classes | append: ' header-sticky'
+  endif
+  assign html_classes = html_classes | strip
 -%}
 <html
   lang="{{ request.locale.iso_code }}"
-  {% if scroll_classes != blank %}
-    class="{{ scroll_classes }}"
+  {% if html_classes != blank %}
+    class="{{ html_classes }}"
   {% endif %}
 >
   <head>
@@ -74,11 +77,20 @@
       {% sections 'header-group' %}
     </div>
     <script>
-      // Measured before first paint so the first section doesn't jump; header-height.js keeps it current.
-      document.documentElement.style.setProperty(
-        '--header-group-h',
-        document.querySelector('.header-group').offsetHeight + 'px',
-      );
+      // Measured before first paint so the first section doesn't jump; header-height.js keeps them current.
+      (() => {
+        const group = document.querySelector('.header-group');
+        const header = group.querySelector('.site-header');
+        let above = 0;
+        for (const section of group.children) {
+          if (section.contains(header)) break;
+          above += section.offsetHeight;
+        }
+        const style = document.documentElement.style;
+        style.setProperty('--header-group-h', group.offsetHeight + 'px');
+        style.setProperty('--header-above-h', above + 'px');
+        style.setProperty('--header-h', group.offsetHeight - above + 'px');
+      })();
     </script>
     <script type="module">
       import { trackHeaderHeight } from '{{ 'header-height.js' | asset_url }}';
