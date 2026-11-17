@@ -102,3 +102,57 @@ describe("dialog", () => {
     );
   });
 });
+
+describe("a link that opens a dialog", () => {
+  let stop;
+  afterEach(() => stop?.abort());
+
+  // Clicks the link and says whether the browser would have followed it. The test's own
+  // listener runs last and cancels the click so the test page stays put.
+  const clickLink = (init = {}, { dialogOnPage = true } = {}) => {
+    const dialog = render();
+    document.body.insertAdjacentHTML(
+      "afterbegin",
+      `<a href="/search" id="Opener" data-dialog-open="Guide">Search</a>`,
+    );
+    if (!dialogOnPage) dialog.remove();
+    stop = new AbortController();
+    let followed;
+    document.addEventListener(
+      "click",
+      (event) => {
+        followed = !event.defaultPrevented;
+        event.preventDefault();
+      },
+      { signal: stop.signal },
+    );
+    document
+      .getElementById("Opener")
+      .dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true, ...init }),
+      );
+    return { dialog, followed };
+  };
+
+  test("opens it on a plain click, without following the link", () => {
+    const { dialog, followed } = clickLink();
+    expect(dialog.open).toBe(true);
+    expect(followed).toBe(false);
+  });
+
+  test.each([
+    ["Ctrl", { ctrlKey: true }],
+    ["Cmd", { metaKey: true }],
+    ["Shift", { shiftKey: true }],
+    ["middle", { button: 1 }],
+  ])("leaves a %s-click to the browser, which opens the page", (_, init) => {
+    const { dialog, followed } = clickLink(init);
+    expect(dialog.open).toBe(false);
+    expect(followed).toBe(true);
+  });
+
+  test("goes to its page when the dialog isn't on the page", () => {
+    const { followed } = clickLink({}, { dialogOnPage: false });
+    expect(followed).toBe(true);
+  });
+});

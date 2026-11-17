@@ -77,6 +77,7 @@
     "drawer_title": "Menu",
     "menu": "Main menu",
     "open_menu": "Open menu",
+    "search": "Search",
     "submenu": "{{ title }} submenu"
   },
   "hero": {
@@ -168,6 +169,22 @@
     "title": "Search",
     "placeholder": "Search articles, pages, or products",
     "submit": "Search",
+    "predictive": {
+      "articles": "Articles",
+      "clear": "Clear search",
+      "collections": "Collections",
+      "no_results": "No results for “{{ terms }}”",
+      "pages": "Pages",
+      "placeholder": "Search the store",
+      "products": "Products",
+      "queries": "Suggestions",
+      "results": "Search results",
+      "results_count": {
+        "one": "{{ count }} result",
+        "other": "{{ count }} results"
+      },
+      "search_for": "Search for “{{ terms }}”"
+    },
     "no_results_html": "No results found for {{ terms }}",
     "results_for_html": "{{ count }} results found for {{ terms }}"
   },

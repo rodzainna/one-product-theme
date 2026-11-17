@@ -42,6 +42,17 @@
     {%- endif -%}
 
     <div class="site-header__tools">
+      {%- if section.settings.show_search -%}
+        {%- assign search_label = 'header.search' | t -%}
+        {%- comment -%} A link, so it still reaches the search page if the script doesn't load. {%- endcomment -%}
+        {%- render 'icon-button',
+          icon: 'search',
+          label: search_label,
+          url: routes.search_url,
+          attributes: 'data-dialog-open="SearchModal" aria-haspopup="dialog"'
+        -%}
+      {%- endif -%}
+
       {%- if shop.customer_accounts_enabled and section.settings.show_account -%}
         {%- assign account_label = 'header.account' | t -%}
         {%- assign account_menu = section.settings.customer_account_menu.handle
@@ -71,6 +82,10 @@
     </div>
   </div>
 </header>
+
+{%- if section.settings.show_search -%}
+  {%- render 'search-modal', id: 'SearchModal' -%}
+{%- endif -%}
 
 {%- if section.settings.menu.links.size > 0 -%}
   {%- capture drawer_menu -%}
@@ -220,6 +235,13 @@
       "id": "logo",
       "label": "t:labels.logo",
       "info": "t:info.logo"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "t:labels.show_search",
+      "info": "t:info.show_search",
+      "default": true
     },
     {
       "type": "checkbox",

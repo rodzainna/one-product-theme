@@ -1,5 +1,5 @@
 /**
- * Opens the <dialog> named by a [data-dialog-open] button as a modal, closes it from its
+ * Opens the <dialog> named by a [data-dialog-open] button or link as a modal, closes it from its
  * [data-dialog-close] button, and from a click outside when it has data-close-outside.
  * The browser handles Esc, the focus trap and returning focus to the opener.
  */
@@ -45,7 +45,18 @@ export const openDialog = (dialog) => {
 const onClick = (event) => {
   const opener = event.target.closest("[data-dialog-open]");
   if (opener) {
-    openDialog(document.getElementById(opener.dataset.dialogOpen));
+    const dialog = document.getElementById(opener.dataset.dialogOpen);
+    // A link opens its dialog on a plain click, and goes to its page when there's no dialog
+    // (the script is missing) or for a click meant to open a new tab.
+    const newTab =
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey;
+    if (!dialog || (opener.matches("a[href]") && newTab)) return;
+    event.preventDefault();
+    openDialog(dialog);
     return;
   }
   const closer = event.target.closest("[data-dialog-close]");
