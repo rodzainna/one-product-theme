@@ -41,6 +41,12 @@ const button = () => page.getByRole("button", { name: "Tax and shipping" });
 const bubble = () => document.getElementById("tip");
 const isOpen = () => bubble().matches(":popover-open");
 const rect = (element) => element.getBoundingClientRect();
+// A pointer crossing the tooltip's edge, dispatched in one tick. Playwright's own moves take a
+// variable time, which made the tests that race the close delay fail on a busy machine.
+const pointer = (type) =>
+  document
+    .querySelector("tool-tip")
+    .dispatchEvent(new PointerEvent(type, { pointerType: "mouse" }));
 
 beforeEach(async () => {
   await import("../../assets/tooltip.js");
@@ -96,7 +102,7 @@ describe("opening and closing", () => {
     render();
     await userEvent.hover(button());
     expect(isOpen()).toBe(true);
-    await userEvent.hover(page.getByRole("button", { name: "Elsewhere" }));
+    pointer("pointerleave");
     expect(isOpen()).toBe(true);
     await wait(CLOSE_DELAY + 100);
     expect(isOpen()).toBe(false);
@@ -106,9 +112,9 @@ describe("opening and closing", () => {
     render();
     await userEvent.hover(button());
     await frame();
-    // Leave the tooltip, as a pointer crossing the gap does, then reach the bubble in time.
-    await userEvent.hover(page.getByRole("button", { name: "Elsewhere" }));
-    await userEvent.hover(bubble());
+    // Leave the tooltip, as a pointer crossing the gap does, and reach the bubble in time.
+    pointer("pointerleave");
+    pointer("pointerenter");
     await wait(CLOSE_DELAY + 100);
     expect(isOpen()).toBe(true);
   });
@@ -116,7 +122,7 @@ describe("opening and closing", () => {
   test("a hover-close timer doesn't close a bubble reopened by click", async () => {
     render();
     await userEvent.hover(button());
-    await userEvent.hover(page.getByRole("button", { name: "Elsewhere" }));
+    pointer("pointerleave");
     await userEvent.keyboard("{Escape}");
     expect(isOpen()).toBe(false);
     button().element().click();

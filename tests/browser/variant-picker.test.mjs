@@ -81,7 +81,9 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  history.replaceState(history.state, "", startUrl);
+  // WebKit allows 100 history changes per 10 seconds across the whole run, so only reset what a test changed.
+  if (location.href !== startUrl)
+    history.replaceState(history.state, "", startUrl);
   document.body.innerHTML = "";
 });
 

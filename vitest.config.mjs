@@ -5,6 +5,8 @@ const browserTests = "tests/browser/**/*.test.mjs";
 
 export default defineConfig({
   test: {
+    // Three browsers each running every file at once starved the machine and made timing tests fail.
+    maxWorkers: 3,
     projects: [
       {
         test: {

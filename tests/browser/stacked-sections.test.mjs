@@ -42,7 +42,10 @@ afterEach(() => {
   cleanup?.();
   document.documentElement.style.removeProperty("--header-offset");
   document.body.innerHTML = "";
-  history.replaceState(null, "", location.pathname + location.search);
+  // WebKit allows 100 history changes per 10 seconds across the whole run, so only reset what a test changed.
+  if (location.hash || history.state !== null) {
+    history.replaceState(null, "", location.pathname + location.search);
+  }
   scrollTo(0, 0);
 });
 
