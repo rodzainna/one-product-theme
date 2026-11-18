@@ -13,9 +13,31 @@
   "sections": {
     "footer": {
       "type": "footer",
+      "blocks": {
+        "about": {
+          "type": "_footer-about",
+          "settings": {
+            "show_social": true
+          }
+        },
+        "shop": {
+          "type": "_footer-menu",
+          "settings": {
+            "heading": "Shop",
+            "menu": "footer"
+          }
+        }
+      },
+      "block_order": [
+        "about",
+        "shop"
+      ],
       "settings": {
-        "menu": "",
-        "show_payment_icons": true
+        "color_scheme": "scheme-3",
+        "show_selectors": true,
+        "show_payment_icons": true,
+        "show_policies": true,
+        "disclaimer": ""
       }
     }
   },

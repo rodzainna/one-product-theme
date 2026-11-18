@@ -1,0 +1,96 @@
+{% doc %}
+  A footer column: a heading over a list of links from a menu.
+
+  @example
+  {% content_for 'block', type: '_footer-menu', id: 'menu' %}
+{% enddoc %}
+
+{%- if block.settings.menu.links.size > 0 -%}
+  <nav
+    class="footer-menu"
+    {% if block.settings.heading != blank %}
+      aria-labelledby="{{ block.id }}-heading"
+    {% else %}
+      aria-label="{{ block.settings.menu.title | escape }}"
+    {% endif %}
+    {{ block.shopify_attributes }}
+  >
+    {%- if block.settings.heading != blank -%}
+      <h2 class="footer-menu__heading" id="{{ block.id }}-heading">{{ block.settings.heading | escape }}</h2>
+    {%- endif -%}
+    <ul class="footer-menu__list">
+      {%- for link in block.settings.menu.links -%}
+        <li>
+          <a
+            class="footer-menu__link"
+            href="{{ link.url }}"
+            {% if link.current %}
+              aria-current="page"
+            {% endif %}
+          >
+            {{- link.title | escape -}}
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+{%- elsif request.design_mode -%}
+  <div class="footer-menu" {{ block.shopify_attributes }}></div>
+{%- endif -%}
+
+{% stylesheet %}
+  .footer-menu__heading {
+    margin: 0 0 var(--space-xs);
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    line-height: var(--leading-heading);
+  }
+
+  .footer-menu__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer-menu__link {
+    display: inline-block;
+    min-block-size: var(--target-min);
+    padding-block: var(--space-2xs);
+    color: inherit;
+    font-size: var(--text-small);
+    overflow-wrap: anywhere;
+    text-decoration: none;
+  }
+
+  .footer-menu__link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (hover: hover) {
+    .footer-menu__link:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.footer_menu",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:labels.heading",
+      "default": "Shop"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:labels.menu",
+      "default": "footer"
+    }
+  ]
+}
+{% endschema %}

@@ -1,56 +1,227 @@
-<footer>
-  <div class="footer__copyright">
-    &copy;
-    {{ 'now' | date: '%Y' }}
-    {{ shop.name | link_to: routes.root_url }}, {{ powered_by_link }}
-  </div>
+{% comment %}
+  The footer: blocks in columns, then the selectors and payment icons, then the copyright and policies.
+{% endcomment %}
 
-  <div class="footer__links">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
-  </div>
+{%- liquid
+  assign show_selectors = false
+  if section.settings.show_selectors
+    if localization.available_countries.size > 1 or localization.available_languages.size > 1
+      assign show_selectors = true
+    endif
+  endif
 
-  <div class="footer__payment">
-    {% if section.settings.show_payment_icons %}
-      {% for type in shop.enabled_payment_types %}
-        {{ type | payment_type_svg_tag }}
-      {% endfor %}
-    {% endif %}
+  assign show_payment = false
+  if section.settings.show_payment_icons and shop.enabled_payment_types.size > 0
+    assign show_payment = true
+  endif
+-%}
+
+<footer class="footer full-width color-{{ section.settings.color_scheme }}">
+  <div class="footer__inner">
+    <div class="footer__blocks">
+      {% content_for 'blocks' %}
+    </div>
+
+    <div class="footer__bottom">
+      {%- if show_selectors or show_payment -%}
+        <div class="footer__row">
+          {%- if show_selectors -%}
+            {%- render 'localization-form', id: 'Footer', names: true, globe: true -%}
+          {%- endif -%}
+          {%- if show_payment -%}
+            <ul class="footer__payment" aria-label="{{ 'footer.payment_methods' | t }}">
+              {%- for type in shop.enabled_payment_types -%}
+                <li>{{ type | payment_type_svg_tag }}</li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      <div class="footer__row">
+        <p class="footer__copyright">
+          &copy; {{ 'now' | date: '%Y' }}
+          {{ shop.name | escape }}
+        </p>
+        {%- if section.settings.show_policies and shop.policies.size > 0 -%}
+          <ul class="footer__policies" aria-label="{{ 'footer.policies' | t }}">
+            {%- for policy in shop.policies -%}
+              <li>
+                <a class="footer__policy" href="{{ policy.url }}">{{ policy.title | escape }}</a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.disclaimer != blank -%}
+        <p class="footer__disclaimer">{{ section.settings.disclaimer | escape }}</p>
+      {%- endif -%}
+    </div>
   </div>
 </footer>
 
 {% stylesheet %}
-  footer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
+  .footer__inner {
+    inline-size: var(--content-width);
+    margin-inline: auto;
+    padding-block: var(--space-xl) var(--space-l);
   }
-  footer a {
-    text-decoration: none;
+
+  .footer__blocks {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-l);
+  }
+
+  @media (min-width: 900px) {
+    .footer__blocks {
+      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    }
+  }
+
+  /* Blocks that print nothing leave no gap or line behind. */
+  .footer__blocks:not(:has(> *)) {
+    display: none;
+  }
+
+  .footer__blocks:not(:has(> *)) + .footer__bottom {
+    margin-block-start: 0;
+    padding-block-start: 0;
+    border-block-start: 0;
+  }
+
+  .footer__bottom {
+    display: grid;
+    gap: var(--space-s);
+    margin-block-start: var(--space-xl);
+    padding-block-start: var(--space-m);
+    border-block-start: 1px solid var(--color-border);
+    color: var(--color-foreground-muted);
+    font-size: var(--text-caption);
+    overflow-wrap: anywhere;
+  }
+
+  .footer__bottom p {
+    margin: 0;
+  }
+
+  /* Two aligned rows: selectors and payment icons, then the copyright and policies. */
+  .footer__row {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-l);
+    align-items: flex-start;
+  }
+
+  @media (min-width: 900px) {
+    .footer__row {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .footer__row .localization {
     color: var(--color-foreground);
   }
-  footer .footer__links,
-  footer .footer__payment {
+
+  .footer__payment,
+  .footer__policies {
     display: flex;
-    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer__payment {
+    gap: var(--space-xs);
+  }
+
+  .footer__payment svg {
+    display: block;
+    inline-size: auto;
+    block-size: 1.5rem;
+  }
+
+  .footer__policies {
+    flex-direction: column;
+  }
+
+  /* Dots only separate links on one line, so a wrapped line never starts with one. */
+  @media (min-width: 900px) {
+    .footer__policies {
+      flex-direction: row;
+      flex-wrap: nowrap;
+    }
+
+    .footer__policies li + li::before {
+      content: '·';
+      content: '·' / '';
+      margin-inline: var(--space-xs);
+    }
+  }
+
+  .footer__policy {
+    display: inline-block;
+    min-block-size: var(--target-min);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .footer__policy:focus-visible {
+    color: var(--color-foreground);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (hover: hover) {
+    .footer__policy:hover {
+      color: var(--color-foreground);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
   }
 {% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.footer",
+  "blocks": [{ "type": "@theme" }, { "type": "_footer-about" }, { "type": "_footer-menu" }],
   "settings": [
     {
-      "type": "link_list",
-      "id": "menu",
-      "label": "t:labels.menu"
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-3"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_selectors",
+      "label": "t:labels.show_selectors",
+      "info": "t:info.show_selectors",
+      "default": true
     },
     {
       "type": "checkbox",
       "id": "show_payment_icons",
       "label": "t:labels.show_payment_icons",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_policies",
+      "label": "t:labels.show_policies",
+      "info": "t:info.show_policies",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "disclaimer",
+      "label": "t:labels.disclaimer",
+      "info": "t:info.disclaimer"
     }
   ]
 }

@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { page } from "vitest/browser";
+import criticalCss from "../../assets/critical.css?raw";
 import headerLiquid from "../../sections/header.liquid?raw";
+import selectLiquid from "../../snippets/select.liquid?raw";
 import localizationLiquid from "../../snippets/localization-form.liquid?raw";
 import "../../assets/localization.js";
 
@@ -128,6 +130,32 @@ describe("arrowing through the options", () => {
       "AU",
     ]);
   });
+});
+
+describe("a long country name", () => {
+  test.each([320, 390])(
+    "doesn't push the footer wider than the window at %ipx",
+    async (width) => {
+      await page.viewport(width, 800);
+      document.body.innerHTML = `
+      <style>
+        :root { --space-2xs: 4px; --space-xs: 8px; --space-m: 16px; --control-h: 44px; --control-h-sm: 32px; --control-pad-y: 4px;
+          --control-pad-xs: 8px; --control-pad-s: 12px; --select-pad-end-sm: 28px; --text-body: 16px; --text-small: 14px; }
+        body { margin: 0; }
+        ${criticalCss}
+        ${styles(selectLiquid)}
+        ${styles(localizationLiquid)}
+      </style>
+      <div style="padding: 0 20px">
+        <div class="localization"><localization-form><form class="localization__form">
+          <span class="select select--sm select--quiet"><select class="control">
+            <option>South Georgia and the South Sandwich Islands (GBP £)</option>
+          </select></span>
+        </form></localization-form></div>
+      </div>`;
+      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
+    },
+  );
 });
 
 describe("layout", () => {

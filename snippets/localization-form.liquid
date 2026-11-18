@@ -1,11 +1,13 @@
 {% doc %}
   Renders the country and language selectors, each in its own localization form and only when
-  the store offers more than one choice. Options read as short codes (AU · AUD, EN) and carry the
-  full name as their accessible name. With scripting a change submits the form
+  the store offers more than one choice. Options read as short codes (AU · AUD, EN) with the full
+  name as their accessible name, or as full names with names. With scripting a change submits the form
   (assets/localization.js), except while arrowing through the options; then, or without scripting, an Update button does.
   https://shopify.dev/docs/storefronts/themes/markets/multiple-currencies-languages
 
   @param {string} id - Unique prefix for the form and field ids, such as Header
+  @param {boolean} [names] - Show full names (Australia (AUD $), English) instead of short codes
+  @param {boolean} [globe] - Put a globe icon before the country selector
 
   @example
   {% render 'localization-form', id: 'Header' %}
@@ -25,17 +27,26 @@
         {%- for country in localization.available_countries -%}
           <option
             value="{{ country.iso_code }}"
-            aria-label="{{ country.name | escape }} ({{ country.currency.iso_code }})"
+            {% unless names %}
+              aria-label="{{ country.name | escape }} ({{ country.currency.iso_code }})"
+            {% endunless %}
             {% if country.iso_code == localization.country.iso_code %}
               selected
             {% endif %}
           >
-            {{- country.iso_code }} · {{ country.currency.iso_code -}}
+            {%- if names -%}
+              {{- country.name | escape }} ({{ country.currency.iso_code }} {{ country.currency.symbol | escape }})
+            {%- else -%}
+              {{- country.iso_code }} · {{ country.currency.iso_code -}}
+            {%- endif -%}
           </option>
         {%- endfor -%}
       {%- endcapture -%}
       <localization-form>
         {%- form 'localization', id: country_form_id, class: 'localization__form' -%}
+          {%- if globe -%}
+            {%- render 'icon', name: 'globe', size: 'sm' -%}
+          {%- endif -%}
           {%- assign country_label = 'localization.country' | t -%}
           {%- render 'select',
             id: country_field_id,
@@ -63,12 +74,18 @@
           <option
             value="{{ language.iso_code }}"
             lang="{{ language.iso_code }}"
-            aria-label="{{ language_first | append: language_rest | escape }}"
+            {% unless names %}
+              aria-label="{{ language_first | append: language_rest | escape }}"
+            {% endunless %}
             {% if language.iso_code == localization.language.iso_code %}
               selected
             {% endif %}
           >
-            {{- language.iso_code | upcase -}}
+            {%- if names -%}
+              {{- language_first | append: language_rest | escape -}}
+            {%- else -%}
+              {{- language.iso_code | upcase -}}
+            {%- endif -%}
           </option>
         {%- endfor -%}
       {%- endcapture -%}
@@ -106,6 +123,18 @@
   /* Header-sized text, to sit level with the 1.25rem icons beside it. */
   .localization .select select {
     font-size: var(--text-small);
+  }
+
+  .localization,
+  .localization__form,
+  .localization .select {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .localization .select select {
+    max-inline-size: 100%;
+    text-overflow: ellipsis;
   }
 
   .localization__form {

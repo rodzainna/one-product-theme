@@ -1,0 +1,138 @@
+{% doc %}
+  The footer's brand column: a logo or the store name, a short line about the store, and
+  social icons for the links set in Theme settings.
+
+  @example
+  {% content_for 'block', type: '_footer-about', id: 'about' %}
+{% enddoc %}
+
+<div class="footer-about" {{ block.shopify_attributes }}>
+  <a class="footer-about__name" href="{{ routes.root_url }}">
+    {%- if block.settings.logo != blank -%}
+      {%- render 'image',
+        image: block.settings.logo,
+        alt: shop.name,
+        class: 'footer-about__logo',
+        width: 480,
+        sizes: '160px'
+      -%}
+    {%- else -%}
+      {{- shop.name | escape -}}
+    {%- endif -%}
+  </a>
+
+  {%- if block.settings.text != blank -%}
+    <p class="footer-about__text">{{ block.settings.text | escape | newline_to_br }}</p>
+  {%- endif -%}
+
+  {%- if block.settings.show_social -%}
+    {%- assign networks = 'instagram,facebook,tiktok,youtube,pinterest,x' | split: ',' -%}
+    {%- liquid
+      assign has_social = false
+      for network in networks
+        assign setting_key = 'social_' | append: network
+        if settings[setting_key] != blank
+          assign has_social = true
+          break
+        endif
+      endfor
+    -%}
+    {%- if has_social -%}
+      <ul class="footer-about__social" aria-label="{{ 'footer.social' | t }}">
+        {%- for network in networks -%}
+          {%- assign setting_key = 'social_' | append: network -%}
+          {%- assign name_key = 'footer.networks.' | append: network -%}
+          {%- if settings[setting_key] != blank -%}
+            <li>
+              <a
+                class="footer-about__social-link"
+                href="{{ settings[setting_key] | escape }}"
+                aria-label="{{ name_key | t }}"
+              >
+                {%- render 'social-icon', name: network -%}
+              </a>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .footer-about {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .footer-about__name {
+    color: inherit;
+    font-family: var(--font-heading);
+    font-size: var(--text-h4);
+    line-height: var(--leading-heading);
+    overflow-wrap: anywhere;
+    text-decoration: none;
+  }
+
+  .footer-about__logo {
+    inline-size: 10rem;
+  }
+
+  .footer-about__text {
+    max-inline-size: 28rem;
+    margin: 0;
+    font-size: var(--text-small);
+    overflow-wrap: anywhere;
+  }
+
+  .footer-about__social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer-about__social-link {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--control-h);
+    block-size: var(--control-h);
+    border-radius: var(--radius-input);
+    color: inherit;
+  }
+
+  @media (hover: hover) {
+    .footer-about__social-link:hover {
+      background: var(--color-hover);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.footer_about",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "t:labels.logo",
+      "info": "t:info.footer_logo"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "t:labels.text"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "label": "t:labels.show_social",
+      "info": "t:info.show_social",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

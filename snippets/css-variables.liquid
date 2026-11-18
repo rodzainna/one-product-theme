@@ -55,6 +55,7 @@
     --page-width: {% if settings.max_page_width == 'wide' %}90rem{% else %}75rem{% endif %};
     --page-margin: {{ settings.min_page_margin }}px;
     --focus-offset: 2px;
+    --focus-offset-field: 0px;
     --layer-sticky: 8;
     --layer-header: 10;
     --layer-temporary: 20;
@@ -166,6 +167,7 @@
       --color-hover: color-mix(in srgb, var(--color-foreground) 8%, transparent);
       --color-active: color-mix(in srgb, var(--color-foreground) 14%, transparent);
       --focus-ring: 3px solid var(--color-accent);
+      --focus-ring-field: 2px solid var(--color-accent);
     }
 
     {% # :where() keeps specificity at zero so a component's own background wins %}

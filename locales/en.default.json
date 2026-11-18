@@ -59,6 +59,19 @@
   "features": {
     "heading": "Features"
   },
+  "footer": {
+    "networks": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "pinterest": "Pinterest",
+      "tiktok": "TikTok",
+      "x": "X",
+      "youtube": "YouTube"
+    },
+    "payment_methods": "Payment methods",
+    "policies": "Policies",
+    "social": "Social media"
+  },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
     "card": "Gift card",
