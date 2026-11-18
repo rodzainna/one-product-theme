@@ -1,18 +1,10 @@
-const BROWSING_KEYS = new Set([
-  "ArrowUp",
-  "ArrowDown",
-  "ArrowLeft",
-  "ArrowRight",
-  "Home",
-  "End",
-  "PageUp",
-  "PageDown",
-]);
+const COMMIT_KEYS = new Set(["Enter"]);
 
 /**
  * Submits a country or language selector's form as soon as a choice is made, so there's no
- * separate button to press. Arrowing through a closed select fires a change per option in some
- * browsers, so those changes show the form's Update button instead of reloading the page.
+ * separate button to press. Arrowing or typing through a closed select fires a change per option
+ * in some browsers, so only Enter or a click submits; other changes show the form's Update button
+ * instead of reloading the page.
  */
 export class LocalizationForm extends HTMLElement {
   #browsing = false;
@@ -30,7 +22,7 @@ export class LocalizationForm extends HTMLElement {
   }
 
   #onKeydown = (event) => {
-    this.#browsing = BROWSING_KEYS.has(event.key);
+    this.#browsing = !COMMIT_KEYS.has(event.key);
   };
 
   #onPointerdown = () => {

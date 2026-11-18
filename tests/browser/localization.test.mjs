@@ -105,7 +105,7 @@ describe("choosing", () => {
   });
 });
 
-describe("arrowing through the options", () => {
+describe("browsing the options with the keyboard", () => {
   test("doesn't reload the page for each option; it shows Update instead", () => {
     const submitted = watchSubmits();
     const select = document.getElementById("country");
@@ -114,6 +114,25 @@ describe("arrowing through the options", () => {
     expect(submitted).toEqual([]);
     expect(shown("#country-form .localization__update")).toBe(true);
     expect(shown("#language-form .localization__update")).toBe(false);
+  });
+
+  test("typing a letter to pick a country doesn't reload either", () => {
+    const submitted = watchSubmits();
+    const select = document.getElementById("country");
+    press(select, "U");
+    choose(select, "US");
+    expect(submitted).toEqual([]);
+    expect(shown("#country-form .localization__update")).toBe(true);
+  });
+
+  test("typing a multi-word name, space included, doesn't reload mid-word", () => {
+    const submitted = watchSubmits();
+    const select = document.getElementById("country");
+    press(select, "U");
+    press(select, " ");
+    choose(select, "US");
+    expect(submitted).toEqual([]);
+    expect(shown("#country-form .localization__update")).toBe(true);
   });
 
   test("pressing Enter or clicking a choice still submits straight away", () => {
