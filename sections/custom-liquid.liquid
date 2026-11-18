@@ -1,0 +1,58 @@
+{% comment %}
+  The merchant's own Liquid or HTML, such as an app snippet or an embed, on any page.
+{% endcomment %}
+
+{%- if section.settings.custom_liquid == blank -%}
+  <div data-empty></div>
+{%- else -%}
+  <div
+    class="custom-liquid-section full-width color-{{ section.settings.color_scheme }}{% if section.settings.full_screen %} section-full{% endif %}"
+  >
+    <div class="custom-liquid-section__content">
+      {{ section.settings.custom_liquid }}
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .custom-liquid-section__content {
+    inline-size: var(--content-width);
+    margin-inline: auto;
+    padding-block: var(--space-l);
+    overflow-x: auto;
+  }
+
+  /* A full-screen section centres what it holds. */
+  .custom-liquid-section.section-full {
+    display: grid;
+    align-content: center;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.custom_liquid",
+  "settings": [
+    {
+      "type": "liquid",
+      "id": "custom_liquid",
+      "label": "t:labels.custom_liquid",
+      "info": "t:info.custom_liquid"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_screen",
+      "label": "t:labels.full_screen",
+      "info": "t:info.full_screen",
+      "default": false
+    }
+  ],
+  "presets": [{ "name": "t:general.custom_liquid" }]
+}
+{% endschema %}

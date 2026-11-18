@@ -7,7 +7,11 @@
   assign og_title = page_title | default: shop.name
   assign og_url = canonical_url | default: request.origin
   assign og_type = 'website'
-  assign og_description = page_description | default: shop.description | default: shop.name
+  assign social_description = page_description | default: shop.description
+  assign twitter_card = 'summary'
+  if page_image
+    assign twitter_card = 'summary_large_image'
+  endif
 
   if request.page_type == 'product'
     assign og_type = 'product'
@@ -34,10 +38,12 @@
   property="og:type"
   content="{{ og_type }}"
 >
-<meta
-  property="og:description"
-  content="{{ og_description | escape }}"
->
+{%- if social_description != blank -%}
+  <meta
+    property="og:description"
+    content="{{ social_description | escape }}"
+  >
+{%- endif -%}
 
 {%- if page_image -%}
   <meta
@@ -75,16 +81,18 @@
 
 <meta
   name="twitter:card"
-  content="summary_large_image"
+  content="{{ twitter_card }}"
 >
 <meta
   name="twitter:title"
   content="{{ og_title | escape }}"
 >
-<meta
-  name="twitter:description"
-  content="{{ og_description | escape }}"
->
+{%- if social_description != blank -%}
+  <meta
+    name="twitter:description"
+    content="{{ social_description | escape }}"
+  >
+{%- endif -%}
 
 <title>
   {{ page_title }}
@@ -98,9 +106,9 @@
   href="{{ canonical_url }}"
 >
 
-{% if page_description %}
+{%- if page_description != blank -%}
   <meta
     name="description"
     content="{{ page_description | escape }}"
   >
-{% endif %}
+{%- endif -%}
