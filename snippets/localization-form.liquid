@@ -1,0 +1,131 @@
+{% doc %}
+  Renders the country and language selectors, each in its own localization form and only when
+  the store offers more than one choice. Options read as short codes (AU · AUD, EN) and carry the
+  full name as their accessible name. With scripting a change submits the form
+  (assets/localization.js), except while arrowing through the options; then, or without scripting, an Update button does.
+  https://shopify.dev/docs/storefronts/themes/markets/multiple-currencies-languages
+
+  @param {string} id - Unique prefix for the form and field ids, such as Header
+
+  @example
+  {% render 'localization-form', id: 'Header' %}
+{% enddoc %}
+
+{%- if localization.available_countries.size > 1 or localization.available_languages.size > 1 -%}
+  {%- liquid
+    assign country_form_id = id | append: '-country-form'
+    assign country_field_id = id | append: '-country'
+    assign language_form_id = id | append: '-language-form'
+    assign language_field_id = id | append: '-language'
+  -%}
+
+  <div class="localization">
+    {%- if localization.available_countries.size > 1 -%}
+      {%- capture country_options -%}
+        {%- for country in localization.available_countries -%}
+          <option
+            value="{{ country.iso_code }}"
+            aria-label="{{ country.name | escape }} ({{ country.currency.iso_code }})"
+            {% if country.iso_code == localization.country.iso_code %}
+              selected
+            {% endif %}
+          >
+            {{- country.iso_code }} · {{ country.currency.iso_code -}}
+          </option>
+        {%- endfor -%}
+      {%- endcapture -%}
+      <localization-form>
+        {%- form 'localization', id: country_form_id, class: 'localization__form' -%}
+          {%- assign country_label = 'localization.country' | t -%}
+          {%- render 'select',
+            id: country_field_id,
+            label: country_label,
+            name: 'country_code',
+            options_html: country_options,
+            size: 'sm',
+            variant: 'quiet',
+            label_hidden: true
+          -%}
+          <button class="link-button localization__update" type="submit">
+            {{ 'localization.update_country' | t }}
+          </button>
+        {%- endform -%}
+      </localization-form>
+    {%- endif -%}
+
+    {%- if localization.available_languages.size > 1 -%}
+      {%- capture language_options -%}
+        {%- for language in localization.available_languages -%}
+          {%- liquid
+            assign language_first = language.endonym_name | slice: 0 | upcase
+            assign language_rest = language.endonym_name | slice: 1, 100
+          -%}
+          <option
+            value="{{ language.iso_code }}"
+            lang="{{ language.iso_code }}"
+            aria-label="{{ language_first | append: language_rest | escape }}"
+            {% if language.iso_code == localization.language.iso_code %}
+              selected
+            {% endif %}
+          >
+            {{- language.iso_code | upcase -}}
+          </option>
+        {%- endfor -%}
+      {%- endcapture -%}
+      <localization-form>
+        {%- form 'localization', id: language_form_id, class: 'localization__form' -%}
+          {%- assign language_label = 'localization.language' | t -%}
+          {%- render 'select',
+            id: language_field_id,
+            label: language_label,
+            name: 'language_code',
+            options_html: language_options,
+            size: 'sm',
+            variant: 'quiet',
+            label_hidden: true
+          -%}
+          <button class="link-button localization__update" type="submit">
+            {{ 'localization.update_language' | t }}
+          </button>
+        {%- endform -%}
+      </localization-form>
+    {%- endif -%}
+  </div>
+
+  <script src="{{ 'localization.js' | asset_url }}" type="module"></script>
+{%- endif -%}
+
+{% stylesheet %}
+  .localization {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    align-items: center;
+  }
+
+  /* Header-sized text, to sit level with the 1.25rem icons beside it. */
+  .localization .select select {
+    font-size: var(--text-small);
+  }
+
+  .localization__form {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+  }
+
+  /* With scripting a change submits the form, so the button is only for visitors without it, or after arrowing through the options. */
+  .localization__update {
+    display: none;
+  }
+
+  .localization__form[data-pending] .localization__update {
+    display: inline-flex;
+  }
+
+  @media (scripting: none) {
+    .localization__update {
+      display: inline-flex;
+    }
+  }
+{% endstylesheet %}

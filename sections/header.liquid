@@ -42,6 +42,12 @@
     {%- endif -%}
 
     <div class="site-header__tools">
+      {%- if section.settings.show_localization -%}
+        <div class="site-header__localization">
+          {%- render 'localization-form', id: 'Header' -%}
+        </div>
+      {%- endif -%}
+
       {%- if section.settings.show_search -%}
         {%- assign search_label = 'header.search' | t -%}
         {%- comment -%} A link, so it still reaches the search page if the script doesn't load. {%- endcomment -%}
@@ -95,10 +101,16 @@
     </nav>
   {%- endcapture -%}
   {%- assign drawer_title = 'header.drawer_title' | t -%}
+  {%- capture drawer_footer -%}
+    {%- if section.settings.show_localization -%}
+      {%- render 'localization-form', id: 'Drawer' -%}
+    {%- endif -%}
+  {%- endcapture -%}
   {%- render 'dialog',
     id: 'MenuDrawer',
     title: drawer_title,
     content: drawer_menu,
+    footer: drawer_footer,
     class: 'dialog--drawer dialog--drawer-start'
   -%}
   <script src="{{ 'header-menu.js' | asset_url }}" type="module"></script>
@@ -141,6 +153,15 @@
     align-items: center;
     gap: var(--space-2xs);
     margin-inline-start: auto;
+  }
+  /* Only where the row has room for them beside the menu; phones have them in the menu drawer. */
+  .site-header__localization {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .site-header__localization {
+      display: block;
+    }
   }
   .site-header__account {
     --shopify-account-avatar-size: var(--control-h);
@@ -235,6 +256,13 @@
       "id": "logo",
       "label": "t:labels.logo",
       "info": "t:info.logo"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_localization",
+      "label": "t:labels.show_localization",
+      "info": "t:info.show_localization",
+      "default": true
     },
     {
       "type": "checkbox",

@@ -77,6 +77,61 @@ describe("header group", () => {
     );
   });
 
+  test("puts a labelled country selector in the header and at the bottom of the menu drawer", () => {
+    const html = group(home);
+    for (const id of ["Header", "Drawer"]) {
+      const form = html.match(
+        new RegExp(`<form[^>]*id="${id}-country-form"[^>]*>[\\s\\S]*?</form>`),
+      )?.[0];
+      expect(form, `${id} form`).toBeDefined();
+      expect(form).toMatch(/action="\/localization"/);
+      expect(form).toMatch(/method="post"/);
+      expect(form).toMatch(/name="form_type"[^>]*value="localization"/);
+      expect(form).toMatch(
+        new RegExp(
+          `<label class="field__label visually-hidden" for="${id}-country">Country or region</label>`,
+        ),
+      );
+      expect(form).toMatch(/<select[^>]*name="country_code"/);
+      expect(form.match(/<option[^>]*\sselected/g)).toHaveLength(1);
+      expect(form).toMatch(
+        /<option[^>]*aria-label="[^"]+ \([A-Z]{3}\)"[^>]*>\s*[A-Z]{2} · [A-Z]{3}\s*<\/option>/,
+      );
+      expect(form).toMatch(
+        /class="link-button localization__update"[^>]*>\s*Update country or region\s*</,
+      );
+    }
+    expect(html.indexOf('id="Drawer-country-form"')).toBeGreaterThan(
+      html.indexOf('id="MenuDrawer"'),
+    );
+  });
+
+  test("shows a language selector only when the store has more than one language", () => {
+    const html = group(home);
+    // The dev store sells in English and French; each selector lists every language with its own lang.
+    expect(html.match(/name="language_code"/g)).toHaveLength(2);
+    expect(
+      html.match(
+        /<option[^>]*lang="fr"[^>]*aria-label="Français"[^>]*>\s*FR\s*</g,
+      ),
+    ).toHaveLength(2);
+    expect(html).toMatch(/>\s*Update language\s*</);
+    expect(html).toMatch(/<form[^>]*id="Header-language-form"/);
+    expect(html).toMatch(/for="Header-language">Language</);
+  });
+
+  test("gives every field and form in the header group its own id", () => {
+    const ids = group(home).match(/\sid="[^"]+"/g);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  test("marks the shopper's country as selected", async () => {
+    const us = group(await get("/?country=US"));
+    expect(us).toMatch(/<option[^>]*value="US"[^>]*\sselected/);
+    const au = group(await get("/?country=AU"));
+    expect(au).toMatch(/<option[^>]*value="AU"[^>]*\sselected/);
+  });
+
   test("keeps the cart icon region the cart script updates", () => {
     expect(group(home)).toMatch(
       /id="CartIcon-[^"]+" data-cart-region data-cart-icon/,

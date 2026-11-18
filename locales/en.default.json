@@ -80,6 +80,12 @@
     "search": "Search",
     "submenu": "{{ title }} submenu"
   },
+  "localization": {
+    "country": "Country or region",
+    "language": "Language",
+    "update_country": "Update country or region",
+    "update_language": "Update language"
+  },
   "hero": {
     "pause_video": "Pause background video",
     "play_video": "Play background video",

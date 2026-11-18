@@ -8,8 +8,16 @@ const stylesheet =
     /{%-?\s*stylesheet\s*-?%}([\s\S]*?){%-?\s*endstylesheet\s*-?%}/,
   )?.[1] ?? "";
 
-// The markup the dialog snippet renders, opened by a button elsewhere on the page.
-const render = ({ closeOutside = true } = {}) => {
+// The markup the dialog snippet renders, opened by a button (or a link) elsewhere on the page.
+const render = ({
+  closeOutside = true,
+  opener = "button",
+  withDialog = true,
+} = {}) => {
+  const openers = {
+    button: `<button type="button" data-dialog-open="Guide">Size guide</button>`,
+    link: `<a href="/size-guide" data-dialog-open="Guide">Size guide</a>`,
+  };
   document.body.innerHTML = `
     <style>
       :root { --radius-card: 12px; --color-overlay: rgb(0 0 0 / 0.5); --space-xs: 8px; --space-s: 12px;
@@ -17,12 +25,16 @@ const render = ({ closeOutside = true } = {}) => {
       body { margin: 0; min-height: 3000px; }
       ${stylesheet}
     </style>
-    <button type="button" data-dialog-open="Guide">Size guide</button>
-    <dialog class="dialog" id="Guide" aria-labelledby="Guide-title" ${closeOutside ? "data-close-outside" : ""}>
+    ${openers[opener]}
+    ${
+      withDialog
+        ? `<dialog class="dialog" id="Guide" aria-labelledby="Guide-title" ${closeOutside ? "data-close-outside" : ""}>
       <div class="dialog__head"><h2 id="Guide-title">Size guide</h2>
         <button type="button" data-dialog-close aria-label="Close">×</button></div>
       <div class="dialog__body" tabindex="0"><p>Chart</p></div>
-    </dialog>`;
+    </dialog>`
+        : ""
+    }`;
   return document.getElementById("Guide");
 };
 
@@ -109,13 +121,8 @@ describe("a link that opens a dialog", () => {
 
   // Clicks the link and says whether the browser would have followed it. The test's own
   // listener runs last and cancels the click so the test page stays put.
-  const clickLink = (init = {}, { dialogOnPage = true } = {}) => {
-    const dialog = render();
-    document.body.insertAdjacentHTML(
-      "afterbegin",
-      `<a href="/search" id="Opener" data-dialog-open="Guide">Search</a>`,
-    );
-    if (!dialogOnPage) dialog.remove();
+  const clickLink = (init = {}, { withDialog = true } = {}) => {
+    const dialog = render({ opener: "link", withDialog });
     stop = new AbortController();
     let followed;
     document.addEventListener(
@@ -126,8 +133,9 @@ describe("a link that opens a dialog", () => {
       },
       { signal: stop.signal },
     );
-    document
-      .getElementById("Opener")
+    page
+      .getByRole("link", { name: "Size guide" })
+      .element()
       .dispatchEvent(
         new MouseEvent("click", { bubbles: true, cancelable: true, ...init }),
       );
@@ -152,7 +160,7 @@ describe("a link that opens a dialog", () => {
   });
 
   test("goes to its page when the dialog isn't on the page", () => {
-    const { followed } = clickLink({}, { dialogOnPage: false });
+    const { followed } = clickLink({}, { withDialog: false });
     expect(followed).toBe(true);
   });
 });
