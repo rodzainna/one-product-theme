@@ -159,6 +159,13 @@
     line-height: var(--leading-snug);
   }
 
+  /* The title is a heading and the discounts a list; both set their own wrapping. */
+  .cart-line__title,
+  .cart-line__meta dt,
+  .cart-line__discounts li {
+    overflow-wrap: anywhere;
+  }
+
   .cart-line__title a {
     color: inherit;
     text-decoration: none;

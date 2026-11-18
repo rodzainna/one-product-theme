@@ -43,8 +43,18 @@
 {% stylesheet %}
   .product-description {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-2xs);
     justify-items: start;
+  }
+
+  .product-description .rte {
+    max-inline-size: 100%;
+  }
+
+  /* Text blocks set their own overflow-wrap, so the description's text needs it directly; tables keep scrolling. */
+  .product-description .rte :is(p, li, h1, h2, h3, h4, h5, h6, blockquote):not(:is(td, th) *) {
+    overflow-wrap: anywhere;
   }
 {% endstylesheet %}
 
