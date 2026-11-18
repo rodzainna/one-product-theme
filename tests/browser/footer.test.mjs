@@ -184,12 +184,21 @@ describe("bottom rows", () => {
     expect(before(".footer__policies li:first-child")).not.toContain("·");
   });
 
-  test("a phone lists policies one per line with no dots, so a wrapped line never starts with one", async () => {
+  test("policy links are spaced apart on a phone, and by the dots alone on a wide screen", async () => {
+    const gap = () =>
+      getComputedStyle(document.querySelector(".footer__policies")).columnGap;
     await page.viewport(390, 800);
-    const links = [...document.querySelectorAll(".footer__policy")].map(
+    expect(gap()).toBe("16px");
+    await page.viewport(1366, 800);
+    expect(gap()).toBe("0px");
+  });
+
+  test("a phone wraps policies in a row with no dots, so a wrapped line never starts with one", async () => {
+    await page.viewport(390, 800);
+    const tops = [...document.querySelectorAll(".footer__policy")].map(
       (link) => link.getBoundingClientRect().top,
     );
-    expect(new Set(links).size).toBe(links.length);
+    expect(new Set(tops).size).toBeLessThan(tops.length);
     expect(
       getComputedStyle(
         document.querySelector(".footer__policies li:nth-child(2)"),

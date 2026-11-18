@@ -10,6 +10,8 @@
     endif
   endif
 
+  assign policy_handles = 'privacy-policy,terms-of-service,refund-policy,shipping-policy' | split: ','
+
   assign show_payment = false
   if section.settings.show_payment_icons and shop.enabled_payment_types.size > 0
     assign show_payment = true
@@ -45,10 +47,21 @@
         </p>
         {%- if section.settings.show_policies and shop.policies.size > 0 -%}
           <ul class="footer__policies" aria-label="{{ 'footer.policies' | t }}">
-            {%- for policy in shop.policies -%}
-              <li>
-                <a class="footer__policy" href="{{ policy.url }}">{{ policy.title | escape }}</a>
-              </li>
+            {%- comment -%} The usual four first, in that order, then any others. {%- endcomment -%}
+            {%- for round in (0..4) -%}
+              {%- for policy in shop.policies -%}
+                {%- assign rank = 4 -%}
+                {%- for handle in policy_handles -%}
+                  {%- if policy.url contains handle -%}
+                    {%- assign rank = forloop.index0 -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                {%- if rank == round -%}
+                  <li>
+                    <a class="footer__policy" href="{{ policy.url }}">{{ policy.title | escape }}</a>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
             {%- endfor -%}
           </ul>
         {%- endif -%}
@@ -166,14 +179,14 @@
   }
 
   .footer__policies {
-    flex-direction: column;
+    gap: 0 var(--space-m);
   }
 
   /* Dots only separate links on one line, so a wrapped line never starts with one. */
   @media (min-width: 900px) {
     .footer__policies {
-      flex-direction: row;
       flex-wrap: nowrap;
+      column-gap: 0;
     }
 
     .footer__policies li + li::before {

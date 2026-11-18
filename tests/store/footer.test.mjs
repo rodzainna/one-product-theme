@@ -43,6 +43,24 @@ describe("footer", () => {
     expect(list).toMatch(/<a class="footer__policy" href="\/policies\/[^"]+">/);
   });
 
+  test("lists the usual policies in a fixed order: privacy, terms, refund, shipping", () => {
+    const hrefs = [
+      ...footer(home).matchAll(
+        /<a class="footer__policy" href="\/policies\/([^"]+)">/g,
+      ),
+    ].map((match) => match[1]);
+    const usual = [
+      "privacy-policy",
+      "terms-of-service",
+      "refund-policy",
+      "shipping-policy",
+    ].filter((handle) => hrefs.includes(handle));
+    expect(hrefs.filter((handle) => usual.includes(handle))).toEqual(usual);
+    expect(usual.length, "fill in the test store's policies").toBeGreaterThan(
+      1,
+    );
+  });
+
   test("shows the country with full names and a globe, and the language beside it", () => {
     const html = footer(home);
     expect(html).toMatch(/<form[^>]*id="Footer-country-form"/);
