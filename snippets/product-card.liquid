@@ -6,17 +6,27 @@
   @param {product} product - The product
   @param {string} sizes - The image's sizes attribute, from the grid's real columns
   @param {string} [heading_tag] - The title's heading element, default h3
+  @param {string} [loading] - eager for cards in the first screen, default lazy
 
   @example
   {% render 'product-card', product: product, sizes: '(min-width: 900px) 22vw, 44vw' %}
 {% enddoc %}
 
-{%- assign tag = heading_tag | default: 'h3' -%}
+{%- liquid
+  assign tag = heading_tag | default: 'h3'
+  assign card_loading = loading | default: 'lazy'
+-%}
 
 <article class="product-card">
   <div class="product-card__media">
     {%- if product.featured_media -%}
-      {% render 'image', image: product.featured_media, alt: '', sizes: sizes, aspect_ratio: '1', loading: 'lazy' %}
+      {% render 'image',
+        image: product.featured_media,
+        alt: '',
+        sizes: sizes,
+        aspect_ratio: '1',
+        loading: card_loading
+      %}
     {%- else -%}
       {{ 'product-1' | placeholder_svg_tag: 'product-card__placeholder' }}
     {%- endif -%}

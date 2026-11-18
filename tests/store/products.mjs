@@ -224,6 +224,24 @@ export const products = [
       inventoryQuantities: [],
     })),
   },
+  {
+    ...base(
+      "test-video-first",
+      "Test video first",
+      "A video is the first media, so the card shows its preview image.",
+    ),
+    ...single("12.00", 50),
+    files: [media.find((item) => item.contentType === "EXTERNAL_VIDEO")],
+  },
+  // Enough extra products that /collections/all runs to a second page (12 per page).
+  ...[1, 2, 3, 4, 5].map((number) => ({
+    ...base(
+      `test-filler-${number}`,
+      `Test filler ${number}`,
+      "Fills the collection page.",
+    ),
+    ...single("5.00", 50),
+  })),
 ];
 
 // Automatic discounts for the cart: one on a product's lines, one on the order. Created by title.
@@ -271,5 +289,14 @@ export const pages = [
     title: "Test reviews",
     templateSuffix: "reviews",
     body: "<p>Test page for the Reviews template.</p>",
+  },
+];
+
+// Manual collections, created by handle. The empty one tests the collection page's empty state.
+export const collections = [
+  {
+    handle: "test-empty",
+    title: "Test empty",
+    descriptionHtml: "<p>Test collection with no products.</p>",
   },
 ];

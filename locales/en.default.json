@@ -49,6 +49,10 @@
       "title": "Login"
     }
   },
+  "collection": {
+    "browse_all": "Browse all products",
+    "empty": "There are no products in this collection yet."
+  },
   "collections": {
     "title": "Collections"
   },
@@ -117,6 +121,12 @@
   "link_tiles": {
     "heading": "Explore",
     "read_more": "Read more"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "next": "Next",
+    "page": "Page {{ number }}",
+    "previous": "Previous"
   },
   "password": {
     "title": "This shop is private",

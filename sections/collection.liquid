@@ -1,49 +1,105 @@
 {% comment %}
-  This section is used in the collection template to render collection page
-  listing all products within a collection.
+  The collection page: its title and description, a grid of product cards and page links.
+  Also serves /collections/all.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
 {% endcomment %}
 
-<h1>{{ collection.title }}</h1>
-
-<div class="collection-products">
-  {% paginate collection.products by 20 %}
-    {% for product in collection.products %}
-      <div class="collection-product">
-        {%- liquid
-          assign card_media = product.media | where: 'media_type', 'image' | first
-          assign card_media = card_media | default: product.featured_media
-          assign card_loading = null
-          if forloop.index > 4
-            assign card_loading = 'lazy'
-          endif
-        -%}
-        {% if card_media %}
-          {% render 'image',
-            class: 'collection-product__image',
-            image: card_media,
-            url: product.url,
-            aspect_ratio: '1',
-            sizes: '(min-width: 1100px) 50vw, 100vw',
-            loading: card_loading
-          %}
-        {% endif %}
-        <div class="collection-product__content">
-          <p>{{ product.title | escape | link_to: product.url }}</p>
-          <p>{{ product.price | money }}</p>
+{%- paginate collection.products by 12 -%}
+  <div class="collection">
+    <header class="collection__header">
+      <h1 class="collection__title h2">{{ collection.title | escape }}</h1>
+      {%- if collection.description != blank -%}
+        <div class="collection__description">
+          {% render 'rte', content: collection.description %}
         </div>
-      </div>
-    {% endfor %}
+      {%- endif -%}
+    </header>
 
-    {{ paginate | default_pagination }}
-  {% endpaginate %}
-</div>
+    {%- if collection.products_count == 0 -%}
+      <div class="collection__empty">
+        <p>{{ 'collection.empty' | t }}</p>
+        {%- if collection.handle != 'all' -%}
+          {%- assign browse_label = 'collection.browse_all' | t -%}
+          {% render 'button', label: browse_label, url: routes.all_products_collection_url, variant: 'secondary' %}
+        {%- endif -%}
+      </div>
+    {%- else -%}
+      <ul class="collection__grid">
+        {%- for product in collection.products -%}
+          {%- liquid
+            assign card_loading = 'lazy'
+            if forloop.index <= 4
+              assign card_loading = 'eager'
+            endif
+          -%}
+          <li>
+            {% render 'product-card',
+              product: product,
+              heading_tag: 'h2',
+              sizes: '(min-width: 900px) 22vw, (min-width: 600px) 30vw, 44vw',
+              loading: card_loading
+            %}
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {% render 'pagination', paginate: paginate %}
+    {%- endif -%}
+  </div>
+{%- endpaginate -%}
 
 {% stylesheet %}
-  .collection-products {
+  .collection {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: var(--space-l);
+    padding-block: var(--space-l) var(--space-xl);
+  }
+
+  .collection__header {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .collection__title {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .collection__empty {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .collection__empty p {
+    margin: 0;
+  }
+
+  .collection__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .collection__grid > li {
+    display: grid;
+  }
+
+  @media (min-width: 600px) {
+    .collection__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-m);
+    }
+  }
+
+  @media (min-width: 900px) {
+    .collection__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 {% endstylesheet %}
 

@@ -1,4 +1,4 @@
-// Creates the missing products, discounts and pages from tests/store/products.mjs.
+// Creates the missing products, discounts, collections and pages from tests/store/products.mjs.
 import { execFileSync } from "node:child_process";
 import {
   copyFileSync,
@@ -9,7 +9,12 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { discounts, pages, products } from "../tests/store/products.mjs";
+import {
+  collections,
+  discounts,
+  pages,
+  products,
+} from "../tests/store/products.mjs";
 
 const API_VERSION = "2026-10";
 const store = process.argv[2];
@@ -265,6 +270,29 @@ try {
       );
     }
     console.log(`created  ${discount.title}`);
+  }
+
+  for (const collection of collections) {
+    const { collectionByIdentifier: found } = execute(
+      "query ($handle: String!) { collectionByIdentifier(identifier: { handle: $handle }) { id } }",
+      { handle: collection.handle },
+    );
+    if (found) {
+      console.log(`kept     collection ${collection.handle}`);
+      continue;
+    }
+    const { collectionCreate } = execute(
+      "mutation ($input: CollectionInput!) { collectionCreate(input: $input) { collection { id } userErrors { message } } }",
+      { input: collection },
+      { mutation: true },
+    );
+    if (collectionCreate.userErrors.length) {
+      throw new Error(
+        `${collection.handle}: ${JSON.stringify(collectionCreate.userErrors)}`,
+      );
+    }
+    publish(collectionCreate.collection.id, onlineStore.id);
+    console.log(`created  collection ${collection.handle}`);
   }
 
   for (const page of pages) {
