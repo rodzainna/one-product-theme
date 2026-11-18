@@ -126,6 +126,7 @@
     "tint": "The card color behind the photo. The text turns light or dark to stay readable.",
     "disclaimer": "A small line under the policy links, such as a demo notice. Leave it empty to hide it.",
     "footer_logo": "Shown instead of the store name.",
+    "footer_text": "A short line under the name. Longer text is cut at 120 characters.",
     "show_policies": "Links to the policies set up under Settings → Policies.",
     "show_selectors": "Shows only when the store sells in more than one country or language.",
     "show_social": "Icons for the links set in Theme settings → Social media. Empty links are skipped.",

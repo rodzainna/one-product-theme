@@ -1,15 +1,8 @@
 {% comment %}
-  The footer: blocks in columns, then the selectors and payment icons, then the copyright and policies.
+  The footer: blocks in columns, then the payment icons, then the copyright and policies.
 {% endcomment %}
 
 {%- liquid
-  assign show_selectors = false
-  if section.settings.show_selectors
-    if localization.available_countries.size > 1 or localization.available_languages.size > 1
-      assign show_selectors = true
-    endif
-  endif
-
   assign policy_handles = 'privacy-policy,terms-of-service,refund-policy,shipping-policy' | split: ','
 
   assign show_payment = false
@@ -25,18 +18,13 @@
     </div>
 
     <div class="footer__bottom">
-      {%- if show_selectors or show_payment -%}
+      {%- if show_payment -%}
         <div class="footer__row">
-          {%- if show_selectors -%}
-            {%- render 'localization-form', id: 'Footer', names: true, globe: true -%}
-          {%- endif -%}
-          {%- if show_payment -%}
-            <ul class="footer__payment" aria-label="{{ 'footer.payment_methods' | t }}">
-              {%- for type in shop.enabled_payment_types -%}
-                <li>{{ type | payment_type_svg_tag }}</li>
-              {%- endfor -%}
-            </ul>
-          {%- endif -%}
+          <ul class="footer__payment" aria-label="{{ 'footer.payment_methods' | t }}">
+            {%- for type in shop.enabled_payment_types -%}
+              <li>{{ type | payment_type_svg_tag }}</li>
+            {%- endfor -%}
+          </ul>
         </div>
       {%- endif -%}
 
@@ -138,7 +126,7 @@
     overflow-wrap: anywhere;
   }
 
-  /* Two aligned rows: selectors and payment icons, then the copyright and policies. */
+  /* Two aligned rows: payment icons, then the copyright and policies. */
   .footer__row {
     display: flex;
     flex-direction: column;
@@ -153,10 +141,6 @@
       align-items: center;
       justify-content: space-between;
     }
-  }
-
-  .footer__row .localization {
-    color: var(--color-foreground);
   }
 
   .footer__payment,
@@ -228,13 +212,6 @@
       "id": "color_scheme",
       "label": "t:labels.color_scheme",
       "default": "scheme-3"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_selectors",
-      "label": "t:labels.show_selectors",
-      "info": "t:info.show_selectors",
-      "default": true
     },
     {
       "type": "checkbox",

@@ -17,7 +17,8 @@
         "about": {
           "type": "_footer-about",
           "settings": {
-            "show_social": true
+            "show_social": true,
+            "show_selectors": true
           }
         },
         "shop": {
@@ -39,7 +40,6 @@
       ],
       "settings": {
         "color_scheme": "scheme-3",
-        "show_selectors": true,
         "show_payment_icons": true,
         "show_policies": true,
         "disclaimer": ""

@@ -61,24 +61,45 @@ describe("footer", () => {
     );
   });
 
-  test("shows the country with full names and a globe, and the language beside it", () => {
+  test("shows a short description under the store name", () => {
+    expect(footer(home)).toMatch(
+      /<a class="footer-about__name"[^>]*>[\s\S]*?<\/a>\s*<p class="footer-about__text">[^<]+<\/p>/,
+    );
+  });
+
+  test("puts the selectors in the brand column, after the social icons", () => {
     const html = footer(home);
-    expect(html).toMatch(/<form[^>]*id="Footer-country-form"/);
+    const about = html.slice(
+      html.indexOf('<div class="footer-about"'),
+      html.indexOf('<nav class="footer-menu"'),
+    );
+    expect(about).toMatch(/id="Footer-[^"]+-country-form"/);
+    expect(about).toMatch(/id="Footer-[^"]+-language-form"/);
+    expect(about.indexOf("footer-about__social")).toBeLessThan(
+      about.indexOf("-country-form"),
+    );
+  });
+
+  test("shows the country and language as short codes, with a globe before the country", () => {
+    const html = footer(home);
+    expect(html).toMatch(/<form[^>]*id="Footer-[^"]+-country-form"/);
     expect(html).toMatch(
       /<svg\s+class="icon icon--sm"[\s\S]*?<circle cx="12" cy="12" r="10"/,
     );
     expect(html).toMatch(
-      /<option[^>]*value="AU"[^>]*>\s*Australia \(AUD \$\)\s*<\/option>/,
+      /<option[^>]*value="AU"[^>]*aria-label="Australia \(AUD\)"[^>]*>\s*AU · AUD\s*<\/option>/,
     );
-    expect(html).toMatch(/<form[^>]*id="Footer-language-form"/);
-    expect(html).toMatch(/<option[^>]*lang="fr"[^>]*>\s*Français\s*<\/option>/);
-    expect(html).not.toMatch(/AU · AUD/);
+    expect(html).toMatch(/<form[^>]*id="Footer-[^"]+-language-form"/);
+    expect(html).toMatch(
+      /<option[^>]*lang="fr"[^>]*aria-label="Français"[^>]*>\s*FR\s*<\/option>/,
+    );
+    expect(html).not.toMatch(/Australia \(AUD \$\)/);
   });
 
   test("labels the selectors for screen readers", () => {
     const html = footer(home);
-    expect(html).toMatch(/for="Footer-country">Country or region</);
-    expect(html).toMatch(/for="Footer-language">Language</);
+    expect(html).toMatch(/for="Footer-[^"]+-country">Country or region</);
+    expect(html).toMatch(/for="Footer-[^"]+-language">Language</);
   });
 
   test("gives its fields ids that don't clash with the header's", () => {

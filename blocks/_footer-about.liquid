@@ -1,6 +1,6 @@
 {% doc %}
-  The footer's brand column: a logo or the store name, a short line about the store, and
-  social icons for the links set in Theme settings.
+  The footer's brand column: a logo or the store name, a short line about the store, social
+  icons for the links set in Theme settings, and the country and language selectors.
 
   @example
   {% content_for 'block', type: '_footer-about', id: 'about' %}
@@ -22,7 +22,7 @@
   </a>
 
   {%- if block.settings.text != blank -%}
-    <p class="footer-about__text">{{ block.settings.text | escape | newline_to_br }}</p>
+    <p class="footer-about__text">{{ block.settings.text | truncate: 120 | escape | newline_to_br }}</p>
   {%- endif -%}
 
   {%- if block.settings.show_social -%}
@@ -56,6 +56,11 @@
         {%- endfor -%}
       </ul>
     {%- endif -%}
+  {%- endif -%}
+
+  {%- if block.settings.show_selectors -%}
+    {%- assign selectors_id = 'Footer-' | append: block.id -%}
+    {%- render 'localization-form', id: selectors_id, globe: true -%}
   {%- endif -%}
 </div>
 
@@ -123,13 +128,22 @@
     {
       "type": "textarea",
       "id": "text",
-      "label": "t:labels.text"
+      "label": "t:labels.text",
+      "info": "t:info.footer_text",
+      "default": "One product, made with care."
     },
     {
       "type": "checkbox",
       "id": "show_social",
       "label": "t:labels.show_social",
       "info": "t:info.show_social",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_selectors",
+      "label": "t:labels.show_selectors",
+      "info": "t:info.show_selectors",
       "default": true
     }
   ]

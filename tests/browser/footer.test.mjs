@@ -45,6 +45,7 @@ const render = ({ name = "Kalayo Coffee" } = {}) => {
               <li><a class="footer-about__social-link" href="#" aria-label="Instagram"><svg class="social-icon" viewBox="0 0 24 24"></svg></a></li>
               <li><a class="footer-about__social-link" href="#" aria-label="Facebook"><svg class="social-icon" viewBox="0 0 24 24"></svg></a></li>
             </ul>
+            <div class="localization"><select><option>Australia (AUD $)</option></select></div>
           </div></div>
           <div class="shopify-block"><nav class="footer-menu">
             <h2 class="footer-menu__heading">Shop</h2>
@@ -65,7 +66,6 @@ const render = ({ name = "Kalayo Coffee" } = {}) => {
         </div>
         <div class="footer__bottom">
           <div class="footer__row" id="row-one">
-            <div class="localization"><select><option>Australia (AUD $)</option></select></div>
             <ul class="footer__payment"><li><svg viewBox="0 0 38 24" width="38" height="24"></svg></li><li><svg viewBox="0 0 38 24" width="38" height="24"></svg></li></ul>
           </div>
           <div class="footer__row" id="row-two">
@@ -89,6 +89,36 @@ beforeEach(() => render());
 
 afterEach(() => {
   document.body.innerHTML = "";
+});
+
+describe("brand column", () => {
+  test("reads name, description, then social icons, top to bottom", async () => {
+    for (const width of [1366, 390]) {
+      await page.viewport(width, 800);
+      expect(box(".footer-about__text").top).toBeGreaterThanOrEqual(
+        box(".footer-about__name").bottom,
+      );
+      expect(box(".footer-about__social").top).toBeGreaterThanOrEqual(
+        box(".footer-about__text").bottom,
+      );
+    }
+  });
+
+  test("the selectors sit under the social icons, in the same column", async () => {
+    for (const width of [1366, 390]) {
+      await page.viewport(width, 800);
+      expect(box(".localization").top).toBeGreaterThanOrEqual(
+        box(".footer-about__social").bottom,
+      );
+      expect(box(".localization").left).toBeCloseTo(
+        box(".footer-about").left,
+        0,
+      );
+      expect(box(".localization").right).toBeLessThanOrEqual(
+        box(".footer-about").right,
+      );
+    }
+  });
 });
 
 describe("columns", () => {
@@ -149,16 +179,14 @@ describe("newsletter", () => {
 });
 
 describe("bottom rows", () => {
-  test("a wide screen puts the selectors and payment icons on one line, and the copyright and policies on the next", async () => {
+  test("a wide screen puts the payment icons on one line, and the copyright and policies on the next", async () => {
     await page.viewport(1366, 800);
     const one = box("#row-one");
     const two = box("#row-two");
-    expect(box(".localization").left).toBeLessThan(
-      box(".footer__payment").left,
+    expect(box(".footer__payment").left).toBeCloseTo(
+      box(".footer__inner").left,
+      0,
     );
-    expect(
-      Math.abs(box(".localization").top - box(".footer__payment").top),
-    ).toBeLessThan(one.height);
     expect(two.top).toBeGreaterThanOrEqual(one.bottom);
     expect(box(".footer__policies").right).toBeCloseTo(
       box(".footer__inner").right,
@@ -168,9 +196,6 @@ describe("bottom rows", () => {
 
   test("a phone stacks each row", async () => {
     await page.viewport(390, 800);
-    expect(box(".footer__payment").top).toBeGreaterThanOrEqual(
-      box(".localization").bottom,
-    );
     expect(box(".footer__policies").top).toBeGreaterThanOrEqual(
       box(".footer__copyright").bottom,
     );
