@@ -123,11 +123,14 @@ describe("product gallery", () => {
     expect(thumbs[0]).toMatch(/aria-label="Show Red test image, 1 of 6"/);
   });
 
-  test("a product without media renders no gallery", async () => {
+  test("a product without media shows a placeholder image instead of the gallery", async () => {
     const html = await section(
       "/products/test-regular",
       await sectionId("/products/test-regular", "main"),
     );
     expect(html).not.toMatch(/<product-gallery/);
+    expect(html).toMatch(
+      /<div class="gallery gallery--empty" aria-hidden="true">\s*<svg[^>]*class="gallery__placeholder"/,
+    );
   });
 });

@@ -1,7 +1,7 @@
 {% doc %}
   Renders a product's media: on desktop the current media with a row of thumbnails, on
   phones a swipe row. Starts on the selected variant's media and jumps to it when another
-  variant is picked (assets/product-gallery.js). Renders nothing without media.
+  variant is picked (assets/product-gallery.js). A product without media shows a placeholder image.
 
   @param {product} product - The product
   @param {string} id - Unique on the page, so the script can find this gallery in a re-rendered section
@@ -113,6 +113,10 @@
       </script>
     {%- endif -%}
   </product-gallery>
+{%- else -%}
+  <div class="gallery gallery--empty" aria-hidden="true">
+    {{ 'product-1' | placeholder_svg_tag: 'gallery__placeholder' }}
+  </div>
 {%- endif -%}
 
 {% stylesheet %}
@@ -122,6 +126,19 @@
 
     display: block;
     min-width: 0;
+  }
+
+  .gallery--empty {
+    aspect-ratio: 1;
+    border-radius: var(--radius-card);
+    background: var(--color-hover);
+  }
+
+  .gallery__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: var(--color-foreground-muted);
   }
 
   .gallery__track,
