@@ -68,6 +68,13 @@
       "x": "X",
       "youtube": "YouTube"
     },
+    "newsletter": {
+      "email": "Email",
+      "follow_unavailable": "Follow on Shop isn't available for this store yet.",
+      "label": "Newsletter",
+      "subscribe": "Subscribe",
+      "success": "Thanks for subscribing."
+    },
     "payment_methods": "Payment methods",
     "policies": "Policies",
     "social": "Social media"

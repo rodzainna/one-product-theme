@@ -44,6 +44,7 @@
     "layout": "Layout",
     "link_tiles": "Link tiles",
     "main": "Main",
+    "newsletter": "Newsletter",
     "page": "Page",
     "password": "Password",
     "pickup_availability": "Pickup availability",
@@ -128,7 +129,10 @@
     "show_policies": "Links to the policies set up under Settings → Policies.",
     "show_selectors": "Shows only when the store sells in more than one country or language.",
     "show_social": "Icons for the links set in Theme settings → Social media. Empty links are skipped.",
-    "social_media": "Add the links the footer shows as icons. Empty links are skipped."
+    "social_media": "Add the links the footer shows as icons. Empty links are skipped.",
+    "newsletter_button": "Leave empty to use the default, Subscribe.",
+    "newsletter_success": "Leave empty to use the default thank-you.",
+    "show_follow_on_shop": "Shows only when Follow on Shop is turned on for the store. Leave it on to show it as soon as it is."
   },
   "labels": {
     "accent": "Accent",
@@ -221,6 +225,7 @@
     "show_account": "Show account",
     "show_cart_note": "Show cart note",
     "show_dynamic_checkout": "Show dynamic checkout buttons",
+    "show_follow_on_shop": "Show Follow on Shop",
     "show_localization": "Show country and language selectors",
     "show_order_number": "Show the order number field",
     "show_payment_icons": "Show payment icons",

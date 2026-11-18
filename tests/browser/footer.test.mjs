@@ -2,7 +2,11 @@ import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { page } from "vitest/browser";
 import aboutLiquid from "../../blocks/_footer-about.liquid?raw";
 import menuLiquid from "../../blocks/_footer-menu.liquid?raw";
+import newsletterLiquid from "../../blocks/_newsletter.liquid?raw";
+import criticalCss from "../../assets/critical.css?raw";
 import footerLiquid from "../../sections/footer.liquid?raw";
+import buttonLiquid from "../../snippets/button.liquid?raw";
+import inputLiquid from "../../snippets/input.liquid?raw";
 import socialLiquid from "../../snippets/social-icon.liquid?raw";
 
 const styles = (liquid) =>
@@ -17,31 +21,47 @@ const render = ({ name = "Kalayo Coffee" } = {}) => {
       :root { --space-2xs: 4px; --space-xs: 8px; --space-s: 12px; --space-m: 16px; --space-l: 32px; --space-xl: 48px;
         --content-width: min(1200px, calc(100% - 40px)); --control-h: 44px; --target-min: 24px; --radius-input: 8px;
         --text-caption: 13px; --text-small: 14px; --text-lg: 18px; --text-h4: 22px; --leading-heading: 1.15;
-        --color-border: #444; --color-foreground: #fff; --color-foreground-muted: #bbb; --color-hover: rgb(255 255 255 / 0.1); }
+        --color-border: #444; --color-foreground: #fff; --color-foreground-muted: #bbb; --color-hover: rgb(255 255 255 / 0.1);
+        --control-pad-y: 4px; --control-pad-xs: 8px; --control-pad-s: 12px; --control-h-sm: 32px; --field-gap: 8px; --radius-button: 999px;
+        --color-button: #e07a3f; --color-button-text: #1c130e; --color-background: #1c130e; --font-body: sans-serif; --weight-body: 400; --weight-ui: 600;
+        --text-body: 16px; --leading-tight: 1.25; --leading-normal: 1.5; --duration: 0.2s; --ease: ease; --color-control-border: #888; --color-error: #f88; --radius-input: 8px; }
       body { margin: 0; }
       ${styles(footerLiquid)}
       ${styles(aboutLiquid)}
       ${styles(menuLiquid)}
+      ${styles(newsletterLiquid)}
+      ${criticalCss}
+      ${styles(inputLiquid)}
+      ${styles(buttonLiquid)}
       ${styles(socialLiquid)}
     </style>
     <footer class="footer">
       <div class="footer__inner">
         <div class="footer__blocks">
-          <div class="footer-about">
+          <div class="shopify-block"><div class="footer-about">
             <a class="footer-about__name" href="/">${name}</a>
             <p class="footer-about__text">Roasts one coffee, and roasts it well.</p>
             <ul class="footer-about__social">
               <li><a class="footer-about__social-link" href="#" aria-label="Instagram"><svg class="social-icon" viewBox="0 0 24 24"></svg></a></li>
               <li><a class="footer-about__social-link" href="#" aria-label="Facebook"><svg class="social-icon" viewBox="0 0 24 24"></svg></a></li>
             </ul>
-          </div>
-          <nav class="footer-menu">
+          </div></div>
+          <div class="shopify-block"><nav class="footer-menu">
             <h2 class="footer-menu__heading">Shop</h2>
             <ul class="footer-menu__list">
               <li><a class="footer-menu__link" href="#">Our story</a></li>
               <li><a class="footer-menu__link" href="#">Contact</a></li>
             </ul>
-          </nav>
+          </nav></div>
+          <div class="shopify-block"><div class="newsletter">
+            <h2 class="newsletter__heading">Subscribe</h2>
+            <form class="newsletter__form"><div class="newsletter__row">
+              <div class="field"><label class="field__label visually-hidden" for="email">Email</label><input class="control input" id="email" type="email"></div>
+              <button class="button" type="submit">Subscribe</button>
+            </div></form>
+          </div></div>
+          <div class="shopify-block" id="empty">
+          </div>
         </div>
         <div class="footer__bottom">
           <div class="footer__row" id="row-one">
@@ -88,6 +108,43 @@ describe("columns", () => {
       box(".footer-about").bottom,
     );
     expect(box(".footer-menu").left).toBe(box(".footer-about").left);
+  });
+});
+
+describe("newsletter", () => {
+  test("gets the widest column, with its field and button on one row", async () => {
+    await page.viewport(1366, 800);
+    const widths = [".footer-about", ".footer-menu", ".newsletter"].map(
+      (selector) => box(selector).width,
+    );
+    expect(widths[2]).toBeGreaterThan(widths[0]);
+    expect(widths[2]).toBeGreaterThan(widths[1]);
+    expect(
+      Math.abs(
+        box(".newsletter .control").top - box(".newsletter .button").top,
+      ),
+    ).toBeLessThan(2);
+  });
+
+  test("keeps the field and button on one row on a phone", async () => {
+    await page.viewport(390, 800);
+    expect(box(".newsletter .button").right).toBeLessThanOrEqual(390);
+    expect(
+      Math.abs(
+        box(".newsletter .control").top - box(".newsletter .button").top,
+      ),
+    ).toBeLessThan(2);
+  });
+
+  test("a block that prints nothing takes no column", async () => {
+    await page.viewport(1366, 800);
+    expect(getComputedStyle(document.getElementById("empty")).display).toBe(
+      "none",
+    );
+    expect(box(".footer-about").width).toBeCloseTo(
+      box(".footer-menu").width,
+      0,
+    );
   });
 });
 
@@ -143,20 +200,28 @@ describe("bottom rows", () => {
 
   test("blocks that print nothing leave no gap or line above the bottom rows", async () => {
     await page.viewport(1366, 800);
-    document.querySelector(".footer__blocks").replaceChildren();
+    const blocks = document.querySelector(".footer__blocks");
+    blocks.replaceChildren(
+      Object.assign(document.createElement("div"), {
+        className: "shopify-block",
+      }),
+    );
     const bottom = document.querySelector(".footer__bottom");
-    expect(
-      getComputedStyle(document.querySelector(".footer__blocks")).display,
-    ).toBe("none");
+    expect(getComputedStyle(blocks).display).toBe("none");
     expect(getComputedStyle(bottom).borderTopWidth).toBe("0px");
     expect(getComputedStyle(bottom).marginTop).toBe("0px");
   });
 });
 
 describe("touch targets", () => {
-  test("social icons are 44px square", () => {
-    const link = box(".footer-about__social-link");
-    expect([link.width, link.height]).toEqual([44, 44]);
+  test("social icons are 20px with 4px around them, so each link is 28px square, 10px apart", () => {
+    const [first, second] = [
+      ...document.querySelectorAll(".footer-about__social-link"),
+    ].map((link) => link.getBoundingClientRect());
+    const icon = box(".footer-about__social-link .social-icon");
+    expect([icon.width, icon.height]).toEqual([20, 20]);
+    expect([first.width, first.height]).toEqual([28, 28]);
+    expect(second.left - first.right).toBe(10);
   });
 
   test("footer and policy links are at least 24px tall", () => {
@@ -171,7 +236,11 @@ describe("long words", () => {
     "a very long store name doesn't widen the page at %ipx",
     async (width) => {
       await page.viewport(width, 800);
-      render({ name: "Supercalifragilisticexpialidocious".repeat(3) });
+      const word = "Supercalifragilisticexpialidocious".repeat(3);
+      render({ name: word });
+      for (const heading of [".footer-menu__heading", ".newsletter__heading"]) {
+        document.querySelector(heading).textContent = word;
+      }
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
     },
   );

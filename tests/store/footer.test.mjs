@@ -75,11 +75,53 @@ describe("footer", () => {
       /<ul class="footer-about__social" aria-label="Social media">([\s\S]*?)<\/ul>/,
     )?.[1];
     if (!list) skip();
-    for (const link of list.match(/<a [^>]*>[\s\S]*?<\/a>/g)) {
+    for (const link of list.match(/<a\s[^>]*>[\s\S]*?<\/a>/g)) {
       expect(link).toMatch(
         /aria-label="(Instagram|Facebook|TikTok|YouTube|Pinterest|X)"/,
       );
       expect(link).toMatch(/<svg class="social-icon"[^>]*aria-hidden="true"/);
     }
+  });
+
+  test("has an email sign-up posting to the customer form, tagged as a newsletter", () => {
+    const form = footer(home).match(
+      /<form[^>]*class="newsletter__form"[\s\S]*?<\/form>/,
+    )?.[0];
+    expect(form).toBeDefined();
+    expect(form).toMatch(/method="post"/);
+    expect(form).toMatch(/name="form_type"[^>]*value="customer"/);
+    expect(form).toMatch(/name="contact\[tags\]"[^>]*value="newsletter"/);
+    expect(form).toMatch(
+      /<input[^>]*type="email"[^>]*name="contact\[email\]"[^>]*autocomplete="email"[^>]*required/,
+    );
+    expect(form).toMatch(/class="field__label visually-hidden"[^>]*>Email</);
+    expect(form).toMatch(
+      /<button\s+class="button"\s+type="submit"\s*>\s*Subscribe\s*<\/button>/,
+    );
+  });
+
+  test("names the sign-up form after its heading", () => {
+    expect(footer(home)).toMatch(
+      /<form[^>]*class="newsletter__form"[^>]*aria-label="Subscribe to our emails"/,
+    );
+  });
+
+  test("wraps every footer block in the element the layout rules rely on", () => {
+    const blocks = footer(home).match(
+      /<div class="footer__blocks">([\s\S]*?)<div class="footer__bottom">/,
+    )?.[1];
+    expect(
+      blocks.match(/<div id="shopify-block-[^"]+" class="shopify-block">/g),
+    ).toHaveLength(3);
+  });
+
+  test("names the sign-up with a heading", () => {
+    expect(footer(home)).toMatch(
+      /<h2 class="newsletter__heading">Subscribe to our emails<\/h2>/,
+    );
+  });
+
+  test("prints no Follow on Shop button while the store hasn't turned it on", () => {
+    expect(footer(home)).not.toMatch(/follow-on-shop/);
   });
 });

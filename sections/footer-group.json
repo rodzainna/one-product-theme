@@ -26,11 +26,16 @@
             "heading": "Shop",
             "menu": "footer"
           }
+        },
+        "newsletter": {
+          "type": "_newsletter",
+          "settings": {}
         }
       },
       "block_order": [
         "about",
-        "shop"
+        "shop",
+        "newsletter"
       ],
       "settings": {
         "color_scheme": "scheme-3",

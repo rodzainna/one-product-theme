@@ -76,16 +76,35 @@
 
   @media (min-width: 900px) {
     .footer__blocks {
-      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .footer__blocks > * {
+      flex: 1 1 14rem;
+      min-inline-size: 0;
+    }
+
+    /* The sign-up gets the widest column, so its field and button fit on one row. */
+    .footer__blocks > .newsletter {
+      flex: 1.4 1 20rem;
+    }
+
+    .footer__blocks > :has(> .newsletter) {
+      flex: 1.4 1 20rem;
     }
   }
 
-  /* Blocks that print nothing leave no gap or line behind. */
-  .footer__blocks:not(:has(> *)) {
+  /* Blocks that print nothing leave no column, gap or line behind. */
+  .footer__blocks > :not(:has(*)) {
     display: none;
   }
 
-  .footer__blocks:not(:has(> *)) + .footer__bottom {
+  .footer__blocks:not(:has(> * > *)) {
+    display: none;
+  }
+
+  .footer__blocks:not(:has(> * > *)) + .footer__bottom {
     margin-block-start: 0;
     padding-block-start: 0;
     border-block-start: 0;
@@ -99,11 +118,11 @@
     border-block-start: 1px solid var(--color-border);
     color: var(--color-foreground-muted);
     font-size: var(--text-caption);
-    overflow-wrap: anywhere;
   }
 
   .footer__bottom p {
     margin: 0;
+    overflow-wrap: anywhere;
   }
 
   /* Two aligned rows: selectors and payment icons, then the copyright and policies. */
@@ -189,7 +208,7 @@
 {% schema %}
 {
   "name": "t:general.footer",
-  "blocks": [{ "type": "@theme" }, { "type": "_footer-about" }, { "type": "_footer-menu" }],
+  "blocks": [{ "type": "@theme" }, { "type": "_footer-about" }, { "type": "_footer-menu" }, { "type": "_newsletter" }],
   "settings": [
     {
       "type": "color_scheme",
