@@ -2,7 +2,7 @@
   Renders the country and language selectors, each in its own localization form and only when
   the store offers more than one choice. Options read as short codes (AU · AUD, EN) with the full
   name as their accessible name. With scripting a change submits the form
-  (assets/localization.js), except while arrowing through the options; then, or without scripting, an Update button does.
+  (assets/select-form.js), except while arrowing through the options; then, or without scripting, an Update button does.
   https://shopify.dev/docs/storefronts/themes/markets/multiple-currencies-languages
 
   @param {string} id - Unique prefix for the form and field ids, such as Header
@@ -35,7 +35,7 @@
           </option>
         {%- endfor -%}
       {%- endcapture -%}
-      <localization-form>
+      <select-form>
         {%- form 'localization', id: country_form_id, class: 'localization__form' -%}
           {%- if globe -%}
             {%- render 'icon', name: 'globe', size: 'sm' -%}
@@ -54,7 +54,7 @@
             {{ 'localization.update_country' | t }}
           </button>
         {%- endform -%}
-      </localization-form>
+      </select-form>
     {%- endif -%}
 
     {%- if localization.available_languages.size > 1 -%}
@@ -76,7 +76,7 @@
           </option>
         {%- endfor -%}
       {%- endcapture -%}
-      <localization-form>
+      <select-form>
         {%- form 'localization', id: language_form_id, class: 'localization__form' -%}
           {%- assign language_label = 'localization.language' | t -%}
           {%- render 'select',
@@ -92,11 +92,11 @@
             {{ 'localization.update_language' | t }}
           </button>
         {%- endform -%}
-      </localization-form>
+      </select-form>
     {%- endif -%}
   </div>
 
-  <script src="{{ 'localization.js' | asset_url }}" type="module"></script>
+  <script src="{{ 'select-form.js' | asset_url }}" type="module"></script>
 {%- endif -%}
 
 {% stylesheet %}

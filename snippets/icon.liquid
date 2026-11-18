@@ -1,7 +1,7 @@
 {% doc %}
   Renders a decorative Lucide-style icon in the current text colour.
 
-  @param {string} name - account, alert, box, cart, check, chevron-down, clock, close, droplet, flame, gift, globe, heart, info, leaf, loader, menu, minus, pause, play, plus, search, shield-check, star or truck
+  @param {string} name - account, alert, box, cart, check, chevron-down, clock, close, droplet, flame, gift, globe, heart, info, leaf, loader, menu, minus, pause, play, plus, search, shield-check, sliders, star or truck
   @param {string} [size] - sm, or blank for the default
 
   @example
@@ -63,6 +63,8 @@
       <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
     {%- when 'globe' -%}
       <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>
+    {%- when 'sliders' -%}
+      <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/>
     {%- when 'gift' -%}
       <path d="M12 7v14" /><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" /><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5" /><rect x="3" y="7" width="18" height="4" rx="1" />
   {%- endcase -%}

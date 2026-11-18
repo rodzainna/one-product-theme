@@ -4,7 +4,7 @@ import criticalCss from "../../assets/critical.css?raw";
 import headerLiquid from "../../sections/header.liquid?raw";
 import selectLiquid from "../../snippets/select.liquid?raw";
 import localizationLiquid from "../../snippets/localization-form.liquid?raw";
-import "../../assets/localization.js";
+import "../../assets/select-form.js";
 
 const styles = (liquid) =>
   liquid.match(
@@ -22,18 +22,18 @@ const render = () => {
     <div class="site-header__tools">
       <div class="site-header__localization">
         <div class="localization">
-          <localization-form>
+          <select-form>
             <form class="localization__form" action="/localization" method="post" id="country-form">
               <select name="country_code" id="country"><option value="AU" selected>Australia</option><option value="US">United States</option></select>
               <button class="link-button localization__update" type="submit">Update</button>
             </form>
-          </localization-form>
-          <localization-form>
+          </select-form>
+          <select-form>
             <form class="localization__form" action="/localization" method="post" id="language-form">
               <select name="language_code" id="language"><option value="en" selected>English</option><option value="fr">Français</option></select>
               <button class="link-button localization__update" type="submit">Update</button>
             </form>
-          </localization-form>
+          </select-form>
         </div>
       </div>
     </div>`;
@@ -166,11 +166,11 @@ describe("a long country name", () => {
         ${styles(localizationLiquid)}
       </style>
       <div style="padding: 0 20px">
-        <div class="localization"><localization-form><form class="localization__form">
+        <div class="localization"><select-form><form class="localization__form">
           <span class="select select--sm select--quiet"><select class="control">
             <option>South Georgia and the South Sandwich Islands (GBP £)</option>
           </select></span>
-        </form></localization-form></div>
+        </form></select-form></div>
       </div>`;
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
     },

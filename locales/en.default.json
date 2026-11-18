@@ -50,8 +50,29 @@
     }
   },
   "collection": {
+    "active_filters": "Active filters",
+    "apply": "Apply",
     "browse_all": "Browse all products",
-    "empty": "There are no products in this collection yet."
+    "clear_all": "Clear all",
+    "empty": "There are no products in this collection yet.",
+    "filter_title": "Filter products",
+    "filters": "Filters",
+    "filters_with_count": "Filters ({{ count }})",
+    "first_page": "Go to the first page",
+    "no_matches": "No products match these filters.",
+    "past_end": "There are no products on this page.",
+    "price_chip_max": "{{ label }}: up to {{ price }}",
+    "price_chip_min": "{{ label }}: from {{ price }}",
+    "price_chip_range": "{{ label }}: {{ from }} – {{ to }}",
+    "price_from": "From",
+    "price_to": "To",
+    "products_count": {
+      "one": "{{ count }} product",
+      "other": "{{ count }} products"
+    },
+    "remove_filter": "Remove filter: {{ filter }}",
+    "sort_by": "Sort by",
+    "update": "Update"
   },
   "collections": {
     "title": "Collections"

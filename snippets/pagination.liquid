@@ -20,14 +20,14 @@
     <ul class="pagination__list">
       {%- if paginate.previous.is_link -%}
         <li>
-          <a class="pagination__link" href="{{ paginate.previous.url }}" rel="prev">{{ previous_label }}</a>
+          <a class="pagination__link" href="{{ paginate.previous.url | escape }}" rel="prev">{{ previous_label }}</a>
         </li>
       {%- endif -%}
       {%- for part in paginate.parts -%}
         <li class="pagination__page">
           {%- if part.is_link -%}
             {%- assign page_label = 'pagination.page' | t: number: part.title -%}
-            <a class="pagination__link" href="{{ part.url }}" aria-label="{{ page_label | escape }}">
+            <a class="pagination__link" href="{{ part.url | escape }}" aria-label="{{ page_label | escape }}">
               {{- part.title -}}
             </a>
           {%- elsif part.title == paginate.current_page -%}
@@ -39,7 +39,7 @@
       {%- endfor -%}
       {%- if paginate.next.is_link -%}
         <li>
-          <a class="pagination__link" href="{{ paginate.next.url }}" rel="next">{{ next_label }}</a>
+          <a class="pagination__link" href="{{ paginate.next.url | escape }}" rel="next">{{ next_label }}</a>
         </li>
       {%- endif -%}
     </ul>

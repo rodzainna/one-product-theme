@@ -16,12 +16,46 @@
       {%- endif -%}
     </header>
 
-    {%- if collection.products_count == 0 -%}
+    {%- liquid
+      assign active_count = 0
+      for filter in collection.filters
+        if filter.type == 'price_range'
+          if filter.min_value.value != blank or filter.max_value.value != blank
+            assign active_count = active_count | plus: 1
+          endif
+        else
+          assign active_count = active_count | plus: filter.active_values.size
+        endif
+      endfor
+
+      assign clear_url = collection.url
+      if collection.sort_by != blank
+        assign sort_param = collection.sort_by | url_encode
+        assign clear_url = collection.url | append: '?sort_by=' | append: sort_param
+      endif
+    -%}
+
+    {%- if collection.products_count > 0 or active_count > 0 -%}
+      {% render 'collection-filters', active_count: active_count, clear_url: clear_url %}
+    {%- endif -%}
+
+    {%- if collection.products.size == 0 -%}
       <div class="collection__empty">
-        <p>{{ 'collection.empty' | t }}</p>
-        {%- if collection.handle != 'all' -%}
-          {%- assign browse_label = 'collection.browse_all' | t -%}
-          {% render 'button', label: browse_label, url: routes.all_products_collection_url, variant: 'secondary' %}
+        {%- if collection.products_count > 0 -%}
+          <p>{{ 'collection.past_end' | t }}</p>
+          {%- assign first_label = 'collection.first_page' | t -%}
+          {%- assign first_url = paginate.parts[0].url | default: clear_url -%}
+          {% render 'button', label: first_label, url: first_url, variant: 'secondary' %}
+        {%- elsif active_count > 0 -%}
+          <p>{{ 'collection.no_matches' | t }}</p>
+          {%- assign clear_label = 'collection.clear_all' | t -%}
+          {% render 'button', label: clear_label, url: clear_url, variant: 'secondary' %}
+        {%- else -%}
+          <p>{{ 'collection.empty' | t }}</p>
+          {%- if collection.handle != 'all' -%}
+            {%- assign browse_label = 'collection.browse_all' | t -%}
+            {% render 'button', label: browse_label, url: routes.all_products_collection_url, variant: 'secondary' %}
+          {%- endif -%}
         {%- endif -%}
       </div>
     {%- else -%}

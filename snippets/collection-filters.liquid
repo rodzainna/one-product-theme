@@ -1,0 +1,400 @@
+{% doc %}
+  Renders the bar above a collection's products: a Filters button that opens a drawer with the
+  store's storefront filters, a sort select, the product count and the active filters as removable
+  chips. Filters apply with the drawer's Apply button; a change of sort applies at once
+  (assets/select-form.js); the sort form carries the applied filters, and the drawer's form carries
+  the sort. Without scripting the drawer's contents show in the page.
+  Filters are set up in the Shopify Search & Discovery app.
+  https://shopify.dev/docs/storefronts/themes/navigation-search/filtering/storefront-filtering/support-storefront-filtering
+
+  Uses the collection object, so call it on a collection page.
+
+  @param {number} active_count - How many filters are applied
+  @param {string} clear_url - Where Clear all goes: the collection, keeping a chosen sort
+
+  @example
+  {% render 'collection-filters', active_count: active_count, clear_url: clear_url %}
+{% enddoc %}
+
+{%- liquid
+  assign filters_id = 'CollectionFilters'
+  assign sort_by = collection.sort_by | default: collection.default_sort_by
+  assign count_label = 'collection.products_count' | t: count: collection.products_count
+  assign filters_label = 'collection.filters' | t
+  if active_count > 0
+    assign filters_label = 'collection.filters_with_count' | t: count: active_count
+  endif
+  assign sort_label = 'collection.sort_by' | t
+
+  assign price_min = ''
+  assign price_max = ''
+  for filter in collection.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank
+        assign price_min = filter.min_value.value | divided_by: 100.0 | round: 2
+      endif
+      if filter.max_value.value != blank
+        assign price_max = filter.max_value.value | divided_by: 100.0 | round: 2
+      endif
+    endif
+  endfor
+-%}
+
+{%- capture sort_options -%}
+  {%- for option in collection.sort_options -%}
+    <option value="{{ option.value | escape }}"{% if option.value == sort_by %} selected{% endif %}>
+      {{- option.name | escape -}}
+    </option>
+  {%- endfor -%}
+{%- endcapture -%}
+
+<div class="collection-filters">
+  <div class="collection-filters__bar">
+    {%- if collection.filters.size > 0 -%}
+      <button
+        class="button button--secondary button--sm collection-filters__open"
+        type="button"
+        aria-haspopup="dialog"
+        data-dialog-open="{{ filters_id }}Drawer"
+      >
+        {%- render 'icon', name: 'sliders', size: 'sm' -%}
+        <span>{{ filters_label }}</span>
+      </button>
+    {%- endif -%}
+    <p class="collection-filters__count">{{ count_label }}</p>
+    <select-form data-skip-empty>
+      <form class="collection-filters__sort" method="get">
+        {%- for filter in collection.filters -%}
+          {%- if filter.type == 'price_range' -%}
+            {%- if price_min != blank -%}
+              <input type="hidden" name="{{ filter.min_value.param_name }}" value="{{ price_min }}">
+            {%- endif -%}
+            {%- if price_max != blank -%}
+              <input type="hidden" name="{{ filter.max_value.param_name }}" value="{{ price_max }}">
+            {%- endif -%}
+          {%- else -%}
+            {%- for value in filter.active_values -%}
+              <input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- render 'select',
+          id: 'CollectionSort',
+          label: sort_label,
+          name: 'sort_by',
+          options_html: sort_options,
+          size: 'sm'
+        -%}
+        <button class="link-button collection-filters__update" type="submit">
+          {{ 'collection.update' | t }}
+        </button>
+      </form>
+    </select-form>
+  </div>
+
+  {%- if active_count > 0 -%}
+    <ul class="collection-filters__chips" aria-label="{{ 'collection.active_filters' | t | escape }}">
+      {%- for filter in collection.filters -%}
+        {%- if filter.type == 'price_range' -%}
+          {%- if filter.min_value.value != blank or filter.max_value.value != blank -%}
+            {%- liquid
+              assign price_from = filter.min_value.value | money
+              assign price_to = filter.max_value.value | money
+              if filter.min_value.value != blank and filter.max_value.value != blank
+                assign chip = 'collection.price_chip_range' | t: label: filter.label, from: price_from, to: price_to
+              elsif filter.min_value.value != blank
+                assign chip = 'collection.price_chip_min' | t: label: filter.label, price: price_from
+              else
+                assign chip = 'collection.price_chip_max' | t: label: filter.label, price: price_to
+              endif
+              assign remove_label = 'collection.remove_filter' | t: filter: chip
+            -%}
+            <li>
+              <a
+                class="collection-filters__chip"
+                href="{{ filter.url_to_remove | escape }}"
+                aria-label="{{ remove_label | escape }}"
+              >
+                {{- chip | escape -}}
+                {%- render 'icon', name: 'close', size: 'sm' -%}
+              </a>
+            </li>
+          {%- endif -%}
+        {%- else -%}
+          {%- for value in filter.active_values -%}
+            {%- liquid
+              assign chip = filter.label | append: ': ' | append: value.label
+              assign remove_label = 'collection.remove_filter' | t: filter: chip
+            -%}
+            <li>
+              <a
+                class="collection-filters__chip"
+                href="{{ value.url_to_remove | escape }}"
+                aria-label="{{ remove_label | escape }}"
+              >
+                {{- chip | escape -}}
+                {%- render 'icon', name: 'close', size: 'sm' -%}
+              </a>
+            </li>
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      <li>
+        <a class="collection-filters__clear" href="{{ clear_url }}">
+          {{- 'collection.clear_all' | t -}}
+        </a>
+      </li>
+    </ul>
+  {%- endif -%}
+
+  {%- if collection.filters.size > 0 -%}
+    {%- capture drawer_body -%}
+        {%- for filter in collection.filters -%}
+          {%- liquid
+            assign group_id = filters_id | append: '-' | append: forloop.index
+          -%}
+          <fieldset class="collection-filters__group">
+            <legend class="collection-filters__legend">{{ filter.label | escape }}</legend>
+            {%- if filter.type == 'price_range' -%}
+                {%- liquid
+                  assign range_max = filter.range_max | divided_by: 100.0 | round: 2
+                  assign from_id = group_id | append: '-from'
+                  assign to_id = group_id | append: '-to'
+                  assign from_label = 'collection.price_from' | t
+                  assign to_label = 'collection.price_to' | t
+                  assign price_attributes = 'min="0" step="any" inputmode="decimal"'
+                -%}
+                <div class="collection-filters__price">
+                  {%- render 'input',
+                    id: from_id,
+                    label: from_label,
+                    type: 'number',
+                    name: filter.min_value.param_name,
+                    value: price_min,
+                    placeholder: '0',
+                    size: 'sm',
+                    attributes: price_attributes
+                  -%}
+                  {%- render 'input',
+                    id: to_id,
+                    label: to_label,
+                    type: 'number',
+                    name: filter.max_value.param_name,
+                    value: price_max,
+                    placeholder: range_max,
+                    size: 'sm',
+                    attributes: price_attributes
+                  -%}
+                </div>
+            {%- else -%}
+                <ul class="collection-filters__list">
+                  {%- for value in filter.values -%}
+                    {%- liquid
+                      assign value_id = group_id | append: '-' | append: forloop.index
+                      assign value_label = value.label | append: ' (' | append: value.count | append: ')'
+                      assign value_disabled = false
+                      if value.count == 0 and value.active == false
+                        assign value_disabled = true
+                      endif
+                    -%}
+                    <li>
+                      {%- render 'checkbox',
+                        id: value_id,
+                        name: value.param_name,
+                        value: value.value,
+                        label: value_label,
+                        checked: value.active,
+                        disabled: value_disabled
+                      -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+            {%- endif -%}
+          </fieldset>
+        {%- endfor -%}
+      {%- endcapture -%}
+
+    {%- capture drawer_footer -%}
+        <div class="collection-filters__actions">
+          {%- assign apply_label = 'collection.apply' | t -%}
+          {%- render 'button', label: apply_label, type: 'submit' -%}
+          <a class="collection-filters__clear" href="{{ clear_url }}">{{ 'collection.clear_all' | t }}</a>
+        </div>
+      {%- endcapture -%}
+
+    {%- assign drawer_title = 'collection.filter_title' | t -%}
+    {%- assign drawer_id = filters_id | append: 'Drawer' -%}
+    <select-form data-skip-empty>
+      <form class="collection-filters__form" method="get">
+        {%- if collection.sort_by != blank -%}
+          <input type="hidden" name="sort_by" value="{{ collection.sort_by | escape }}">
+        {%- endif -%}
+        {%- render 'dialog',
+          id: drawer_id,
+          title: drawer_title,
+          content: drawer_body,
+          footer: drawer_footer,
+          class: 'dialog--drawer dialog--drawer-start'
+        -%}
+      </form>
+    </select-form>
+  {%- endif -%}
+</div>
+
+<script src="{{ 'select-form.js' | asset_url }}" type="module"></script>
+
+{% stylesheet %}
+  .collection-filters {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .collection-filters__bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-m);
+    align-items: center;
+  }
+
+  .collection-filters__open {
+    gap: var(--space-xs);
+  }
+
+  .collection-filters__count {
+    margin: 0;
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+
+  /* The sort sits at the end of the row. */
+  .collection-filters__bar > select-form {
+    margin-inline-start: auto;
+  }
+
+  .collection-filters__sort {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+  }
+
+  .collection-filters__sort .field {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+  }
+
+  .collection-filters__sort .field__label {
+    font-size: var(--text-small);
+    white-space: nowrap;
+  }
+
+  /* Shown without scripting, or after browsing the sort options with the keyboard. */
+  .collection-filters__update {
+    display: none;
+  }
+
+  .collection-filters__sort[data-pending] .collection-filters__update {
+    display: inline-flex;
+  }
+
+  .collection-filters__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .collection-filters__chip {
+    display: inline-flex;
+    gap: var(--space-2xs);
+    align-items: center;
+    min-height: var(--control-h-sm);
+    padding-inline: var(--space-s) var(--space-xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    color: inherit;
+    font-size: var(--text-small);
+    text-decoration: none;
+  }
+
+  .collection-filters__clear {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+    color: var(--color-accent);
+    font-size: var(--text-small);
+  }
+
+  @media (hover: hover) {
+    .collection-filters__chip:hover {
+      background: var(--color-hover);
+    }
+  }
+
+  .collection-filters__chip:focus-visible,
+  .collection-filters__clear:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .collection-filters__group {
+    margin: 0 0 var(--space-m);
+    padding: 0;
+    border: 0;
+  }
+
+  .collection-filters__legend {
+    margin-block-end: var(--space-xs);
+    padding: 0;
+    font-weight: var(--weight-ui);
+  }
+
+  .collection-filters__list {
+    display: grid;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .collection-filters__price {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-s);
+  }
+
+  .collection-filters__actions {
+    display: flex;
+    gap: var(--space-m);
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Without scripting the drawer can't open, so its filters show in the page instead. */
+  @media (scripting: none) {
+    .collection-filters__open {
+      display: none;
+    }
+
+    .collection-filters .dialog {
+      display: block;
+      position: static;
+      width: auto;
+      height: auto;
+      margin: 0;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+    }
+
+    .collection-filters [data-dialog-close] {
+      display: none;
+    }
+
+    .collection-filters__update {
+      display: inline-flex;
+    }
+  }
+{% endstylesheet %}
