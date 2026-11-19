@@ -15,36 +15,26 @@
   assign search_label = 'header.search' | t
   assign clear_label = 'search.predictive.clear' | t
   assign close_label = 'accessibility.close' | t
+  assign placeholder = 'search.predictive.placeholder' | t
 -%}
 
 <predictive-search data-url="{{ routes.predictive_search_url }}">
   <dialog class="dialog search-modal" id="{{ id }}" aria-label="{{ search_label }}" data-close-outside>
     <form class="search-modal__form" action="{{ routes.search_url }}" method="get" role="search">
+      <input type="hidden" name="type" value="article,page,product">
       <div class="search-modal__bar">
-        <div class="search-modal__field">
-          {%- render 'icon', name: 'search' -%}
-          <span class="search-modal__loader">{%- render 'icon', name: 'loader' -%}</span>
-          <label class="visually-hidden" for="{{ field_id }}">{{ search_label }}</label>
-          <input
-            class="search-modal__input"
-            id="{{ field_id }}"
-            type="text"
-            name="q"
-            enterkeyhint="search"
-            placeholder="{{ 'search.predictive.placeholder' | t }}"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            autofocus
-            role="combobox"
-            aria-autocomplete="list"
-            aria-haspopup="listbox"
-            aria-expanded="false"
-            aria-controls="predictive-search-listbox"
-            data-field
-          >
-          {%- render 'icon-button', icon: 'close', label: clear_label, size: 'sm', attributes: 'hidden data-clear' -%}
-        </div>
+        {%- capture field_attributes -%}
+          aria-controls="predictive-search-listbox" aria-autocomplete="list" aria-haspopup="listbox"
+          aria-expanded="false" role="combobox" autofocus
+        {%- endcapture -%}
+        {% render 'search-field',
+          id: field_id,
+          label: search_label,
+          clear_label: clear_label,
+          type: 'text',
+          placeholder: placeholder,
+          attributes: field_attributes
+        %}
         <button class="search-modal__close" type="button" data-dialog-close>{{ close_label }}</button>
       </div>
     </form>
@@ -69,65 +59,6 @@
     gap: var(--space-s);
     align-items: center;
     padding: var(--space-m);
-  }
-
-  /* A soft filled field; focus shows as a dark border, not the page-wide ring around a field that's focused on open. */
-  .search-modal__field {
-    display: flex;
-    flex: 1;
-    gap: var(--space-xs);
-    align-items: center;
-    min-inline-size: 0;
-    min-block-size: calc(var(--control-h) + var(--space-xs));
-    padding-inline: var(--control-pad-m) var(--space-2xs);
-    border: 2px solid transparent;
-    border-radius: var(--radius-input);
-    background: var(--color-hover);
-    transition: border-color var(--duration) var(--ease);
-  }
-
-  /* While a search is pending the loader takes the search icon's place, at the same size, so nothing shifts. */
-  .search-modal__loader {
-    display: none;
-  }
-
-  predictive-search[data-loading] .search-modal__field > .icon {
-    display: none;
-  }
-
-  predictive-search[data-loading] .search-modal__loader {
-    display: inline-flex;
-    animation: search-modal-spin var(--duration-spin) var(--ease-linear) infinite;
-  }
-
-  @keyframes search-modal-spin {
-    to {
-      rotate: 360deg;
-    }
-  }
-
-  .search-modal__field:focus-within {
-    border-color: var(--color-foreground);
-  }
-
-  .search-modal__input {
-    flex: 1;
-    min-inline-size: 0;
-    min-block-size: var(--control-h);
-    padding: var(--control-pad-y) 0;
-    border: 0;
-    background: transparent;
-    color: var(--color-foreground);
-    font-size: var(--text-lg);
-  }
-
-  .search-modal__input:focus {
-    outline: 0;
-  }
-
-  .search-modal__input::placeholder {
-    color: var(--color-foreground-muted);
-    opacity: 1;
   }
 
   .search-modal__close {

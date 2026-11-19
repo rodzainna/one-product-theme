@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, test } from "vitest";
-import { page } from "vitest/browser";
+import { page, userEvent } from "vitest/browser";
 import dialogLiquid from "../../snippets/dialog.liquid?raw";
+import fieldLiquid from "../../snippets/search-field.liquid?raw";
 import modalLiquid from "../../snippets/search-modal.liquid?raw";
 
 const styles = (liquid) =>
@@ -19,15 +20,16 @@ const render = () => {
         --text-lg: 18px; --duration-spin: 0.8s; --ease-linear: linear; }
       body { margin: 0; }
       ${styles(dialogLiquid)}
+      ${styles(fieldLiquid)}
       ${styles(modalLiquid)}
     </style>
     <predictive-search><dialog class="dialog search-modal" id="modal">
       <form class="search-modal__form">
         <div class="search-modal__bar">
-          <div class="search-modal__field">
+          <div class="search-field">
             <svg class="icon" id="search-icon" width="24" height="24"></svg>
-            <span class="search-modal__loader"><svg class="icon" width="24" height="24"></svg></span>
-            <input class="search-modal__input" type="search">
+            <span class="search-field__loader"><svg class="icon" width="24" height="24"></svg></span>
+            <input class="search-field__input" type="search">
           </div>
           <button class="search-modal__close" type="button">Close</button>
         </div>
@@ -80,9 +82,7 @@ test("it sits a sixth of the way down the window and grows downward as results a
 test("the field and Close share a row inside the card", () => {
   const modal = render();
   modal.showModal();
-  const field = modal
-    .querySelector(".search-modal__field")
-    .getBoundingClientRect();
+  const field = modal.querySelector(".search-field").getBoundingClientRect();
   const close = modal
     .querySelector(".search-modal__close")
     .getBoundingClientRect();
@@ -118,18 +118,29 @@ test("while searching, a spinning loader takes the search icon's place at the sa
   const modal = render();
   modal.showModal();
   const icon = modal.querySelector("#search-icon");
-  const loader = modal.querySelector(".search-modal__loader");
+  const loader = modal.querySelector(".search-field__loader");
   const shown = (element) => getComputedStyle(element).display !== "none";
   expect([shown(icon), shown(loader)]).toEqual([true, false]);
   const field = modal
-    .querySelector(".search-modal__input")
+    .querySelector(".search-field__input")
     .getBoundingClientRect();
 
   document.querySelector("predictive-search").setAttribute("data-loading", "");
   expect([shown(icon), shown(loader)]).toEqual([false, true]);
-  expect(getComputedStyle(loader).animationName).toBe("search-modal-spin");
+  expect(getComputedStyle(loader).animationName).toBe("search-field-spin");
   expect(loader.getBoundingClientRect().width).toBe(24);
   expect(
-    modal.querySelector(".search-modal__input").getBoundingClientRect().left,
+    modal.querySelector(".search-field__input").getBoundingClientRect().left,
   ).toBe(field.left);
+});
+
+test("Escape closes the card even while the field has text", async () => {
+  const modal = render();
+  const input = modal.querySelector(".search-field__input");
+  input.type = "text";
+  input.value = "tea";
+  modal.showModal();
+  input.focus();
+  await userEvent.keyboard("{Escape}");
+  expect(modal.open).toBe(false);
 });

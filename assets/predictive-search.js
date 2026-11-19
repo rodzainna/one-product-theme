@@ -143,7 +143,10 @@ export class PredictiveSearch extends HTMLElement {
     // The "Search for" link needs the exact text, which the section only has HTML-escaped.
     if (fresh) {
       const all = fresh.querySelector("[data-search-all]");
-      all.href = `${this.#form.action}?${new URLSearchParams({ q: terms })}`;
+      const params = new URLSearchParams({ q: terms });
+      const type = this.#form.elements.type?.value;
+      if (type) params.set("type", type);
+      all.href = `${this.#form.action}?${params}`;
     }
     this.#show(fresh);
   }

@@ -1,4 +1,4 @@
-// Creates the missing products, discounts, collections and pages from tests/store/products.mjs.
+// Creates the missing products, discounts, collections, pages and articles from tests/store/products.mjs.
 import { execFileSync } from "node:child_process";
 import {
   copyFileSync,
@@ -10,6 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  articles,
   collections,
   discounts,
   pages,
@@ -323,6 +324,56 @@ try {
       );
     }
     console.log(`created  page ${page.handle}`);
+  }
+
+  for (const article of articles) {
+    const { articles: found } = execute(
+      "query ($query: String!) { articles(first: 1, query: $query) { nodes { id } } }",
+      { query: `handle:${article.handle}` },
+    );
+    if (found.nodes.length) {
+      console.log(`kept     article ${article.handle}`);
+      continue;
+    }
+    let { blogs } = execute(
+      "query ($query: String!) { blogs(first: 1, query: $query) { nodes { id } } }",
+      { query: `handle:${article.blog}` },
+    );
+    if (!blogs.nodes.length) {
+      const { blogCreate } = execute(
+        "mutation ($blog: BlogCreateInput!) { blogCreate(blog: $blog) { blog { id } userErrors { message } } }",
+        { blog: { title: article.blog, handle: article.blog } },
+        { mutation: true },
+      );
+      if (blogCreate.userErrors.length) {
+        throw new Error(
+          `${article.blog}: ${JSON.stringify(blogCreate.userErrors)}`,
+        );
+      }
+      blogs = { nodes: [blogCreate.blog] };
+      console.log(`created  blog ${article.blog}`);
+    }
+    const { articleCreate } = execute(
+      "mutation ($article: ArticleCreateInput!) { articleCreate(article: $article) { userErrors { message } } }",
+      {
+        article: {
+          blogId: blogs.nodes[0].id,
+          handle: article.handle,
+          title: article.title,
+          author: { name: article.author },
+          summary: article.summary,
+          body: article.body,
+          isPublished: true,
+        },
+      },
+      { mutation: true },
+    );
+    if (articleCreate.userErrors.length) {
+      throw new Error(
+        `${article.handle}: ${JSON.stringify(articleCreate.userErrors)}`,
+      );
+    }
+    console.log(`created  article ${article.handle}`);
   }
 } catch (error) {
   const reason = String(error.stderr ?? "").trim();

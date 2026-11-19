@@ -31,6 +31,8 @@ pnpm test:store:setup <test-store>.myshopify.com
 
 The pickup tests also need local pickup turned on for the store's location, with an address (Settings → Locations). The gift card product needs gift cards activated (Products → Gift cards). The recommendation tests need the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app installed first; the setup script then sets test-two-options' related and complementary products. The cart tests need two automatic discounts, which the setup script creates (named "Test …").
 
+The search tests need an article: the setup script adds `test-article` to the News blog, and creates the blog when the store has none.
+
 Existing products are left as they are, so to apply a change in `products.mjs`, delete that product on the store and run the setup again.
 
 Then start a preview with the storefront password, at `http://127.0.0.1:9293` unless `STORE_URL` says otherwise. `read -s` keeps the password out of your shell history:

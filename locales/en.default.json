@@ -245,8 +245,22 @@
       },
       "search_for": "Search for “{{ terms }}”"
     },
-    "no_results_html": "No results found for {{ terms }}",
-    "results_for_html": "{{ count }} results found for {{ terms }}"
+    "hint": "Find products, articles and pages.",
+    "no_results": "No results for “{{ terms }}”. Check the spelling or try a different word.",
+    "past_end": "There are no results on this page.",
+    "results_count": {
+      "one": "{{ count }} result",
+      "other": "{{ count }} results"
+    },
+    "types": {
+      "all": "All",
+      "article": "Article",
+      "articles": "Articles",
+      "page": "Page",
+      "pages": "Pages",
+      "products": "Products"
+    },
+    "types_label": "Result types"
   },
   "testimonials": {
     "heading": "What people say"

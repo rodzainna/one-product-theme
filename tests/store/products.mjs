@@ -314,3 +314,15 @@ export const collections = [
     title: `Test collection ${index + 1}`,
   })),
 ];
+
+// Articles go in the blog with the given handle, which the setup script creates when it's missing.
+export const articles = [
+  {
+    blog: "news",
+    handle: "test-article",
+    title: "Test article",
+    author: "Test author",
+    summary: "<p>Test article for the search results.</p>",
+    body: "<p>Test article for the search results, with a body that is longer than its summary.</p>",
+  },
+];

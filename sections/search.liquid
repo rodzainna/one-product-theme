@@ -1,84 +1,277 @@
 {% comment %}
-  This section is used in the search template to render search results for
-  products, articles, and pages.
+  The search page: the search field, a row of links to narrow the results to products, articles or
+  pages, and the results as one grid of cards in relevance order. Products get the filter and sort
+  bar from the collection page; filters come from the Shopify Search & Discovery app.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/search
 {% endcomment %}
 
-<h1>{{ 'search.title' | t }}</h1>
+{%- liquid
+  assign all_types = 'article,page,product'
+  assign types_value = all_types
+  assign active_count = 0
+  assign has_products = false
+  if search.performed
+    assign types_value = search.types | join: ','
+    if search.types contains 'product'
+      assign has_products = true
+    endif
+    for filter in search.filters
+      if filter.type == 'price_range'
+        if filter.min_value.value != blank or filter.max_value.value != blank
+          assign active_count = active_count | plus: 1
+        endif
+      else
+        assign active_count = active_count | plus: filter.active_values.size
+      endif
+    endfor
+  endif
 
-<form action="{{ routes.search_url }}" method="get" role="search">
-  {%- liquid
-    assign search_id = 'Search-' | append: section.id
-    assign search_label = 'search.title' | t
-    assign search_placeholder = 'search.placeholder' | t
-    assign submit_label = 'search.submit' | t
-  -%}
-  {% render 'input',
-    id: search_id,
-    label: search_label,
-    label_hidden: true,
-    type: 'search',
-    name: 'q',
-    value: search.terms,
-    placeholder: search_placeholder
-  %}
-  {% render 'button', label: submit_label, type: 'submit' %}
-</form>
+  assign raw_terms = search.terms | replace: '&lt;', '<' | replace: '&gt;', '>' | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&amp;', '&'
+  assign terms_param = raw_terms | url_encode
+  assign search_base = routes.search_url | append: '?q=' | append: terms_param
+  assign clear_url = search_base | append: '&type=' | append: types_value
+  if search.sort_by != search.default_sort_by
+    assign sort_param = search.sort_by | url_encode
+    assign clear_url = clear_url | append: '&sort_by=' | append: sort_param
+  endif
+-%}
 
-{% if search.performed %}
-  {% if search.results_count == 0 %}
-    <p>{{ 'search.no_results_html' | t: terms: search.terms }}</p>
-  {% else %}
-    <p>{{ 'search.results_for_html' | t: terms: search.terms, count: search.results_count }}</p>
+{%- paginate search.results by 12 -%}
+  <div class="search section-full{% unless search.performed %} search--blank{% endunless %}">
+    <h1 class="search__title h2">{{ 'search.title' | t }}</h1>
+    {%- unless search.performed -%}
+      <p class="search__hint">{{ 'search.hint' | t }}</p>
+    {%- endunless -%}
 
-    <div class="search-results">
-      {% paginate search.results by 20 %}
-        {% # Search result items may be an article, a page, or a product. %}
-        {% for result in search.results %}
-          <div class="search-result">
+    <search-form class="search__form-wrapper">
+      <form class="search__form" action="{{ routes.search_url }}" method="get" role="search">
+        {%- liquid
+          assign search_id = 'Search-' | append: section.id
+          assign search_label = 'search.title' | t
+          assign search_placeholder = 'search.placeholder' | t
+          assign clear_label = 'search.predictive.clear' | t
+          assign submit_label = 'search.submit' | t
+        -%}
+        <input type="hidden" name="type" value="{{ types_value }}">
+        {% render 'search-field',
+          id: search_id,
+          label: search_label,
+          clear_label: clear_label,
+          value: search.terms,
+          placeholder: search_placeholder
+        %}
+        {% render 'button', label: submit_label, type: 'submit' %}
+      </form>
+    </search-form>
+
+    {%- if search.performed -%}
+      {%- liquid
+        assign types_label = 'search.types_label' | t
+        assign count_label = 'search.results_count' | t: count: search.results_count
+      -%}
+
+      <nav class="search__types" aria-label="{{ types_label | escape }}">
+        <ul class="search__types-list">
+          {%- for choice in (1..4) -%}
             {%- liquid
-              assign featured_image = result.featured_image | default: result.image
-              assign result_loading = null
-              if forloop.index > 4
-                assign result_loading = 'lazy'
-              endif
+              case choice
+                when 1
+                  assign choice_value = all_types
+                  assign choice_label = 'search.types.all' | t
+                when 2
+                  assign choice_value = 'product'
+                  assign choice_label = 'search.types.products' | t
+                when 3
+                  assign choice_value = 'article'
+                  assign choice_label = 'search.types.articles' | t
+                else
+                  assign choice_value = 'page'
+                  assign choice_label = 'search.types.pages' | t
+              endcase
+              assign choice_type = choice_value | url_encode
+              assign choice_url = search_base | append: '&type=' | append: choice_type
             -%}
-            {% if featured_image %}
-              {% render 'image',
-                class: 'search-result__image',
-                image: featured_image,
-                url: result.url,
-                sizes: '(min-width: 900px) 25vw, 100vw',
-                loading: result_loading
-              %}
-            {% endif %}
-            <div class="search-result__content">
-              <p>
-                {{ result.title | link_to: result.url }}
-                {% if result.price %}
-                  {{ result.price | money_with_currency }}
+            <li>
+              <a
+                class="search__type"
+                href="{{ choice_url | escape }}"
+                {% if choice_value == types_value %}
+                  aria-current="true"
                 {% endif %}
-              </p>
-            </div>
-          </div>
-        {% endfor %}
+              >
+                {{- choice_label -}}
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </nav>
 
-        {{ paginate | default_pagination }}
-      {% endpaginate %}
-    </div>
-  {% endif %}
-{% endif %}
+      {%- assign show_bar = false -%}
+      {%- if has_products -%}
+        {%- if search.results_count > 0 or active_count > 0 -%}
+          {%- assign show_bar = true -%}
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if show_bar -%}
+        {%- capture hidden_html -%}
+          <input type="hidden" name="q" value="{{ search.terms | escape }}">
+          <input type="hidden" name="type" value="{{ types_value }}">
+        {%- endcapture -%}
+        {% render 'collection-filters',
+          source: search,
+          count_label: count_label,
+          active_count: active_count,
+          clear_url: clear_url,
+          hidden_html: hidden_html
+        %}
+      {%- elsif search.results_count > 0 -%}
+        <p class="search__count">{{ count_label }}</p>
+      {%- endif -%}
+
+      {%- if search.results.size == 0 -%}
+        <div class="search__empty">
+          {%- assign terms = search.terms | escape -%}
+          {%- if search.results_count > 0 -%}
+            <p>{{ 'search.past_end' | t }}</p>
+            {%- assign first_label = 'collection.first_page' | t -%}
+            {%- assign first_url = paginate.parts[0].url | default: clear_url -%}
+            {% render 'button', label: first_label, url: first_url, variant: 'secondary' %}
+          {%- elsif active_count > 0 -%}
+            <p>{{ 'collection.no_matches' | t }}</p>
+            {%- assign clear_label = 'collection.clear_all' | t -%}
+            {% render 'button', label: clear_label, url: clear_url, variant: 'secondary' %}
+          {%- else -%}
+            <p>{{ 'search.no_results' | t: terms: terms }}</p>
+          {%- endif -%}
+        </div>
+      {%- else -%}
+        <ul class="card-grid">
+          {%- for result in search.results -%}
+            {%- liquid
+              assign card_loading = 'lazy'
+              if forloop.index <= 4
+                assign card_loading = 'eager'
+              endif
+              assign card_sizes = '(min-width: 900px) 22vw, (min-width: 600px) 30vw, 44vw'
+            -%}
+            <li>
+              {%- if result.object_type == 'product' -%}
+                {% render 'product-card',
+                  product: result,
+                  heading_tag: 'h2',
+                  sizes: card_sizes,
+                  loading: card_loading
+                %}
+              {%- else -%}
+                {% render 'search-result-card', result: result, sizes: card_sizes, loading: card_loading %}
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {% render 'pagination', paginate: paginate %}
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+{%- endpaginate -%}
+
+<script src="{{ 'search-form.js' | asset_url }}" type="module"></script>
 
 {% stylesheet %}
-  .search-results {
+  .search {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-l);
+    align-content: start;
+    padding-block: var(--space-l) var(--space-xl);
   }
-  .search-results .prev,
-  .search-results .page,
-  .search-results .next {
-    grid-column: 1 / -1;
+
+  .search__title {
+    margin: 0;
+  }
+
+  .search__form-wrapper {
+    display: block;
+    min-inline-size: 0;
+    max-width: 40rem;
+  }
+
+  .search__form {
+    display: flex;
+    gap: var(--space-s);
+    align-items: stretch;
+  }
+
+  .search__hint {
+    margin: 0;
+    color: var(--color-foreground-muted);
+  }
+
+  /* Before a search, the title, a line of help and the field sit in the middle of the screen. */
+  .search--blank {
+    justify-items: center;
+    align-content: center;
+    text-align: center;
+  }
+
+  .search--blank .search__form-wrapper {
+    width: 100%;
+  }
+
+  .search__types-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .search__type {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-h-sm);
+    padding-inline: var(--space-m);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    color: inherit;
+    font-size: var(--text-small);
+    text-decoration: none;
+  }
+
+  .search__type[aria-current] {
+    border-color: var(--color-button);
+    background: var(--color-button);
+    color: var(--color-button-text);
+  }
+
+  @media (hover: hover) {
+    .search__type:not([aria-current]):hover {
+      background: var(--color-hover);
+    }
+  }
+
+  .search__type:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .search__count {
+    margin: 0;
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+
+  .search__empty {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .search__empty p {
+    margin: 0;
+    overflow-wrap: anywhere;
   }
 {% endstylesheet %}
 

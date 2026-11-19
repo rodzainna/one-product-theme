@@ -103,6 +103,20 @@ describe("searching", () => {
     expect(new URL(all.href).search).toBe("?q=salt+%26+pepper");
   });
 
+  test("passes the form's result types on to the full results", async () => {
+    respond();
+    ui.form.insertAdjacentHTML(
+      "afterbegin",
+      '<input type="hidden" name="type" value="article,page,product">',
+    );
+    type(ui.input, "tea");
+    await expect.poll(() => ui.results.querySelector("a")).not.toBeNull();
+    const all = ui.results.querySelector("[data-search-all]");
+    expect(new URL(all.href).search).toBe(
+      "?q=tea&type=article%2Cpage%2Cproduct",
+    );
+  });
+
   test("shows only the field again when the text drops below two characters", async () => {
     respond();
     type(ui.input, "tea");

@@ -28,6 +28,7 @@
         endif
       endfor
 
+      assign count_label = 'collection.products_count' | t: count: collection.products_count
       assign clear_url = collection.url
       if collection.sort_by != blank
         assign sort_param = collection.sort_by | url_encode
@@ -36,7 +37,12 @@
     -%}
 
     {%- if collection.products_count > 0 or active_count > 0 -%}
-      {% render 'collection-filters', active_count: active_count, clear_url: clear_url %}
+      {% render 'collection-filters',
+        source: collection,
+        count_label: count_label,
+        active_count: active_count,
+        clear_url: clear_url
+      %}
     {%- endif -%}
 
     {%- if collection.products.size == 0 -%}

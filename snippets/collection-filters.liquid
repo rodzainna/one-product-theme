@@ -1,5 +1,5 @@
 {% doc %}
-  Renders the bar above a collection's products: a Filters button that opens a drawer with the
+  Renders the bar above a list of products: a Filters button that opens a drawer with the
   store's storefront filters, a sort select, the product count and the active filters as removable
   chips. Filters apply with the drawer's Apply button; a change of sort applies at once
   (assets/select-form.js); the sort form carries the applied filters, and the drawer's form carries
@@ -7,19 +7,21 @@
   Filters are set up in the Shopify Search & Discovery app.
   https://shopify.dev/docs/storefronts/themes/navigation-search/filtering/storefront-filtering/support-storefront-filtering
 
-  Uses the collection object, so call it on a collection page.
+  Works with the collection object and the search object, which share filters and sort options.
 
+  @param {object} source - The collection or the search object
+  @param {string} count_label - The count text, already translated
   @param {number} active_count - How many filters are applied
-  @param {string} clear_url - Where Clear all goes: the collection, keeping a chosen sort
+  @param {string} clear_url - Where Clear all goes: the list's own page, keeping a chosen sort
+  @param {string} [hidden_html] - Hidden inputs both forms carry along, such as the search terms
 
   @example
-  {% render 'collection-filters', active_count: active_count, clear_url: clear_url %}
+  {% render 'collection-filters', source: collection, count_label: count_label, active_count: active_count, clear_url: clear_url %}
 {% enddoc %}
 
 {%- liquid
   assign filters_id = 'CollectionFilters'
-  assign sort_by = collection.sort_by | default: collection.default_sort_by
-  assign count_label = 'collection.products_count' | t: count: collection.products_count
+  assign sort_by = source.sort_by | default: source.default_sort_by
   assign filters_label = 'collection.filters' | t
   if active_count > 0
     assign filters_label = 'collection.filters_with_count' | t: count: active_count
@@ -28,7 +30,7 @@
 
   assign price_min = ''
   assign price_max = ''
-  for filter in collection.filters
+  for filter in source.filters
     if filter.type == 'price_range'
       if filter.min_value.value != blank
         assign price_min = filter.min_value.value | divided_by: 100.0 | round: 2
@@ -41,7 +43,7 @@
 -%}
 
 {%- capture sort_options -%}
-  {%- for option in collection.sort_options -%}
+  {%- for option in source.sort_options -%}
     <option value="{{ option.value | escape }}"{% if option.value == sort_by %} selected{% endif %}>
       {{- option.name | escape -}}
     </option>
@@ -50,7 +52,7 @@
 
 <div class="collection-filters">
   <div class="collection-filters__bar">
-    {%- if collection.filters.size > 0 -%}
+    {%- if source.filters.size > 0 -%}
       <button
         class="button button--secondary button--sm collection-filters__open"
         type="button"
@@ -64,7 +66,8 @@
     <p class="collection-filters__count">{{ count_label }}</p>
     <select-form data-skip-empty>
       <form class="collection-filters__sort" method="get">
-        {%- for filter in collection.filters -%}
+        {{ hidden_html }}
+        {%- for filter in source.filters -%}
           {%- if filter.type == 'price_range' -%}
             {%- if price_min != blank -%}
               <input type="hidden" name="{{ filter.min_value.param_name }}" value="{{ price_min }}">
@@ -94,7 +97,7 @@
 
   {%- if active_count > 0 -%}
     <ul class="collection-filters__chips" aria-label="{{ 'collection.active_filters' | t | escape }}">
-      {%- for filter in collection.filters -%}
+      {%- for filter in source.filters -%}
         {%- if filter.type == 'price_range' -%}
           {%- if filter.min_value.value != blank or filter.max_value.value != blank -%}
             {%- liquid
@@ -140,16 +143,16 @@
         {%- endif -%}
       {%- endfor -%}
       <li>
-        <a class="collection-filters__clear" href="{{ clear_url }}">
+        <a class="collection-filters__clear" href="{{ clear_url | escape }}">
           {{- 'collection.clear_all' | t -}}
         </a>
       </li>
     </ul>
   {%- endif -%}
 
-  {%- if collection.filters.size > 0 -%}
+  {%- if source.filters.size > 0 -%}
     {%- capture drawer_body -%}
-        {%- for filter in collection.filters -%}
+        {%- for filter in source.filters -%}
           {%- liquid
             assign group_id = filters_id | append: '-' | append: forloop.index
           -%}
@@ -218,7 +221,7 @@
         <div class="collection-filters__actions">
           {%- assign apply_label = 'collection.apply' | t -%}
           {%- render 'button', label: apply_label, type: 'submit' -%}
-          <a class="collection-filters__clear" href="{{ clear_url }}">{{ 'collection.clear_all' | t }}</a>
+          <a class="collection-filters__clear" href="{{ clear_url | escape }}">{{ 'collection.clear_all' | t }}</a>
         </div>
       {%- endcapture -%}
 
@@ -226,8 +229,9 @@
     {%- assign drawer_id = filters_id | append: 'Drawer' -%}
     <select-form data-skip-empty>
       <form class="collection-filters__form" method="get">
-        {%- if collection.sort_by != blank -%}
-          <input type="hidden" name="sort_by" value="{{ collection.sort_by | escape }}">
+        {{ hidden_html }}
+        {%- if source.sort_by != blank -%}
+          <input type="hidden" name="sort_by" value="{{ source.sort_by | escape }}">
         {%- endif -%}
         {%- render 'dialog',
           id: drawer_id,

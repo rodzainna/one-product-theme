@@ -1,0 +1,122 @@
+{% doc %}
+  Renders the search field: a search icon, the input and a Clear button that shows once there is text.
+  While an ancestor has the data-loading attribute, a spinning loader takes the search icon's place.
+  The header's search modal and the search page share it.
+
+  @param {string} id - Unique id for the input
+  @param {string} label - Accessible name, already translated; not shown
+  @param {string} clear_label - Accessible name of the Clear button, already translated
+  @param {string} [name] - Form field name, default q
+  @param {string} [type] - search (default) or text; in a dialog use text, because Esc in a search field clears it before it closes the dialog
+  @param {string} [value] - Current text
+  @param {string} [placeholder] - Example text, never a replacement for the label
+  @param {string} [attributes] - Extra HTML attributes for the input
+
+  @example
+  {% render 'search-field', id: 'Search-field', label: search_label, clear_label: clear_label, value: search.terms %}
+{% enddoc %}
+
+<div class="search-field">
+  {%- render 'icon', name: 'search' -%}
+  <span class="search-field__loader">{%- render 'icon', name: 'loader' -%}</span>
+  <label class="visually-hidden" for="{{ id }}">{{ label }}</label>
+  <input
+    class="search-field__input"
+    id="{{ id }}"
+    type="{{ type | default: 'search' }}"
+    name="{{ name | default: 'q' }}"
+    {% if value != blank %}
+      value="{{ value | escape }}"
+    {% endif %}
+    {% if placeholder != blank %}
+      placeholder="{{ placeholder | escape }}"
+    {% endif %}
+    enterkeyhint="search"
+    autocomplete="off"
+    autocapitalize="off"
+    spellcheck="false"
+    {{ attributes }}
+    data-field
+  >
+  {%- liquid
+    assign clear_attributes = 'data-clear'
+    if value == blank
+      assign clear_attributes = 'hidden data-clear'
+    endif
+    render 'icon-button', icon: 'close', label: clear_label, size: 'sm', attributes: clear_attributes
+  -%}
+</div>
+
+{% stylesheet %}
+  /* A soft filled field; focus shows as a dark border, not the page-wide ring around a field that's focused on open. */
+  .search-field {
+    display: flex;
+    flex: 1;
+    gap: var(--space-xs);
+    align-items: center;
+    min-inline-size: 0;
+    min-block-size: calc(var(--control-h) + var(--space-xs));
+    padding-inline: var(--control-pad-m) var(--space-2xs);
+    border: 2px solid transparent;
+    border-radius: var(--radius-input);
+    background: var(--color-hover);
+    transition: border-color var(--duration) var(--ease);
+  }
+
+  .search-field:focus-within {
+    border-color: var(--color-foreground);
+  }
+
+  /* While a search is pending the loader takes the search icon's place, at the same size, so nothing shifts. */
+  .search-field__loader {
+    display: none;
+  }
+
+  [data-loading] .search-field > .icon {
+    display: none;
+  }
+
+  [data-loading] .search-field__loader {
+    display: inline-flex;
+    animation: search-field-spin var(--duration-spin) var(--ease-linear) infinite;
+  }
+
+  @keyframes search-field-spin {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  .search-field__input {
+    flex: 1;
+    min-inline-size: 0;
+    min-block-size: var(--control-h);
+    padding: var(--control-pad-y) 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-foreground);
+    font-size: var(--text-lg);
+  }
+
+  .search-field__input:focus {
+    outline: 0;
+  }
+
+  .search-field__input::placeholder {
+    color: var(--color-foreground-muted);
+    opacity: 1;
+  }
+
+  /* The Clear button is ours, so the browser's own cross is hidden. */
+  .search-field__input::-webkit-search-cancel-button {
+    appearance: none;
+    display: none;
+  }
+
+  /* Clearing needs scripting. */
+  @media (scripting: none) {
+    .search-field [data-clear] {
+      display: none;
+    }
+  }
+{% endstylesheet %}
