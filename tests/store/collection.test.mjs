@@ -88,7 +88,7 @@ describe("pagination", () => {
   });
 
   test("names each page link by its number", () => {
-    expect(pagination(first)).toMatch(/aria-label="Page 2">2<\/a>/);
+    expect(pagination(first)).toMatch(/aria-label="Page 2"\s*>\s*2\s*<\/a>/);
   });
 
   test("shows no page links when everything fits on one page", async () => {

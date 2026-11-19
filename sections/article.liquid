@@ -1,100 +1,392 @@
 {% comment %}
-  This section is used in the article template to render the article page, which
-  displays the full content of the blog post and can optionally include a
-  comments section for customers (not shown in this example).
+  The article page: one reading column with the title, date, author, tags, featured image and text,
+  links to the newer and older article, and the comments (a paginated list and a form) when the
+  blog allows them.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/article
 {% endcomment %}
 
-{% if article.image %}
-  {% render 'image', image: article.image, preload: true %}
-{% endif %}
+{%- liquid
+  assign date = article.published_at | time_tag: format: 'date'
+  assign back_label = 'blog.back_to' | t: blog: blog.title
+-%}
 
-<h1>{{ article.title }}</h1>
+<div class="article section-full">
+  <article class="article__column">
+    <a class="article__back" href="{{ blog.url }}">{{ back_label | escape }}</a>
 
-{% assign date = article.published_at | time_tag: format: 'date' %}
-<p>{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
+    <header class="article__header">
+      <h1 class="article__title h2">{{ article.title | escape }}</h1>
+      <p class="article__meta">{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
+      {%- if article.tags.size > 0 -%}
+        <ul class="article__tags" aria-label="{{ 'blog.tags' | t | escape }}">
+          {%- for tag in article.tags -%}
+            <li class="article__tag">
+              <a href="{{ blog.url }}/tagged/{{ tag | handleize }}">{{ tag | escape }}</a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </header>
 
-{% render 'rte', content: article.content %}
+    {%- if article.image != blank -%}
+      {% render 'image',
+        image: article.image,
+        aspect_ratio: '3 / 2',
+        sizes: '(min-width: 45rem) 45rem, 100vw',
+        preload: true,
+        class: 'article__image'
+      %}
+    {%- endif -%}
 
-{% if blog.comments_enabled? %}
-  <h2>{{ 'blog.article_comments' | t }}</h2>
+    <div class="article__content">
+      {% render 'rte', content: article.content %}
+    </div>
 
-  <div id="comments">
-    {% paginate article.comments by 10 %}
-      {% for comment in article.comments %}
-        <div>
-          <p>{{ comment.author }}</p>
-          <p>
-            {{- comment.created_at | time_tag: format: 'date' -}}
-          </p>
-          {% render 'rte', content: comment.content %}
-        </div>
-      {% endfor %}
+    {%- if blog.previous_article != blank or blog.next_article != blank -%}
+      <nav class="article__more" aria-label="{{ 'blog.more_articles' | t | escape }}">
+        {%- if blog.previous_article != blank -%}
+          <a class="article__more-link" href="{{ blog.previous_article.url }}" rel="prev">
+            <span class="article__more-label">{{ 'blog.previous' | t }}</span>
+            <span class="article__more-title">{{ blog.previous_article.title | escape }}</span>
+          </a>
+        {%- endif -%}
+        {%- if blog.next_article != blank -%}
+          <a class="article__more-link article__more-link--next" href="{{ blog.next_article.url }}" rel="next">
+            <span class="article__more-label">{{ 'blog.next' | t }}</span>
+            <span class="article__more-title">{{ blog.next_article.title | escape }}</span>
+          </a>
+        {%- endif -%}
+      </nav>
+    {%- endif -%}
 
-      {{ paginate | default_pagination: anchor: 'comments' }}
-    {% endpaginate %}
-  </div>
+    {%- if blog.comments_enabled? -%}
+      <section class="comments" id="comments" aria-labelledby="Comments-title">
+        <h2 class="comments__title h3" id="Comments-title">
+          {%- if article.comments_count > 0 -%}
+            {{- 'blog.comments_with_count' | t: count: article.comments_count -}}
+          {%- else -%}
+            {{- 'blog.comments' | t -}}
+          {%- endif -%}
+        </h2>
 
-  {% form 'new_comment', article %}
-    <h2>{{ 'blog.comment_form_title' | t }}</h2>
+        {%- paginate article.comments by 10 -%}
+          {%- if article.comments_count == 0 -%}
+            <p class="comments__empty">{{ 'blog.no_comments' | t }}</p>
+          {%- elsif article.comments.size == 0 -%}
+            <div class="comments__empty">
+              <p>{{ 'blog.comments_past_end' | t }}</p>
+              {%- assign first_label = 'collection.first_page' | t -%}
+              {%- assign first_url = paginate.parts[0].url | append: '#comments' -%}
+              {% render 'button', label: first_label, url: first_url, variant: 'secondary' %}
+            </div>
+          {%- else -%}
+            <ol class="comments__list">
+              {%- for comment in article.comments -%}
+                <li class="comment" id="comment-{{ comment.id }}">
+                  <p class="comment__meta">
+                    <span class="comment__author">{{ comment.author | escape }}</span>
+                    {{ comment.created_at | time_tag: format: 'date' }}
+                  </p>
+                  {% render 'rte', content: comment.content %}
+                </li>
+              {%- endfor -%}
+            </ol>
+            {% render 'pagination', paginate: paginate, anchor: 'comments' %}
+          {%- endif -%}
+        {%- endpaginate -%}
 
-    {%- liquid
-      assign comment_prefix = 'CommentForm-' | append: section.id
-      if form.errors
-        render 'message', type: 'error', errors: form.errors, id_prefix: comment_prefix
-      elsif form.posted_successfully?
-        if blog.moderated?
-          assign posted_text = 'blog.comment_posted_moderated' | t
-        else
-          assign posted_text = 'blog.comment_posted' | t
-        endif
-        render 'message', type: 'success', text: posted_text, focus: true
-      endif
+        {%- form 'new_comment', article, class: 'comments__form' -%}
+          <h2 class="comments__form-title h3">{{ 'blog.comment_form_title' | t }}</h2>
 
-      assign name_label = 'blog.comment_form_name' | t
-      assign email_label = 'blog.comment_form_email' | t
-      assign body_label = 'blog.comment_form_body' | t
-      assign submit_label = 'blog.comment_form_submit' | t
-      assign author_id = comment_prefix | append: '-author'
-      assign email_id = comment_prefix | append: '-email'
-      assign body_id = comment_prefix | append: '-body'
-    -%}
+          {%- liquid
+            assign comment_prefix = 'CommentForm-' | append: section.id
+            if form.errors
+              render 'message', type: 'error', errors: form.errors, id_prefix: comment_prefix
+            elsif form.posted_successfully?
+              if blog.moderated?
+                assign posted_text = 'blog.comment_posted_moderated' | t
+              else
+                assign posted_text = 'blog.comment_posted' | t
+              endif
+              render 'message', type: 'success', text: posted_text, focus: true
+            endif
 
-    {% render 'input',
-      id: author_id,
-      label: name_label,
-      name: 'comment[author]',
-      value: form.author,
-      autocomplete: 'name',
-      required: true,
-      errors: form.errors,
-      field: 'author'
-    %}
-    {% render 'input',
-      id: email_id,
-      label: email_label,
-      type: 'email',
-      name: 'comment[email]',
-      value: form.email,
-      autocomplete: 'email',
-      required: true,
-      errors: form.errors,
-      field: 'email'
-    %}
-    {% render 'input',
-      id: body_id,
-      label: body_label,
-      type: 'textarea',
-      name: 'comment[body]',
-      value: form.body,
-      required: true,
-      errors: form.errors,
-      field: 'body'
-    %}
-    {% render 'button', label: submit_label, type: 'submit' %}
-  {% endform %}
-{% endif %}
+            assign name_label = 'blog.comment_form_name' | t
+            assign email_label = 'blog.comment_form_email' | t
+            assign body_label = 'blog.comment_form_body' | t
+            assign submit_label = 'blog.comment_form_submit' | t
+            assign author_id = comment_prefix | append: '-author'
+            assign email_id = comment_prefix | append: '-email'
+            assign body_id = comment_prefix | append: '-body'
+          -%}
+
+          {% render 'input',
+            id: author_id,
+            label: name_label,
+            name: 'comment[author]',
+            value: form.author,
+            autocomplete: 'name',
+            required: true,
+            errors: form.errors,
+            field: 'author'
+          %}
+          {% render 'input',
+            id: email_id,
+            label: email_label,
+            type: 'email',
+            name: 'comment[email]',
+            value: form.email,
+            autocomplete: 'email',
+            required: true,
+            errors: form.errors,
+            field: 'email'
+          %}
+          {% render 'input',
+            id: body_id,
+            label: body_label,
+            type: 'textarea',
+            name: 'comment[body]',
+            value: form.body,
+            required: true,
+            errors: form.errors,
+            field: 'body'
+          %}
+          <div class="comments__submit">
+            {% render 'button', label: submit_label, type: 'submit' %}
+          </div>
+        {%- endform -%}
+      </section>
+    {%- endif -%}
+  </article>
+</div>
+
+{% stylesheet %}
+  .article {
+    display: grid;
+    align-content: start;
+    justify-items: center;
+    padding-block: var(--space-l) var(--space-xl);
+  }
+
+  /* The same reading width as the policy pages. */
+  .article__column {
+    display: grid;
+    gap: var(--space-l);
+    inline-size: 100%;
+    max-inline-size: 45rem;
+    min-inline-size: 0;
+  }
+
+  /* A grid item is as wide as its longest word unless told otherwise. */
+  .article__column > *,
+  .comments > * {
+    min-inline-size: 0;
+  }
+
+  .article__back {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    min-height: var(--target-min);
+    color: var(--color-accent);
+    font-size: var(--text-small);
+    overflow-wrap: anywhere;
+  }
+
+  .article__header {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .article__title {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .article__meta {
+    margin: 0;
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+    overflow-wrap: anywhere;
+  }
+
+  .article__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .article__tag a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-h-sm);
+    padding-inline: var(--space-s);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    color: inherit;
+    font-size: var(--text-small);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  @media (hover: hover) {
+    .article__tag a:hover {
+      background: var(--color-hover);
+    }
+  }
+
+  .article__tag a:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  .article__image {
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+
+  .article__content {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* The title is the page's h1 at h2 size, so headings in the text step down from it. */
+  .article__content h2 {
+    font-size: var(--text-h3);
+  }
+
+  .article__content h3 {
+    font-size: var(--text-h4);
+  }
+
+  .article__more {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-m);
+  }
+
+  .article__more-link {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+    padding: var(--space-s) var(--space-m);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .article__more-link--next {
+    grid-column: 2;
+    text-align: end;
+  }
+
+  .article__more-label {
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+
+  .article__more-title {
+    overflow-wrap: anywhere;
+  }
+
+  @media (hover: hover) {
+    .article__more-link:hover {
+      background: var(--color-hover);
+    }
+  }
+
+  .article__more-link:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  @media (max-width: 599.98px) {
+    .article__more {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .article__more-link--next {
+      grid-column: 1;
+    }
+  }
+
+  .comments {
+    display: grid;
+    gap: var(--space-m);
+    padding-block-start: var(--space-l);
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  .comments__title,
+  .comments__form-title {
+    margin: 0;
+  }
+
+  .comments__empty {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+    margin: 0;
+    color: var(--color-foreground-muted);
+  }
+
+  .comments__empty p {
+    margin: 0;
+  }
+
+  .comments__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .comment {
+    padding-block: var(--space-m);
+    border-block-end: 1px solid var(--color-border);
+    overflow-wrap: anywhere;
+  }
+
+  .comment:first-child {
+    padding-block-start: 0;
+  }
+
+  .comment__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-s);
+    margin: 0 0 var(--space-xs);
+    color: var(--color-foreground-muted);
+    font-size: var(--text-small);
+  }
+
+  .comment__author {
+    color: var(--color-foreground);
+    font-weight: var(--weight-ui);
+  }
+
+  .comment .rte > :first-child {
+    margin-block-start: 0;
+  }
+
+  .comment .rte > :last-child {
+    margin-block-end: 0;
+  }
+
+  .comments__form {
+    display: grid;
+    gap: var(--space-m);
+    padding-block-start: var(--space-m);
+  }
+
+  .comments__submit {
+    display: flex;
+  }
+{% endstylesheet %}
 
 {% schema %}
 {

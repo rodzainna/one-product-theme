@@ -3,6 +3,7 @@
   and Next. Renders nothing when everything fits on one page. Call it inside the paginate tag.
 
   @param {object} paginate - The paginate object
+  @param {string} [anchor] - An element id the links scroll to, such as comments
 
   @example
   {% paginate collection.products by 12 %}
@@ -15,19 +16,29 @@
     assign nav_label = 'pagination.label' | t
     assign previous_label = 'pagination.previous' | t
     assign next_label = 'pagination.next' | t
+    assign hash = ''
+    if anchor != blank
+      assign hash = '#' | append: anchor
+    endif
   -%}
   <nav class="pagination" aria-label="{{ nav_label | escape }}">
     <ul class="pagination__list">
       {%- if paginate.previous.is_link -%}
         <li>
-          <a class="pagination__link" href="{{ paginate.previous.url | escape }}" rel="prev">{{ previous_label }}</a>
+          <a class="pagination__link" href="{{ paginate.previous.url | append: hash | escape }}" rel="prev">
+            {{- previous_label -}}
+          </a>
         </li>
       {%- endif -%}
       {%- for part in paginate.parts -%}
         <li class="pagination__page">
           {%- if part.is_link -%}
             {%- assign page_label = 'pagination.page' | t: number: part.title -%}
-            <a class="pagination__link" href="{{ part.url | escape }}" aria-label="{{ page_label | escape }}">
+            <a
+              class="pagination__link"
+              href="{{ part.url | append: hash | escape }}"
+              aria-label="{{ page_label | escape }}"
+            >
               {{- part.title -}}
             </a>
           {%- elsif part.title == paginate.current_page -%}
@@ -39,7 +50,9 @@
       {%- endfor -%}
       {%- if paginate.next.is_link -%}
         <li>
-          <a class="pagination__link" href="{{ paginate.next.url | escape }}" rel="next">{{ next_label }}</a>
+          <a class="pagination__link" href="{{ paginate.next.url | append: hash | escape }}" rel="next">
+            {{- next_label -}}
+          </a>
         </li>
       {%- endif -%}
     </ul>

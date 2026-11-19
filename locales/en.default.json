@@ -16,15 +16,30 @@
     "unit_price_separator": "per"
   },
   "blog": {
-    "article_comments": "Comments",
     "article_metadata_html": "{{ date }} by {{ author }}",
+    "back_to": "Back to {{ blog }}",
     "comment_form_body": "Comment",
     "comment_form_email": "Email",
     "comment_form_name": "Name",
     "comment_form_submit": "Post",
     "comment_form_title": "Add a comment",
     "comment_posted": "Your comment was posted.",
-    "comment_posted_moderated": "Thanks. Your comment will show once it's approved."
+    "comment_posted_moderated": "Thanks. Your comment will show once it's approved.",
+    "comments": "Comments",
+    "comments_past_end": "There are no comments on this page.",
+    "comments_with_count": {
+      "one": "{{ count }} comment",
+      "other": "{{ count }} comments"
+    },
+    "empty": "There are no articles yet.",
+    "more_articles": "More articles",
+    "next": "Next article",
+    "no_comments": "No comments yet.",
+    "past_end": "There are no articles on this page.",
+    "previous": "Previous article",
+    "show_all": "Show all articles",
+    "tagged": "Tagged “{{ tag }}”",
+    "tags": "Tags"
   },
   "cart": {
     "title": "Your cart",

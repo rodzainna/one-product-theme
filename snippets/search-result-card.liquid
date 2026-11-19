@@ -20,7 +20,7 @@
     assign type_label = 'search.types.page' | t
     assign excerpt_source = result.content
   endif
-  assign excerpt = excerpt_source | strip_html | strip_newlines | truncatewords: 20
+  assign excerpt = excerpt_source | strip_html | newline_to_br | replace: '<br />', ' ' | truncatewords: 20
 -%}
 
 <article class="result-card">

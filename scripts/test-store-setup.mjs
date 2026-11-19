@@ -1,4 +1,4 @@
-// Creates the missing products, discounts, collections, pages and articles from tests/store/products.mjs.
+// Creates the missing products, discounts, collections, pages and articles, and opens the News blog to moderated comments from tests/store/products.mjs.
 import { execFileSync } from "node:child_process";
 import {
   copyFileSync,
@@ -363,6 +363,9 @@ try {
           author: { name: article.author },
           summary: article.summary,
           body: article.body,
+          image: article.image,
+          tags: article.tags,
+          publishDate: article.publishDate,
           isPublished: true,
         },
       },
@@ -374,6 +377,37 @@ try {
       );
     }
     console.log(`created  article ${article.handle}`);
+  }
+
+  // Comments are posted on the storefront (the Admin API can't create them); the test ones are approved here.
+  const { blogs: newsBlog } = execute(
+    'query { blogs(first: 1, query: "handle:news") { nodes { id commentPolicy } } }',
+  );
+  if (newsBlog.nodes[0]?.commentPolicy === "CLOSED") {
+    const { blogUpdate } = execute(
+      "mutation ($id: ID!, $blog: BlogUpdateInput!) { blogUpdate(id: $id, blog: $blog) { userErrors { message } } }",
+      { id: newsBlog.nodes[0].id, blog: { commentPolicy: "MODERATED" } },
+      { mutation: true },
+    );
+    if (blogUpdate.userErrors.length) {
+      throw new Error(JSON.stringify(blogUpdate.userErrors));
+    }
+    console.log("updated  blog news: comments moderated");
+  }
+  const { comments } = execute(
+    'query { comments(first: 100, query: "published_status:unpublished") { nodes { id author { name } } } }',
+  );
+  for (const comment of comments.nodes) {
+    if (!comment.author.name.startsWith("Test commenter")) continue;
+    const { commentApprove } = execute(
+      "mutation ($id: ID!) { commentApprove(id: $id) { userErrors { message } } }",
+      { id: comment.id },
+      { mutation: true },
+    );
+    if (commentApprove.userErrors.length) {
+      throw new Error(JSON.stringify(commentApprove.userErrors));
+    }
+    console.log(`approved comment by ${comment.author.name}`);
   }
 } catch (error) {
   const reason = String(error.stderr ?? "").trim();

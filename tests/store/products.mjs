@@ -316,6 +316,22 @@ export const collections = [
 ];
 
 // Articles go in the blog with the given handle, which the setup script creates when it's missing.
+// Their wording avoids "test" in the fillers so the search tests, which look for it, aren't thrown off.
+const MDN_VIDEO =
+  "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
+const LONG_WORD = "Supercalifragilisticexpialidocious".repeat(3);
+const articleImage = (colour, size, text) => ({
+  url: `https://placehold.co/${size}/${colour}/FFFFFF.png?text=${text}`,
+  altText: `${text} article image`,
+});
+const filler = (number) => ({
+  blog: "news",
+  handle: `journal-entry-${number}`,
+  title: `Journal entry ${number}`,
+  author: "Test author",
+  publishDate: `2026-10-${String(number).padStart(2, "0")}T09:00:00Z`,
+  body: "<p>A short entry that fills the blog's list.</p>",
+});
 export const articles = [
   {
     blog: "news",
@@ -324,5 +340,63 @@ export const articles = [
     author: "Test author",
     summary: "<p>Test article for the search results.</p>",
     body: "<p>Test article for the search results, with a body that is longer than its summary.</p>",
+  },
+  {
+    blog: "news",
+    handle: "article-with-image",
+    title: "An article with an image",
+    author: "Test author",
+    publishDate: "2026-11-10T09:00:00Z",
+    tags: ["brewing", "guides"],
+    image: articleImage("5F6B73", "1600x1000", "Landscape"),
+    summary: "<p>A landscape picture, headings, a list and a quote.</p>",
+    body: `<p>The opening paragraph, long enough to wrap onto a second line on a phone and to show the reading width on a desktop screen.</p><h2>A heading</h2><p>Text under the heading, with a <a href="/collections/all">link to the store</a>.</p><ul><li>First point</li><li>Second point</li><li>Third point</li></ul><blockquote><p>A quote, set apart from the text around it.</p></blockquote><h3>A smaller heading</h3><p>A closing paragraph.</p>`,
+  },
+  {
+    blog: "news",
+    handle: "article-with-video",
+    title: "An article with a hosted video",
+    author: "Test author",
+    publishDate: "2026-11-09T09:00:00Z",
+    image: articleImage("1E4FA8", "1200x1600", "Portrait"),
+    summary: "<p>A portrait picture and a video inside the text.</p>",
+    body: `<p>The video below sits in the article's text.</p><video controls width="1280" height="720" src="${MDN_VIDEO}"></video><p>A paragraph after the video.</p>`,
+  },
+  {
+    blog: "news",
+    handle: "article-with-youtube",
+    title: "An article with an embedded video",
+    author: "Test author",
+    publishDate: "2026-11-08T09:00:00Z",
+    image: articleImage("C62828", "1200x1200", "Square"),
+    summary: "<p>A square picture and a YouTube video in the text.</p>",
+    body: `<p>The embedded video below is Big Buck Bunny from the Blender Foundation.</p><iframe width="560" height="315" src="https://www.youtube.com/embed/aqz-KE-bpKQ" title="Big Buck Bunny" allowfullscreen></iframe><p>A paragraph after the video.</p>`,
+  },
+  {
+    blog: "news",
+    handle: "article-with-long-words",
+    title: `A title with ${LONG_WORD} in it`,
+    author: `Author${LONG_WORD}`,
+    publishDate: "2026-11-07T09:00:00Z",
+    summary: `<p>An excerpt with ${LONG_WORD} and more words after it.</p>`,
+    body: `<p>${LONG_WORD}</p><p>${"A very long article body. ".repeat(60)}</p>`,
+  },
+  {
+    blog: "news",
+    handle: "article-without-excerpt",
+    title: "An article without an excerpt or an image",
+    author: "Test author",
+    publishDate: "2026-11-06T09:00:00Z",
+    body: "<p>No summary is set, so the list falls back to the start of this text, which is long enough to be cut short after twenty or so words, because a card must stay tidy.</p>",
+  },
+  ...Array.from({ length: 10 }, (_, index) => filler(index + 1)),
+  {
+    blog: "news",
+    handle: "article-in-paragraphs",
+    title: "An article in paragraphs",
+    author: "Test author",
+    publishDate: "2026-10-20T09:00:00Z",
+    tags: ["Cold Brew"],
+    body: "<p>First paragraph.</p>\n<p>Second paragraph.</p>\n<p>Third paragraph.</p>",
   },
 ];

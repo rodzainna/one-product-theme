@@ -150,6 +150,13 @@ describe("results", () => {
     expect(html).toContain("Test article for the search results.");
   });
 
+  test("keep a space between an article's paragraphs in its excerpt", async () => {
+    const html = await get(url("q=paragraphs&type=article"));
+    expect(html).toMatch(
+      /First paragraph\.\s+Second paragraph\.\s+Third paragraph\./,
+    );
+  });
+
   test("show the count, singular or plural", async () => {
     expect(mixed).toMatch(/class="collection-filters__count">\d+ results</);
     expect(pagesOnly).toMatch(/class="search__count">\d+ results</);

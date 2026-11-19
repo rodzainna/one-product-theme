@@ -1,33 +1,120 @@
 {% comment %}
-  This section is used in the blog template to render the blog page listing all
-  articles within a blog.
+  The blog page: its title and a grid of article cards with page links, or a message when there
+  are no articles. A tagged view (/blogs/news/tagged/<tag>) names its tag and links back to all.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/blog
 {% endcomment %}
 
-<h1>{{ blog.title }}</h1>
+{%- paginate blog.articles by 12 -%}
+  <div class="blog section-full">
+    <header class="blog__header">
+      <h1 class="blog__title h2">{{ blog.title | escape }}</h1>
+      {%- if current_tags.size > 0 -%}
+        <p class="blog__tagged">
+          {{- 'blog.tagged' | t: tag: current_tags.first -}}
+          <a class="blog__all" href="{{ blog.url }}">{{ 'blog.show_all' | t }}</a>
+        </p>
+      {%- endif -%}
+    </header>
 
-{% paginate blog.articles by 5 %}
-  {% for article in blog.articles %}
-    <div>
-      {% if article.image %}
-        {% render 'image', image: article.image, preload: forloop.first, loading: 'lazy' %}
-      {% endif %}
-      <h2>
-        {{ article.title | link_to: article.url }}
-      </h2>
-      {% assign date = article.published_at | time_tag: format: 'date' %}
-      <p>{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
-      {% if article.excerpt != blank %}
-        {% render 'rte', content: article.excerpt %}
-      {% endif %}
-    </div>
-  {% endfor %}
+    {%- if blog.articles.size == 0 -%}
+      <div class="blog__empty">
+        {%- if paginate.items > 0 -%}
+          <p>{{ 'blog.past_end' | t }}</p>
+          {%- assign first_label = 'collection.first_page' | t -%}
+          {%- assign first_url = paginate.parts[0].url | default: blog.url -%}
+          {% render 'button', label: first_label, url: first_url, variant: 'secondary' %}
+        {%- else -%}
+          <p>{{ 'blog.empty' | t }}</p>
+        {%- endif -%}
+      </div>
+    {%- else -%}
+      {%- assign eager_done = false -%}
+      <ul class="card-grid blog__grid">
+        {%- for article in blog.articles -%}
+          {%- liquid
+            assign card_loading = 'lazy'
+            if article.image != blank and eager_done != true
+              assign card_loading = 'eager'
+              assign eager_done = true
+            endif
+          -%}
+          <li>
+            {% render 'article-card',
+              article: article,
+              sizes: '(min-width: 1280px) 400px, (min-width: 900px) 30vw, (min-width: 600px) 45vw, 100vw',
+              loading: card_loading
+            %}
+          </li>
+        {%- endfor -%}
+      </ul>
 
-  {%- if paginate.pages > 1 -%}
-    {{- paginate | default_pagination -}}
-  {%- endif -%}
-{% endpaginate %}
+      {% render 'pagination', paginate: paginate %}
+    {%- endif -%}
+  </div>
+{%- endpaginate -%}
+
+{% stylesheet %}
+  .blog {
+    display: grid;
+    gap: var(--space-l);
+    align-content: start;
+    padding-block: var(--space-l) var(--space-xl);
+  }
+
+  .blog__header {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .blog__title {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .blog__tagged {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-m);
+    align-items: center;
+    margin: 0;
+    color: var(--color-foreground-muted);
+  }
+
+  .blog__all {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+    color: var(--color-accent);
+  }
+
+  .blog__empty {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
+  }
+
+  .blog__empty p {
+    margin: 0;
+  }
+
+  /* Articles are wider than product cards: one column on a phone, two from 600px, three from 900px. */
+  .card-grid.blog__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 600px) {
+    .card-grid.blog__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 900px) {
+    .card-grid.blog__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
