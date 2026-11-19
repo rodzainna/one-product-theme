@@ -1,0 +1,125 @@
+.gift-card {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: var(--space-xl) var(--page-margin);
+  text-align: center;
+}
+
+.gift-card__card {
+  /* The logo max width slider stops at the QR box: 160px code plus 16px padding each side. */
+  --qr-size: 160px;
+  --qr-pad: 16px;
+  display: grid;
+  gap: var(--space-m);
+  justify-items: center;
+  inline-size: 100%;
+  max-inline-size: 28rem;
+}
+
+.gift-card__logo {
+  display: block;
+  max-inline-size: 100%;
+}
+
+.gift-card__logo > .image {
+  display: grid;
+  justify-items: center;
+}
+
+.gift-card__logo > .image > img {
+  inline-size: auto;
+  block-size: auto;
+  max-inline-size: min(var(--logo-max-width), 100%);
+  max-block-size: var(--logo-max-height);
+}
+
+.gift-card__name {
+  margin: 0;
+  font-size: var(--text-h4);
+  font-family: var(--font-heading);
+  overflow-wrap: anywhere;
+}
+
+.gift-card__balance {
+  margin: 0;
+  font-size: var(--text-h1);
+  overflow-wrap: anywhere;
+}
+
+.gift-card__notice,
+.gift-card__hint {
+  margin: 0;
+  color: var(--color-foreground-muted);
+}
+
+.gift-card__message {
+  display: grid;
+  gap: var(--space-2xs);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.gift-card__message figcaption {
+  color: var(--color-foreground-muted);
+  font-size: var(--text-small);
+}
+
+.gift-card__message blockquote {
+  margin: 0;
+}
+
+.gift-card__code-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+}
+
+/* Same width as the button, so the code stays centred. Shrinks first when space is tight. */
+.gift-card__code-row::before {
+  content: "";
+  flex: 0 1000000 var(--control-h);
+  min-inline-size: 0;
+}
+
+.gift-card__code-row > .icon-button {
+  flex: none;
+}
+
+.gift-card__copy-status {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline: 0;
+  color: var(--color-foreground-muted);
+  font-size: var(--text-small);
+  line-height: var(--leading-none);
+}
+
+.gift-card__code {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-ui);
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}
+
+.gift-card__qr {
+  padding: var(--qr-pad);
+  background: var(--color-qr-background);
+}
+
+.gift-card__qr :is(canvas, img) {
+  display: block;
+}
+
+.gift-card__qr:empty {
+  display: none;
+}
+
+.gift-card__wallet img {
+  display: block;
+}

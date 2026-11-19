@@ -268,6 +268,40 @@
     ]
   },
   {
+    "name": "t:general.gift_card",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "gift_card_logo",
+        "label": "t:labels.logo",
+        "info": "t:info.logo"
+      },
+      {
+        "type": "range",
+        "id": "gift_card_logo_max_width",
+        "min": 40,
+        "max": 192,
+        "step": 8,
+        "unit": "px",
+        "label": "t:labels.logo_max_width",
+        "info": "t:info.gift_card_logo_max_width",
+        "default": 192,
+        "visible_if": "{{ settings.gift_card_logo != blank }}"
+      },
+      {
+        "type": "range",
+        "id": "gift_card_logo_max_height",
+        "min": 24,
+        "max": 120,
+        "step": 8,
+        "unit": "px",
+        "label": "t:labels.logo_max_height",
+        "default": 80,
+        "visible_if": "{{ settings.gift_card_logo != blank }}"
+      }
+    ]
+  },
+  {
     "name": "t:general.social_media",
     "settings": [
       {

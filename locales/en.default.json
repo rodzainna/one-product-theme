@@ -125,9 +125,16 @@
   },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
-    "card": "Gift card",
+    "back_to_shop": "Visit the shop",
+    "code": "Gift card code",
+    "copied": "Copied",
+    "copy": "Copy gift card code",
+    "copy_failed": "Couldn't copy. The code is selected.",
+    "disabled": "This gift card can't be used",
     "expired": "This gift card has expired",
-    "expires_on": "Expires on {{ expires_on }}",
+    "expires_on_html": "Expires on {{ expires_on }}",
+    "message_from_sender": "A message for you",
+    "qr_code": "QR code for this gift card",
     "use_at_checkout": "Use this gift card at checkout"
   },
   "header": {
