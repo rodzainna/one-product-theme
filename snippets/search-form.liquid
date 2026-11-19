@@ -1,0 +1,51 @@
+{% doc %}
+  Renders a search form: the search field, a Search button and a hidden list of the result types to
+  look in. assets/search-form.js shows the clear button and a loader while the next page loads. The
+  search page and the 404 page share it. The field is required, so an empty search says so natively.
+
+  @param {string} id - Unique id for the field
+  @param {string} [value] - The terms already searched for
+  @param {string} [types] - Result types to search, default article,page,product
+  @param {string} [class] - Extra class on the wrapper
+
+  @example
+  {% render 'search-form', id: 'Search-404', class: 'not-found__search' %}
+{% enddoc %}
+
+{%- liquid
+  assign form_types = types | default: 'article,page,product'
+  assign search_label = 'search.title' | t
+  assign search_placeholder = 'search.placeholder' | t
+  assign clear_label = 'search.predictive.clear' | t
+  assign submit_label = 'search.submit' | t
+-%}
+
+<search-form class="search-form{% if class != blank %} {{ class }}{% endif %}">
+  <form class="search-form__row" action="{{ routes.search_url }}" method="get" role="search">
+    <input type="hidden" name="type" value="{{ form_types }}">
+    {% render 'search-field',
+      id: id,
+      label: search_label,
+      clear_label: clear_label,
+      value: value,
+      placeholder: search_placeholder,
+      attributes: 'required'
+    %}
+    {% render 'button', label: submit_label, type: 'submit' %}
+  </form>
+</search-form>
+
+<script src="{{ 'search-form.js' | asset_url }}" type="module"></script>
+
+{% stylesheet %}
+  .search-form {
+    display: block;
+    min-inline-size: 0;
+  }
+
+  .search-form__row {
+    display: flex;
+    gap: var(--space-s);
+    align-items: stretch;
+  }
+{% endstylesheet %}

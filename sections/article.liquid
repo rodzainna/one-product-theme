@@ -11,8 +11,8 @@
   assign back_label = 'blog.back_to' | t: blog: blog.title
 -%}
 
-<div class="article section-full">
-  <article class="article__column">
+<div class="article reading section-full">
+  <article class="article__column reading__column">
     <a class="article__back" href="{{ blog.url }}">{{ back_label | escape }}</a>
 
     <header class="article__header">
@@ -39,7 +39,7 @@
       %}
     {%- endif -%}
 
-    <div class="article__content">
+    <div class="article__content reading__content">
       {% render 'rte', content: article.content %}
     </div>
 
@@ -162,28 +162,6 @@
 </div>
 
 {% stylesheet %}
-  .article {
-    display: grid;
-    align-content: start;
-    justify-items: center;
-    padding-block: var(--space-l) var(--space-xl);
-  }
-
-  /* The same reading width as the policy pages. */
-  .article__column {
-    display: grid;
-    gap: var(--space-l);
-    inline-size: 100%;
-    max-inline-size: 45rem;
-    min-inline-size: 0;
-  }
-
-  /* A grid item is as wide as its longest word unless told otherwise. */
-  .article__column > *,
-  .comments > * {
-    min-inline-size: 0;
-  }
-
   .article__back {
     display: inline-flex;
     align-items: center;
@@ -249,20 +227,6 @@
     overflow: hidden;
   }
 
-  .article__content {
-    min-inline-size: 0;
-    overflow-wrap: anywhere;
-  }
-
-  /* The title is the page's h1 at h2 size, so headings in the text step down from it. */
-  .article__content h2 {
-    font-size: var(--text-h3);
-  }
-
-  .article__content h3 {
-    font-size: var(--text-h4);
-  }
-
   .article__more {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -313,6 +277,10 @@
     .article__more-link--next {
       grid-column: 1;
     }
+  }
+
+  .comments > * {
+    min-inline-size: 0;
   }
 
   .comments {

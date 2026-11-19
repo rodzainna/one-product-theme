@@ -120,7 +120,7 @@ describe("article page", () => {
   });
 
   test("is a full-screen section that scrolls normally", () => {
-    expect(withImage).toContain('class="article section-full"');
+    expect(withImage).toContain('class="article reading section-full"');
   });
 
   test("shows tags as links to the tagged blog", () => {
@@ -151,7 +151,7 @@ describe("article page", () => {
 
   test("shows the text with its headings, list and quote", () => {
     const content = withImage.match(
-      /<div class="article__content">[\s\S]*?<\/div>\s*(<nav|<section|<\/article>)/,
+      /<div class="article__content reading__content">[\s\S]*?<\/div>\s*(<nav|<section|<\/article>)/,
     )?.[0];
     for (const part of [
       "<h2",

@@ -11,7 +11,7 @@ const render = async (width) => {
   await page.viewport(width, 800);
   document.body.innerHTML = `
     <style>
-      :root { --space-l: 24px; --space-xl: 48px; --page-margin: 24px; --text-h2: 44px; --text-h3: 28px; --text-h4: 20px; --text-h1: 64px; }
+      :root { --space-l: 24px; --space-xl: 48px; --page-margin: 24px; --reading-width: 45rem; --text-h2: 44px; --text-h3: 28px; --text-h4: 20px; --text-h1: 64px; }
       body { margin: 0 }
       ${criticalCss}
       ${shopifyPolicyCss}

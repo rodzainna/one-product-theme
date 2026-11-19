@@ -3,6 +3,7 @@ import { page } from "vitest/browser";
 import criticalCss from "../../assets/critical.css?raw";
 import searchLiquid from "../../sections/search.liquid?raw";
 import fieldLiquid from "../../snippets/search-field.liquid?raw";
+import searchFormLiquid from "../../snippets/search-form.liquid?raw";
 import cardLiquid from "../../snippets/search-result-card.liquid?raw";
 
 const styles = (liquid) =>
@@ -31,13 +32,14 @@ const render = (cards, blank = false) => {
       body { margin: 0; }
       ${criticalCss}
       ${styles(fieldLiquid)}
+      ${styles(searchFormLiquid)}
       ${styles(searchLiquid)}
       ${styles(cardLiquid)}
     </style>
     <div class="shopify-section"><div class="search section-full${blank ? " search--blank" : ""}">
       <h1 class="search__title h2">Search</h1>
       ${blank ? '<p class="search__hint">Find products.</p>' : ""}
-      <search-form class="search__form-wrapper"><form class="search__form">
+      <search-form class="search-form search__form-wrapper"><form class="search-form__row">
         <div class="search-field"><svg class="icon" width="24" height="24"></svg>
           <input class="search-field__input" type="search" name="q" placeholder="Search articles, pages, or products" data-field>
           <button type="button" data-clear>x</button></div>
@@ -108,7 +110,7 @@ describe("search page result cards", () => {
       render([plain], true);
       expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
       const field = box(".search-field");
-      const button = box(".search__form button[type=submit]");
+      const button = box(".search-form__row button[type=submit]");
       expect(button.left).toBeGreaterThanOrEqual(field.right);
       expect(button.right).toBeLessThanOrEqual(width);
     },

@@ -261,6 +261,11 @@ export const discounts = [
 // Pages that use a page.<suffix>.json template. Created by handle.
 export const pages = [
   {
+    handle: "test-plain",
+    title: "Test plain page",
+    body: `<p>The default page template, with the text in one reading column.</p><h2>A heading</h2><p>Text under the heading, with a <a href="/collections/all">link to the store</a>.</p><ul><li>First point</li><li>Second point</li></ul><h3>A smaller heading</h3><p>${"Supercalifragilisticexpialidocious".repeat(3)}</p>`,
+  },
+  {
     handle: "test-about",
     title: "Test about",
     templateSuffix: "about",

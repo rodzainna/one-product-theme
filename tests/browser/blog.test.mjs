@@ -11,7 +11,7 @@ const styles = (liquid) =>
   )?.[1] ?? "";
 
 const tokens = `:root { --space-2xs: 4px; --space-xs: 8px; --space-s: 12px; --space-m: 16px; --space-l: 32px; --space-xl: 48px;
-  --page-margin: 20px; --page-width: 1200px; --radius-card: 12px; --radius-button: 999px; --color-border: #444;
+  --page-margin: 20px; --reading-width: 45rem; --page-width: 1200px; --radius-card: 12px; --radius-button: 999px; --color-border: #444;
   --color-background: #fff; --color-foreground: #000; --color-foreground-muted: #666; --color-hover: #eee; --color-accent: #a40;
   --text-body: 16px; --text-small: 14px; --text-h3: 24px; --text-h4: 20px; --leading-snug: 1.3; --control-h-sm: 36px;
   --target-min: 44px; --weight-ui: 600; --focus-ring: 2px solid #00f; --focus-offset: 2px; }
@@ -43,11 +43,11 @@ const renderArticle = ({
   comments = [],
 } = {}) => {
   document.body.innerHTML = `<style>${tokens} ${criticalCss} ${styles(articleLiquid)}</style>
-    <div class="shopify-section"><div class="article section-full"><article class="article__column">
+    <div class="shopify-section"><div class="article reading section-full"><article class="article__column reading__column">
       <a class="article__back" href="#">Back to News</a>
       <header class="article__header"><h1 class="article__title h2">${title}</h1>
         <p class="article__meta">November 10, 2026 by Test author</p></header>
-      <div class="article__content"><div class="rte">${content}</div></div>
+      <div class="article__content reading__content"><div class="rte">${content}</div></div>
       <nav class="article__more">
         <a class="article__more-link" href="#"><span class="article__more-label">Previous article</span><span class="article__more-title">${title}</span></a>
         <a class="article__more-link article__more-link--next" href="#"><span class="article__more-label">Next article</span><span class="article__more-title">${title}</span></a>

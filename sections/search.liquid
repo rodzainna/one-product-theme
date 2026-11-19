@@ -37,6 +37,7 @@
   endif
 -%}
 
+{%- assign search_id = 'Search-' | append: section.id -%}
 {%- paginate search.results by 12 -%}
   <div class="search section-full{% unless search.performed %} search--blank{% endunless %}">
     <h1 class="search__title h2">{{ 'search.title' | t }}</h1>
@@ -44,26 +45,7 @@
       <p class="search__hint">{{ 'search.hint' | t }}</p>
     {%- endunless -%}
 
-    <search-form class="search__form-wrapper">
-      <form class="search__form" action="{{ routes.search_url }}" method="get" role="search">
-        {%- liquid
-          assign search_id = 'Search-' | append: section.id
-          assign search_label = 'search.title' | t
-          assign search_placeholder = 'search.placeholder' | t
-          assign clear_label = 'search.predictive.clear' | t
-          assign submit_label = 'search.submit' | t
-        -%}
-        <input type="hidden" name="type" value="{{ types_value }}">
-        {% render 'search-field',
-          id: search_id,
-          label: search_label,
-          clear_label: clear_label,
-          value: search.terms,
-          placeholder: search_placeholder
-        %}
-        {% render 'button', label: submit_label, type: 'submit' %}
-      </form>
-    </search-form>
+    {% render 'search-form', id: search_id, value: search.terms, types: types_value, class: 'search__form-wrapper' %}
 
     {%- if search.performed -%}
       {%- liquid
@@ -177,8 +159,6 @@
   </div>
 {%- endpaginate -%}
 
-<script src="{{ 'search-form.js' | asset_url }}" type="module"></script>
-
 {% stylesheet %}
   .search {
     display: grid;
@@ -192,15 +172,8 @@
   }
 
   .search__form-wrapper {
-    display: block;
-    min-inline-size: 0;
-    max-width: 40rem;
-  }
-
-  .search__form {
-    display: flex;
-    gap: var(--space-s);
-    align-items: stretch;
+    inline-size: 100%;
+    max-inline-size: 40rem;
   }
 
   .search__hint {

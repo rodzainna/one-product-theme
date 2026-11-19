@@ -33,7 +33,7 @@ const typeLinks = (html) =>
 describe("search page", () => {
   test("has the page title as its one heading, and a search form that keeps the types", () => {
     expect(count(mixed, /<h1[\s>]/g)).toBe(1);
-    expect(mixed).toMatch(/<form class="search__form"[^>]*role="search"/);
+    expect(mixed).toMatch(/<form class="search-form__row"[^>]*role="search"/);
     expect(mixed).toContain(`<input type="hidden" name="type" value="${ALL}">`);
     expect(pagesOnly).toContain(
       '<input type="hidden" name="type" value="page">',
@@ -54,6 +54,7 @@ describe("search page", () => {
       expect(field(html)).toContain('class="search-field__loader"');
       expect(field(html)).toMatch(/<input[^>]*type="search"[^>]*name="q"/);
     }
+    expect(field(blank)).toMatch(/<input[^>]*name="q"[^>]*required/);
     expect(field(blank)).toMatch(/<button[^>]*\bhidden\b[^>]*data-clear/);
     expect(field(mixed)).not.toMatch(/<button[^>]*\bhidden\b[^>]*data-clear/);
     expect(field(mixed)).toMatch(/<input[^>]*value="test"/);
@@ -75,7 +76,7 @@ describe("search page", () => {
   });
 
   test("shows only the form before a search is made", () => {
-    expect(blank).toContain('class="search__form"');
+    expect(blank).toContain('class="search-form__row"');
     expect(blank).not.toContain("search__types");
     expect(blank).not.toContain("card-grid");
   });

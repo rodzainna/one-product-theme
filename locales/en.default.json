@@ -1,8 +1,9 @@
 {
   "404": {
-    "title": "404",
-    "not_found": "Page not found.",
-    "back_to_shopping": "Back to shopping"
+    "back_to_shopping": "Back to shopping",
+    "home": "Home",
+    "not_found": "The page may have moved, or the address may be mistyped.",
+    "title": "Page not found"
   },
   "accessibility": {
     "close": "Close",
@@ -168,9 +169,11 @@
     "previous": "Previous"
   },
   "password": {
-    "title": "This shop is private",
-    "password": "Password",
-    "enter": "Enter"
+    "default_message": "This shop is private.",
+    "enter": "Enter",
+    "owner": "Are you the store owner?",
+    "owner_login": "Log in",
+    "password": "Password"
   },
   "products": {
     "gift_card": {

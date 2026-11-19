@@ -1,13 +1,25 @@
 {% comment %}
-  This section is used in the page template to render store pages like About us
-  or Contact us.
+  The plain page template, for pages such as Privacy or Shipping: the title and the rich text in
+  one reading column, the width of the article and policy pages.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/page
 {% endcomment %}
 
-<h1>{{ page.title }}</h1>
+<div class="page reading section-full">
+  <div class="page__column reading__column">
+    <h1 class="page__title h2">{{ page.title | escape }}</h1>
+    <div class="page__content reading__content">
+      {% render 'rte', content: page.content %}
+    </div>
+  </div>
+</div>
 
-{% render 'rte', content: page.content %}
+{% stylesheet %}
+  .page__title {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
