@@ -789,6 +789,33 @@ main
   }
 }
 
+/* A grid of cards: two columns on a phone, three from 600px, four from 900px. */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-s);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card-grid > li {
+  display: grid;
+}
+
+@media (min-width: 600px) {
+  .card-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-m);
+  }
+}
+
+@media (min-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /* Room for the sticky add-to-cart bar (--sticky-bar-h is 0 while it's hidden), so it never covers focus or the footer. */
 html {
   scroll-padding-block-end: var(--sticky-bar-h);

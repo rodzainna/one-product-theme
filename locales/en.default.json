@@ -75,6 +75,9 @@
     "update": "Update"
   },
   "collections": {
+    "empty": "There are no collections yet.",
+    "past_end": "There are no collections on this page.",
+    "shop_all": "Shop all products",
     "title": "Collections"
   },
   "faq": {

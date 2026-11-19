@@ -127,7 +127,7 @@ describe("an empty collection", () => {
     expect(empty).toMatch(
       /<a[^>]*href="\/collections\/all"[^>]*>\s*Browse all products\s*<\/a>/,
     );
-    expect(empty).not.toMatch(/class="collection__grid"/);
+    expect(empty).not.toMatch(/class="card-grid"/);
     expect(pagination(empty)).toBeUndefined();
   });
 });

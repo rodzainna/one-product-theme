@@ -176,8 +176,6 @@
     "full_review": "Full review",
     "full_screen": "Full screen",
     "gradient": "Gradient strength",
-    "grid_gap": "Grid spacing",
-    "grid_item_width": "Grid item width",
     "heading": "Heading",
     "heading_scale": "Heading size",
     "headings": "Headings",
@@ -291,10 +289,6 @@
     "page_width": {
       "narrow": "Narrow",
       "wide": "Wide"
-    },
-    "size": {
-      "large": "Large",
-      "small": "Small"
     },
     "element": {
       "paragraph": "Paragraph",

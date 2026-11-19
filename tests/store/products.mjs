@@ -292,11 +292,25 @@ export const pages = [
   },
 ];
 
-// Manual collections, created by handle. The empty one tests the collection page's empty state.
+// Collections, created by handle. The empty one tests the collection page's empty state, the smart
+// one holds the filler products, and the twelve numbered ones push /collections to a second page.
 export const collections = [
   {
     handle: "test-empty",
     title: "Test empty",
     descriptionHtml: "<p>Test collection with no products.</p>",
   },
+  {
+    handle: "test-fillers",
+    title: "Test fillers",
+    descriptionHtml: "<p>The filler products.</p>",
+    ruleSet: {
+      appliedDisjunctively: false,
+      rules: [{ column: "TITLE", relation: "CONTAINS", condition: "filler" }],
+    },
+  },
+  ...Array.from({ length: 12 }, (_, index) => ({
+    handle: `test-collection-${index + 1}`,
+    title: `Test collection ${index + 1}`,
+  })),
 ];

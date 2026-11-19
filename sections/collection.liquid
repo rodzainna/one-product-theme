@@ -59,7 +59,7 @@
         {%- endif -%}
       </div>
     {%- else -%}
-      <ul class="collection__grid">
+      <ul class="card-grid">
         {%- for product in collection.products -%}
           {%- liquid
             assign card_loading = 'lazy'
@@ -108,32 +108,6 @@
 
   .collection__empty p {
     margin: 0;
-  }
-
-  .collection__grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-s);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .collection__grid > li {
-    display: grid;
-  }
-
-  @media (min-width: 600px) {
-    .collection__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--space-m);
-    }
-  }
-
-  @media (min-width: 900px) {
-    .collection__grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
   }
 {% endstylesheet %}
 

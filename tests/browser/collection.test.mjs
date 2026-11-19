@@ -37,7 +37,7 @@ const render = ({
     <div class="shopify-section">
       <div class="collection">
         <header class="collection__header"><h1 class="collection__title h2">${title}</h1></header>
-        <ul class="collection__grid">${titles.map(card).join("")}</ul>
+        <ul class="card-grid">${titles.map(card).join("")}</ul>
         ${
           pages
             ? `<nav class="pagination" aria-label="Pagination"><ul class="pagination__list">
@@ -56,8 +56,8 @@ const render = ({
 
 const lefts = () =>
   new Set(
-    [...document.querySelectorAll(".collection__grid .product-card")].map(
-      (item) => Math.round(item.getBoundingClientRect().left),
+    [...document.querySelectorAll(".card-grid .product-card")].map((item) =>
+      Math.round(item.getBoundingClientRect().left),
     ),
   );
 
@@ -83,9 +83,7 @@ describe("grid", () => {
   test("a single product keeps a card's width, at the left, instead of stretching", async () => {
     await page.viewport(1366, 800);
     render({ titles: ["Only one"] });
-    const grid = document
-      .querySelector(".collection__grid")
-      .getBoundingClientRect();
+    const grid = document.querySelector(".card-grid").getBoundingClientRect();
     const only = document
       .querySelector(".product-card")
       .getBoundingClientRect();
@@ -116,7 +114,7 @@ describe("grid", () => {
     await page.viewport(390, 800);
     render();
     expect(
-      document.querySelector(".collection__grid").getBoundingClientRect().top,
+      document.querySelector(".card-grid").getBoundingClientRect().top,
     ).toBeGreaterThanOrEqual(
       document.querySelector(".collection__title").getBoundingClientRect()
         .bottom,
@@ -150,9 +148,7 @@ describe("page links", () => {
     const links = [...document.querySelectorAll(".pagination__list li")];
     const first = links[0].getBoundingClientRect();
     const last = links.at(-1).getBoundingClientRect();
-    const grid = document
-      .querySelector(".collection__grid")
-      .getBoundingClientRect();
+    const grid = document.querySelector(".card-grid").getBoundingClientRect();
     expect(first.top).toBeGreaterThanOrEqual(grid.bottom);
     expect(
       Math.abs((first.left + last.right) / 2 - (grid.left + grid.right) / 2),

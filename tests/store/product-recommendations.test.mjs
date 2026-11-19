@@ -80,10 +80,12 @@ describe("recommended products", () => {
     const section = await fetchSection("related");
     expect(section).toMatch(/You may also like/);
     const links = titles(section);
-    expect(links.map((t) => t.title)).toEqual([
+    // The picks come first; Shopify then fills up to the limit with products of its own choosing.
+    expect(links.map((t) => t.title).slice(0, 2)).toEqual([
       "Test regular",
       "Test size sold out",
     ]);
+    expect(links.length).toBeLessThanOrEqual(4);
     for (const { href } of links) {
       expect(new URL(href, "http://store").searchParams.has("pr_rec_id")).toBe(
         true,

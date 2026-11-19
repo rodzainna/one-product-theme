@@ -1,82 +1,76 @@
 {% comment %}
-  This section is used in the list-collections template to render a list of
-  collections.
+  The list of collections: a grid of collection cards with page links, or a message and a way
+  to the store's products when there are none.
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/list-collections
 {% endcomment %}
 
-<h1>{{ 'collections.title' | t }}</h1>
+{%- paginate collections by 12 -%}
+  <div class="collections">
+    <h1 class="collections__title h2">{{ 'collections.title' | t }}</h1>
 
-<div
-  class="collections {{ section.settings.grid_item_width }}"
-  style="--grid-gap: {{ section.settings.grid_gap }}px"
->
-  {% for collection in collections %}
-    <a class="collection-card" href="{{ collection.url }}">
-      {% if collection.featured_image %}
-        {% render 'image',
-          class: 'collection-card__image',
-          image: collection.featured_image,
-          aspect_ratio: '1',
-          sizes: '(min-width: 900px) 33vw, 100vw'
-        %}
-      {% endif %}
-
-      <div class="collection-card__content">
-        <p>{{ collection.title }}</p>
-
-        {% if collection.description %}
-          <p>{{ collection.description | strip_html | truncatewords: 15 }}</p>
-        {% endif %}
+    {%- if paginate.items == 0 -%}
+      <div class="collections__empty">
+        <p>{{ 'collections.empty' | t }}</p>
+        {%- assign shop_label = 'collections.shop_all' | t -%}
+        {% render 'button', label: shop_label, url: routes.all_products_collection_url, variant: 'secondary' %}
       </div>
-    </a>
-  {% endfor %}
-</div>
+    {%- elsif paginate.current_page > paginate.pages -%}
+      <div class="collections__empty">
+        <p>{{ 'collections.past_end' | t }}</p>
+        {%- assign first_label = 'collection.first_page' | t -%}
+        {% render 'button', label: first_label, url: routes.collections_url, variant: 'secondary' %}
+      </div>
+    {%- else -%}
+      <ul class="card-grid">
+        {%- for collection in collections -%}
+          {%- liquid
+            assign card_loading = 'lazy'
+            if forloop.index <= 4
+              assign card_loading = 'eager'
+            endif
+          -%}
+          <li>
+            {% render 'collection-card',
+              collection: collection,
+              sizes: '(min-width: 900px) 22vw, (min-width: 600px) 30vw, 44vw',
+              loading: card_loading
+            %}
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {% render 'pagination', paginate: paginate %}
+    {%- endif -%}
+  </div>
+{%- endpaginate -%}
 
 {% stylesheet %}
   .collections {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(var(--collection-card-size), 100%), 1fr));
-    gap: var(--grid-gap);
+    gap: var(--space-l);
+    padding-block: var(--space-l) var(--space-xl);
   }
-  .collections--compact {
-    --collection-card-size: 160px;
+
+  .collections__title {
+    margin: 0;
+    overflow-wrap: anywhere;
   }
-  .collections--full {
-    --collection-card-size: 280px;
+
+  .collections__empty {
+    display: grid;
+    gap: var(--space-s);
+    justify-items: start;
   }
-  .collection-card {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+
+  .collections__empty p {
+    margin: 0;
   }
 {% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.collections_grid",
-  "settings": [
-    {
-      "type": "select",
-      "id": "grid_item_width",
-      "label": "t:labels.grid_item_width",
-      "options": [
-        { "value": "collections--compact", "label": "t:options.size.small" },
-        { "value": "collections--full", "label": "t:options.size.large" }
-      ],
-      "default": "collections--full"
-    },
-    {
-      "type": "range",
-      "id": "grid_gap",
-      "label": "t:labels.grid_gap",
-      "min": 0,
-      "max": 50,
-      "step": 5,
-      "unit": "px",
-      "default": 10
-    }
-  ],
-  "presets": [{ "name": "t:general.collections_grid" }]
+  "settings": []
 }
 {% endschema %}
