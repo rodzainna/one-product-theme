@@ -54,6 +54,8 @@ const render = ({
     </div>`;
 };
 
+const box = (selector) =>
+  document.querySelector(selector).getBoundingClientRect();
 const lefts = () =>
   new Set(
     [...document.querySelectorAll(".card-grid .product-card")].map((item) =>
@@ -62,7 +64,27 @@ const lefts = () =>
   );
 
 afterEach(() => {
+  document.documentElement.style.removeProperty("--header-group-h");
   document.body.innerHTML = "";
+});
+
+describe("a short page", () => {
+  test("fills the screen with its content at the top, not spread out", async () => {
+    await page.viewport(1366, 800);
+    render({ titles: [] });
+    document.body.innerHTML = `<main>${document.body.innerHTML}</main>`;
+    document.documentElement.style.setProperty("--header-group-h", "100px");
+    const section = document.querySelector(".collection");
+    section.classList.add("section-full");
+    section.innerHTML = `<header class="collection__header"><h1 class="collection__title h2">Empty</h1></header>
+      <div class="collection__empty"><p>Nothing here</p><a href="#" style="display:block;height:44px">Browse</a></div>`;
+    expect(box(".collection").height).toBe(800 - 100);
+    expect(
+      box(".collection__empty").top - box(".collection__header").bottom,
+    ).toBe(32);
+    expect(box(".collection__empty a").height).toBe(44);
+    expect(box(".collection__empty").bottom).toBeLessThan(400);
+  });
 });
 
 describe("grid", () => {

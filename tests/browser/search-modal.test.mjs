@@ -48,6 +48,12 @@ afterEach(() => {
   document.body.innerHTML = "";
 });
 
+test("the field sets an ellipsis, so a long placeholder isn't cut mid-letter", () => {
+  render();
+  const input = document.querySelector(".search-field__input");
+  expect(getComputedStyle(input).textOverflow).toBe("ellipsis");
+});
+
 test("it's a card centred across the window, 36rem wide, with all four corners rounded", () => {
   const modal = render();
   modal.showModal();

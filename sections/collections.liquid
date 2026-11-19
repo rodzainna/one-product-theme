@@ -6,7 +6,7 @@
 {% endcomment %}
 
 {%- paginate collections by 12 -%}
-  <div class="collections">
+  <div class="collections section-full">
     <h1 class="collections__title h2">{{ 'collections.title' | t }}</h1>
 
     {%- if paginate.items == 0 -%}
@@ -49,6 +49,7 @@
   .collections {
     display: grid;
     gap: var(--space-l);
+    align-content: start;
     padding-block: var(--space-l) var(--space-xl);
   }
 

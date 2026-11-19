@@ -31,6 +31,7 @@ const size = (selector) =>
 
 afterEach(() => {
   document.body.innerHTML = "";
+  document.documentElement.style.removeProperty("--header-group-h");
 });
 
 describe("a policy page", () => {
@@ -42,6 +43,12 @@ describe("a policy page", () => {
     expect(
       box(".shopify-policy__title h1").top - box("main").top,
     ).toBeGreaterThanOrEqual(48);
+  });
+
+  test("fills the screen below the header when the policy is short", async () => {
+    await render(1366);
+    document.documentElement.style.setProperty("--header-group-h", "100px");
+    expect(box(".shopify-policy__container").height).toBe(800 - 100);
   });
 
   test("lines the title up with the text instead of centring it", async () => {

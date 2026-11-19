@@ -6,7 +6,7 @@
 {% endcomment %}
 
 {%- paginate collection.products by 12 -%}
-  <div class="collection">
+  <div class="collection section-full">
     <header class="collection__header">
       <h1 class="collection__title h2">{{ collection.title | escape }}</h1>
       {%- if collection.description != blank -%}
@@ -93,6 +93,7 @@
   .collection {
     display: grid;
     gap: var(--space-l);
+    align-content: start;
     padding-block: var(--space-l) var(--space-xl);
   }
 

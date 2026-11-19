@@ -75,6 +75,14 @@ describe("pagination", () => {
   });
 });
 
+describe("the page's size", () => {
+  test("fills the screen, with or without collections on it", () => {
+    for (const html of [first, pastEnd]) {
+      expect(html).toContain('class="collections section-full"');
+    }
+  });
+});
+
 describe("a page past the last", () => {
   test("says so and links to the first page", () => {
     expect(pastEnd).toMatch(/There are no collections on this page\./);

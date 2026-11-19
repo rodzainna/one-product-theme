@@ -117,6 +117,14 @@ describe("pagination", () => {
   });
 });
 
+describe("the page's size", () => {
+  test("fills the screen in every state, so a short page doesn't leave the footer mid-screen", () => {
+    for (const html of [first, empty, noMatch, pastEnd]) {
+      expect(html).toContain('class="collection section-full"');
+    }
+  });
+});
+
 describe("an empty collection", () => {
   test("shows the collection's description, then says it's empty and offers all products, with no grid or page links", () => {
     expect(empty).toMatch(
