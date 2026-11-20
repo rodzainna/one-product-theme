@@ -10,6 +10,9 @@ const stylesheet =
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const frame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+// The script places the bubble in the toggle event, a task after the click, so one frame isn't enough.
+const placed = () =>
+  expect.poll(() => document.getElementById("tip").style.visibility).toBe("");
 
 const render = ({
   left = "50%",
@@ -147,7 +150,7 @@ describe("placement", () => {
   test("centred above the button when there's room", async () => {
     render();
     button().element().click();
-    await frame();
+    await placed();
     const b = rect(button().element());
     const r = rect(bubble());
     expect(
@@ -165,10 +168,11 @@ describe("placement", () => {
   test("below the button when there's no room above", async () => {
     render({ top: "2px" });
     button().element().click();
-    await frame();
-    expect(
-      Math.round(rect(bubble()).top - rect(button().element()).bottom),
-    ).toBe(GAP);
+    await expect
+      .poll(() =>
+        Math.round(rect(bubble()).top - rect(button().element()).bottom),
+      )
+      .toBe(GAP);
   });
 
   test.each([
@@ -180,7 +184,7 @@ describe("placement", () => {
       text: "A longer note that is wide enough to reach past the edge of the screen.",
     });
     button().element().click();
-    await frame();
+    await placed();
     const r = rect(bubble());
     expect(r.left).toBeGreaterThanOrEqual(GAP - 0.5);
     expect(r.right).toBeLessThanOrEqual(
@@ -193,13 +197,13 @@ describe("placement", () => {
     document.querySelector(".host").style.position = "absolute";
     document.body.style.height = "3000px";
     button().element().click();
-    await frame();
+    await placed();
     scrollBy(0, 100);
-    await frame();
-    await frame();
-    expect(
-      Math.round(rect(button().element()).top - rect(bubble()).bottom),
-    ).toBe(GAP);
+    await expect
+      .poll(() =>
+        Math.round(rect(button().element()).top - rect(bubble()).bottom),
+      )
+      .toBe(GAP);
     scrollTo(0, 0);
   });
 });

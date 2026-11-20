@@ -12,8 +12,8 @@ const render = (name) => {
   document.body.innerHTML = `
     <style>
       :root { --space-2xs: 4px; --space-xs: 8px; --space-m: 16px; --text-h4: 22px; --weight-heading: 700;
-        --leading-none: 1; --font-heading: serif; --color-border: #ddd; --content-grid: 20px 1fr 20px; }
-      body { margin: 0; }
+        --leading-none: 1; --font-heading: "Times New Roman", "Liberation Serif", serif; --color-border: #ddd; --content-grid: 20px 1fr 20px; }
+      body { margin: 0; font-family: Arial, "Liberation Sans", sans-serif; }
       ${stylesheet}
     </style>
     <header class="site-header"><div class="site-header__inner">

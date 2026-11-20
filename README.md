@@ -1,5 +1,7 @@
 # One Product Theme
 
+[![CI](https://github.com/rodzainna/one-product-theme/actions/workflows/ci.yml/badge.svg)](https://github.com/rodzainna/one-product-theme/actions/workflows/ci.yml)
+
 An industry-agnostic Shopify theme for stores that sell one product. Every heading, image, colour and font comes from theme settings and blocks, so the same theme suits a coffee brand, a gadget or a skincare line.
 
 > **Status:** in development. Demo stores and screenshots will be added as sections land.
@@ -49,6 +51,16 @@ The browser tests include WebKit, which drops mouse clicks while the Mac's scree
 Git hooks: commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (commitlint), staged files are formatted on commit, and `pnpm check`, `pnpm test` and a format check run before each push. The CSS guard (Stylelint, `stylelint.config.mjs`) checks `assets/*.css` and every `{% stylesheet %}` block, and fails on colours, font sizes, weights, radii, z-index, padding or timings that bypass the design tokens.
 
 JSON templates, section groups and `config/settings_data.json` are left unformatted because the theme editor rewrites them.
+
+## Continuous integration
+
+GitHub Actions runs the same checks as the pre-push hook on every pull request and on pushes to `main`. It only checks: nothing is deployed.
+
+1. **Lint, Node tests and the PR title** run side by side: Prettier, Theme Check and the CSS guard; the Node tests; and a Conventional Commits check of the title (pull requests only), because the squash merge puts it on `main`.
+2. **Chromium, Firefox and WebKit** run side by side, but only when step 1 passed.
+3. **CI passed** is the single check to require before merging.
+
+The store tests (`pnpm test:store`) aren't part of CI: they need a live Shopify store and its storefront password.
 
 ## License
 

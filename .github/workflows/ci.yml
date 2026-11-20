@@ -1,0 +1,122 @@
+name: CI
+
+# Checks only. Nothing is deployed, and the store tests are left out because they need a live
+# Shopify store (see the README).
+on:
+  pull_request:
+    # edited, so fixing the PR title re-runs the title check
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: "0"
+  SHOPIFY_CLI_VERSION: 5.0.2
+  SHOPIFY_CLI_NO_ANALYTICS: "1"
+
+jobs:
+  # Stage 1: cheap checks, in parallel.
+  lint:
+    name: Lint
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install Shopify CLI
+        run: npm install --global "@shopify/cli@${SHOPIFY_CLI_VERSION}"
+      - name: Prettier
+        run: pnpm format:check
+      - name: Theme Check and the CSS guard
+        run: pnpm check
+
+  unit:
+    name: Node tests
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm exec vitest run --project node --reporter=default --reporter=github-actions
+
+  # The squash merge puts the PR title on main, and the commit-msg hook never sees it.
+  pr-title:
+    name: PR title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Conventional Commits
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint
+
+  # Stage 2: the three browsers, only when stage 1 passed. One failing engine doesn't stop the others.
+  browsers:
+    name: ${{ matrix.browser }}
+    needs: [lint, unit, pr-title]
+    # pr-title is skipped on pushes, so only a failure there stops the browsers.
+    if: ${{ !cancelled() && needs.lint.result == 'success' && needs.unit.result == 'success' && needs.pr-title.result != 'failure' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install ${{ matrix.browser }} and its system libraries
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      # The tests name Arial and Times New Roman; these are the Linux fonts with the same widths.
+      - name: Install metric-compatible fonts
+        run: sudo apt-get install --yes --no-install-recommends fonts-liberation
+      - name: Browser tests
+        run: pnpm exec vitest run --project "browser (${{ matrix.browser }})" --reporter=default --reporter=github-actions
+      - name: Keep the failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: failure-screenshots-${{ matrix.browser }}
+          path: .vitest/attachments
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Stage 3: the one check to require before merging, so renaming or adding an engine above never
+  # breaks the branch rule.
+  ci-pass:
+    name: CI passed
+    needs: [lint, unit, pr-title, browsers]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - name: Fail unless every job passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+          BROWSERS: ${{ needs.browsers.result }}
+        run: |
+          echo "Results: $RESULTS"
+          case " $RESULTS " in
+            *" failure "* | *" cancelled "*) exit 1 ;;
+          esac
+          # A skipped pr-title job (a push to main) is fine; skipped browsers means stage 1 failed.
+          [ "$BROWSERS" = "success" ]

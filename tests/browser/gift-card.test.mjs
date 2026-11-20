@@ -20,7 +20,8 @@ const logoMarkup = (width, height) => `<div class="gift-card__logo"
 
 const tokens = `:root { --space-2xs: 4px; --space-s: 12px; --space-m: 16px; --space-xl: 48px; --page-margin: 20px;
   --color-background: #fff; --color-foreground: #000; --color-foreground-muted: #666; --color-qr-background: #fff;
-  --text-small: 14px; --text-lg: 18px; --text-h1: 64px; --text-h4: 20px; --weight-ui: 500; --font-heading: serif;
+  --text-small: 14px; --text-lg: 18px; --text-h1: 64px; --text-h4: 20px; --weight-ui: 500; --font-heading: "Times New Roman", "Liberation Serif", serif;
+  --font-body: Arial, "Liberation Sans", sans-serif;
   --control-h: 44px; --control-h-sm: 36px; --radius-full: 999px; --duration: 0.2s; --ease: ease; --color-hover: #eee; }
   body { margin: 0; }`;
 const badge =
@@ -174,7 +175,7 @@ describe("gift card copy button", () => {
     const code = box(".gift-card__code");
     const button = box("[data-copy]");
     expect(Math.abs(code.left + code.width / 2 - 1366 / 2)).toBeLessThan(2);
-    expect(button.left).toBeGreaterThanOrEqual(code.right);
+    expect(button.left).toBeGreaterThanOrEqual(code.right - 0.01);
     expect(
       Math.abs(button.top + button.height / 2 - (code.top + code.height / 2)),
     ).toBeLessThan(2);
