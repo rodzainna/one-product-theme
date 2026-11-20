@@ -1,12 +1,30 @@
 {% comment %}
-  The collection page: its title and description, a grid of product cards and page links.
+  The collection page: its image, title and description, a grid of product cards and page links.
   Also serves /collections/all.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
 {% endcomment %}
 
+{%- liquid
+  assign page_width = '75rem'
+  if settings.max_page_width == 'wide'
+    assign page_width = '90rem'
+  endif
+  assign banner_sizes = '(min-width: ' | append: page_width | append: ') ' | append: page_width | append: ', 100vw'
+-%}
+
 {%- paginate collection.products by 12 -%}
   <div class="collection section-full">
+    {%- if collection.image != blank -%}
+      {% render 'image',
+        image: collection.image,
+        aspect_ratio: '3 / 1',
+        sizes: banner_sizes,
+        preload: true,
+        class: 'collection__banner'
+      %}
+    {%- endif -%}
+
     <header class="collection__header">
       <h1 class="collection__title h2">{{ collection.title | escape }}</h1>
       {%- if collection.description != blank -%}
@@ -95,6 +113,10 @@
     gap: var(--space-l);
     align-content: start;
     padding-block: var(--space-l) var(--space-xl);
+  }
+
+  .collection__banner {
+    border-radius: var(--radius-card);
   }
 
   .collection__header {

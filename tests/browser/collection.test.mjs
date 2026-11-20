@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import { page } from "vitest/browser";
 import criticalCss from "../../assets/critical.css?raw";
 import collectionLiquid from "../../sections/collection.liquid?raw";
+import imageLiquid from "../../snippets/image.liquid?raw";
 import cardLiquid from "../../snippets/product-card.liquid?raw";
 import paginationLiquid from "../../snippets/pagination.liquid?raw";
 
@@ -9,6 +10,9 @@ const styles = (liquid) =>
   liquid.match(
     /{%-?\s*stylesheet\s*-?%}([\s\S]*?){%-?\s*endstylesheet\s*-?%}/,
   )?.[1] ?? "";
+
+const picture =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1800' height='1200'%3E%3Crect width='1800' height='1200' fill='%23888'/%3E%3C/svg%3E";
 
 const card = (title) => `<li><article class="product-card">
   <div class="product-card__media"></div>
@@ -20,6 +24,7 @@ const render = ({
   title = "Coffee",
   titles = ["One", "Two", "Three", "Four", "Five"],
   pages = false,
+  banner = false,
 } = {}) => {
   document.body.innerHTML = `
     <style>
@@ -30,12 +35,14 @@ const render = ({
         --text-body: 16px; --leading-snug: 1.3; --focus-ring: 2px solid #00f; --focus-offset: 2px; }
       body { margin: 0; }
       ${criticalCss}
+      ${styles(imageLiquid)}
       ${styles(collectionLiquid)}
       ${styles(cardLiquid)}
       ${styles(paginationLiquid)}
     </style>
     <div class="shopify-section">
       <div class="collection">
+        ${banner ? `<div class="image image--cropped collection__banner" style="--image-ratio: 3 / 1"><img alt="" src="${picture}" width="1800" height="1200"></div>` : ""}
         <header class="collection__header"><h1 class="collection__title h2">${title}</h1></header>
         <ul class="card-grid">${titles.map(card).join("")}</ul>
         ${
@@ -66,6 +73,39 @@ const lefts = () =>
 afterEach(() => {
   document.documentElement.style.removeProperty("--header-group-h");
   document.body.innerHTML = "";
+});
+
+describe("banner", () => {
+  test.each([390, 768, 1366])(
+    "is a 3:1 strip as wide as the grid at %ipx, however tall the picture is",
+    async (width) => {
+      await page.viewport(width, 800);
+      render({ banner: true });
+      const banner = box(".collection__banner");
+      expect(banner.width / banner.height).toBeCloseTo(3, 1);
+      expect(banner.width).toBe(box(".card-grid").width);
+    },
+  );
+
+  test("sits above the title with the page's usual gap, with the cards' corners", async () => {
+    await page.viewport(1366, 800);
+    render({ banner: true });
+    expect(
+      box(".collection__header").top - box(".collection__banner").bottom,
+    ).toBeCloseTo(32, 1);
+    const style = getComputedStyle(
+      document.querySelector(".collection__banner"),
+    );
+    expect(style.borderTopLeftRadius).toBe("12px");
+    expect(style.overflow).toBe("hidden");
+  });
+
+  test("leaves no gap above the title when the collection has no image", async () => {
+    await page.viewport(1366, 800);
+    render();
+    expect(document.querySelector(".collection__banner")).toBeNull();
+    expect(box(".collection__header").top - box(".collection").top).toBe(32);
+  });
 });
 
 describe("a short page", () => {

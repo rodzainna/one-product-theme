@@ -298,7 +298,8 @@ export const pages = [
 ];
 
 // Collections, created by handle. The empty one tests the collection page's empty state, the smart
-// one holds the filler products, and the twelve numbered ones push /collections to a second page.
+// one holds the filler products and has a banner image, and the twelve numbered ones push
+// /collections to a second page.
 export const collections = [
   {
     handle: "test-empty",
@@ -309,6 +310,10 @@ export const collections = [
     handle: "test-fillers",
     title: "Test fillers",
     descriptionHtml: "<p>The filler products.</p>",
+    image: {
+      src: "https://placehold.co/1800x600/5F7F6A/FFFFFF.png?text=Test+fillers",
+      altText: "Test fillers banner",
+    },
     ruleSet: {
       appliedDisjunctively: false,
       rules: [{ column: "TITLE", relation: "CONTAINS", condition: "filler" }],

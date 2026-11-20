@@ -7,6 +7,9 @@ let empty;
 let filtered;
 let noMatch;
 let pastEnd;
+let withImage;
+let withImageSecond;
+let withImageFiltered;
 const FILTERED =
   "/collections/all?filter.v.availability=1&filter.v.price.lte=15&sort_by=price-ascending";
 beforeAll(async () => {
@@ -16,6 +19,11 @@ beforeAll(async () => {
   filtered = await get(FILTERED);
   noMatch = await get("/collections/all?filter.v.price.gte=99999");
   pastEnd = await get("/collections/all?page=99");
+  withImage = await get("/collections/test-fillers");
+  withImageSecond = await get("/collections/test-fillers?page=2");
+  withImageFiltered = await get(
+    "/collections/test-fillers?filter.v.availability=1",
+  );
 });
 
 const cards = (html) => html.match(/<article class="product-card">/g) ?? [];
@@ -114,6 +122,35 @@ describe("pagination", () => {
 
   test("has no empty list items", () => {
     expect(pagination(first)).not.toMatch(/<li>\s*<\/li>/);
+  });
+});
+
+describe("the collection's image", () => {
+  const banner = (html) =>
+    html.match(
+      /<div\s+class="image image--cropped collection__banner"[^>]*>[\s\S]*?<\/div>/,
+    )?.[0];
+
+  test("shows as a 3:1 banner with the admin's alt text, above the title", () => {
+    const html = banner(withImage);
+    expect(html).toBeDefined();
+    expect(html).toContain("--image-ratio: 3 / 1");
+    expect(html).toContain('sizes="(min-width: 75rem) 75rem, 100vw"');
+    expect(html).toContain('alt="Test fillers banner"');
+    expect(withImage.indexOf("collection__banner")).toBeLessThan(
+      withImage.indexOf('<h1 class="collection__title'),
+    );
+  });
+
+  test("shows on every page and in a filtered view, like the title", () => {
+    expect(banner(withImageSecond)).toBeDefined();
+    expect(banner(withImageFiltered)).toBeDefined();
+  });
+
+  test("is left out when the collection has no image", () => {
+    for (const html of [first, empty, noMatch, pastEnd]) {
+      expect(html).not.toContain("collection__banner");
+    }
   });
 });
 

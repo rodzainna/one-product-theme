@@ -275,11 +275,26 @@ try {
 
   for (const collection of collections) {
     const { collectionByIdentifier: found } = execute(
-      "query ($handle: String!) { collectionByIdentifier(identifier: { handle: $handle }) { id } }",
+      "query ($handle: String!) { collectionByIdentifier(identifier: { handle: $handle }) { id image { id altText } } }",
       { handle: collection.handle },
     );
     if (found) {
-      console.log(`kept     collection ${collection.handle}`);
+      const wanted = collection.image;
+      if (wanted && found.image?.altText !== wanted.altText) {
+        const { collectionUpdate } = execute(
+          "mutation ($input: CollectionInput!) { collectionUpdate(input: $input) { userErrors { message } } }",
+          { input: { id: found.id, image: wanted } },
+          { mutation: true },
+        );
+        if (collectionUpdate.userErrors.length) {
+          throw new Error(
+            `${collection.handle}: ${JSON.stringify(collectionUpdate.userErrors)}`,
+          );
+        }
+        console.log(`updated  collection ${collection.handle}: image`);
+      } else {
+        console.log(`kept     collection ${collection.handle}`);
+      }
       continue;
     }
     const { collectionCreate } = execute(
