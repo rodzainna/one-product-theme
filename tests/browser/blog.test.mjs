@@ -22,10 +22,10 @@ const card = ({
   title = "Title",
   excerpt = "An excerpt.",
   image = false,
-}) => `<li><article class="article-card">
+}) => `<li><article class="article-card linked-card">
   ${image ? '<div class="article-card__media"><div style="aspect-ratio: 3 / 2; background: #ccc"></div></div>' : ""}
   <div class="article-card__body"><p class="article-card__meta">November 10, 2026 by Test author</p>
-  <h2 class="article-card__title"><a class="article-card__link" href="#">${title}</a></h2>
+  <h2 class="article-card__title"><a class="linked-card__link" href="#">${title}</a></h2>
   <p class="article-card__excerpt">${excerpt}</p></div>
 </article></li>`;
 
@@ -92,9 +92,7 @@ describe("blog list", () => {
       const { left, top, height } = item.getBoundingClientRect();
       for (const y of [top + 8, top + height - 8]) {
         expect(
-          document
-            .elementFromPoint(left + 8, y)
-            .closest("a.article-card__link"),
+          document.elementFromPoint(left + 8, y).closest("a.linked-card__link"),
         ).not.toBeNull();
       }
     }

@@ -856,6 +856,46 @@ main
   }
 }
 
+/* The bordered, rounded, clipped box every card shares. */
+.card,
+.linked-card {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+/* A card with one link that covers the whole card, so the card is clickable. */
+.linked-card {
+  position: relative;
+  background: var(--color-background);
+}
+
+.linked-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.linked-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.linked-card__link:focus-visible {
+  outline: none;
+}
+
+.linked-card:has(.linked-card__link:focus-visible) {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+@media (hover: hover) {
+  .linked-card:hover .linked-card__link {
+    text-decoration: underline;
+  }
+}
+
 /* Room for the sticky add-to-cart bar (--sticky-bar-h is 0 while it's hidden), so it never covers focus or the footer. */
 html {
   scroll-padding-block-end: var(--sticky-bar-h);

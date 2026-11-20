@@ -14,9 +14,9 @@ const styles = (liquid) =>
 const picture =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1800' height='1200'%3E%3Crect width='1800' height='1200' fill='%23888'/%3E%3C/svg%3E";
 
-const card = (title) => `<li><article class="product-card">
+const card = (title) => `<li><article class="product-card linked-card">
   <div class="product-card__media"></div>
-  <div class="product-card__body"><h3 class="product-card__title"><a class="product-card__link" href="#">${title}</a></h3></div>
+  <div class="product-card__body"><h3 class="product-card__title"><a class="linked-card__link" href="#">${title}</a></h3></div>
 </article></li>`;
 
 // The section as the page renders it, inside the content column Shopify's section wrapper gives it.

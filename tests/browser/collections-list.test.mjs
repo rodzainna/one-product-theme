@@ -9,9 +9,9 @@ const styles = (liquid) =>
     /{%-?\s*stylesheet\s*-?%}([\s\S]*?){%-?\s*endstylesheet\s*-?%}/,
   )?.[1] ?? "";
 
-const card = (title) => `<li><article class="collection-card">
+const card = (title) => `<li><article class="collection-card linked-card">
   <div class="collection-card__media"><svg class="collection-card__placeholder" viewBox="0 0 200 100"></svg></div>
-  <div class="collection-card__body"><h2 class="collection-card__title"><a class="collection-card__link" href="#">${title}</a></h2>
+  <div class="collection-card__body"><h2 class="collection-card__title"><a class="linked-card__link" href="#">${title}</a></h2>
   <p class="collection-card__count">3 products</p></div>
 </article></li>`;
 
@@ -117,6 +117,6 @@ describe("collection cards", () => {
     render();
     const { left, top } = box(".collection-card");
     const hit = document.elementFromPoint(left + 8, top + 8);
-    expect(hit.closest("a.collection-card__link")).not.toBeNull();
+    expect(hit.closest("a.linked-card__link")).not.toBeNull();
   });
 });

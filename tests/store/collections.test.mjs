@@ -11,7 +11,7 @@ beforeAll(async () => {
 });
 
 const cards = (html) =>
-  html.split('<article class="collection-card">').slice(1);
+  html.split('<article class="collection-card linked-card">').slice(1);
 const pagination = (html) =>
   html.match(/<nav class="pagination"[\s\S]*?<\/nav>/)?.[0];
 
@@ -26,9 +26,9 @@ describe("collection list page", () => {
   test("lists twelve collections per page as cards, each with one link to its collection", () => {
     expect(cards(first)).toHaveLength(12);
     for (const html of cards(first)) {
-      expect(html.match(/<a class="collection-card__link"/g)).toHaveLength(1);
+      expect(html.match(/<a class="linked-card__link"/g)).toHaveLength(1);
       expect(html).toMatch(
-        /<h2 class="collection-card__title">\s*<a class="collection-card__link" href="\/collections\/[^"]+">/,
+        /<h2 class="collection-card__title">\s*<a class="linked-card__link" href="\/collections\/[^"]+">/,
       );
     }
   });

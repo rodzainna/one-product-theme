@@ -20,7 +20,8 @@ beforeAll(async () => {
   noImage = await get("/blogs/news/article-without-excerpt");
 });
 
-const cards = (html) => html.split('<article class="article-card">').slice(1);
+const cards = (html) =>
+  html.split('<article class="article-card linked-card">').slice(1);
 const count = (html, pattern) => (html.match(pattern) ?? []).length;
 
 describe("blog page", () => {
@@ -42,9 +43,9 @@ describe("blog page", () => {
 
   test("gives each card one link to its article, a date and author line, and a title heading", () => {
     for (const html of cards(first)) {
-      expect(count(html, /<a class="article-card__link"/g)).toBe(1);
+      expect(count(html, /<a class="linked-card__link"/g)).toBe(1);
       expect(html).toMatch(
-        /<h2 class="article-card__title">\s*<a class="article-card__link" href="\/blogs\/news\/[^"]+">/,
+        /<h2 class="article-card__title">\s*<a class="linked-card__link" href="\/blogs\/news\/[^"]+">/,
       );
       expect(html).toMatch(
         /class="article-card__meta">[\s\S]*?<time[^>]*datetime="[^"]+"[\s\S]*?by[\s\S]*?<\/p>/,

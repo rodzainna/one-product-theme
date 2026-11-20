@@ -50,14 +50,12 @@ describe("recommended products", () => {
   const cards = (section) =>
     [
       ...section.matchAll(
-        /<article class="product-card">([\s\S]*?)<\/article>/g,
+        /<article class="product-card linked-card">([\s\S]*?)<\/article>/g,
       ),
     ].map(([, body]) => body);
   const titles = (section) =>
     [
-      ...section.matchAll(
-        /class="product-card__link" href="([^"]+)">([^<]+)</g,
-      ),
+      ...section.matchAll(/class="linked-card__link" href="([^"]+)">([^<]+)</g),
     ].map(([, href, title]) => ({
       href: href.replaceAll("&amp;", "&"),
       title,

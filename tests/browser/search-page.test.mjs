@@ -11,10 +11,14 @@ const styles = (liquid) =>
     /{%-?\s*stylesheet\s*-?%}([\s\S]*?){%-?\s*endstylesheet\s*-?%}/,
   )?.[1] ?? "";
 
-const card = ({ title, excerpt, image }) => `<li><article class="result-card">
+const card = ({
+  title,
+  excerpt,
+  image,
+}) => `<li><article class="result-card linked-card">
   ${image ? '<div class="result-card__media"><div style="aspect-ratio: 1; background: #ccc"></div></div>' : ""}
   <div class="result-card__body"><span class="badge">Page</span>
-  <h2 class="result-card__title"><a class="result-card__link" href="#">${title}</a></h2>
+  <h2 class="result-card__title"><a class="linked-card__link" href="#">${title}</a></h2>
   <p class="result-card__excerpt">${excerpt}</p></div>
 </article></li>`;
 
@@ -71,7 +75,7 @@ describe("search page result cards", () => {
       const { left, top, height } = item.getBoundingClientRect();
       for (const y of [top + 8, top + height - 8]) {
         const hit = document.elementFromPoint(left + 8, y);
-        expect(hit.closest("a.result-card__link")).not.toBeNull();
+        expect(hit.closest("a.linked-card__link")).not.toBeNull();
       }
     }
   });

@@ -26,7 +26,8 @@ beforeAll(async () => {
   );
 });
 
-const cards = (html) => html.match(/<article class="product-card">/g) ?? [];
+const cards = (html) =>
+  html.match(/<article class="product-card linked-card">/g) ?? [];
 const pagination = (html) =>
   html.match(/<nav class="pagination"[\s\S]*?<\/nav>/)?.[0];
 
@@ -41,7 +42,7 @@ describe("collection page", () => {
   test("lists twelve products as cards, each with one link to its product", () => {
     expect(cards(first)).toHaveLength(12);
     const links = first.match(
-      /<a class="product-card__link" href="\/products\/[^"]+">/g,
+      /<a class="linked-card__link" href="\/products\/[^"]+">/g,
     );
     expect(links).toHaveLength(12);
   });
@@ -54,7 +55,7 @@ describe("collection page", () => {
   test("a product whose first media is a video shows the video's preview image", async () => {
     const html = await get("/collections/all?sort_by=title-descending");
     const card = html
-      .split('<article class="product-card">')
+      .split('<article class="product-card linked-card">')
       .find((part) => part.includes('href="/products/test-video-first"'));
     expect(card).toMatch(/<img[^>]*src="[^"]*preview_images\//);
   });
@@ -63,7 +64,7 @@ describe("collection page", () => {
     // Title order puts products with photos first, so the first four have images to check.
     const html = await get("/collections/all?sort_by=title-descending");
     const loading = html
-      .split('<article class="product-card">')
+      .split('<article class="product-card linked-card">')
       .slice(1)
       .map((card) => card.match(/<img[^>]*loading="(\w+)"/)?.[1]);
     const firstFour = loading.slice(0, 4).filter(Boolean);

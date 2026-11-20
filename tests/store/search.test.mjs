@@ -126,28 +126,34 @@ describe("type links", () => {
 describe("results", () => {
   test("mix product cards with page cards in one grid, twelve to a page", () => {
     expect(count(mixed, /<ul class="card-grid"/g)).toBe(1);
-    expect(count(mixed, /class="product-card"/g)).toBeGreaterThan(0);
-    expect(count(mixed, /class="result-card"/g)).toBeGreaterThan(0);
+    expect(count(mixed, /class="product-card linked-card"/g)).toBeGreaterThan(
+      0,
+    );
+    expect(count(mixed, /class="result-card linked-card"/g)).toBeGreaterThan(0);
     expect(
-      count(mixed, /class="product-card"/g) +
-        count(mixed, /class="result-card"/g),
+      count(mixed, /class="product-card linked-card"/g) +
+        count(mixed, /class="result-card linked-card"/g),
     ).toBe(12);
   });
 
   test("give every card one link, and a type label to pages", () => {
-    expect(count(pagesOnly, /class="result-card"/g)).toBeGreaterThan(0);
-    expect(count(pagesOnly, /class="result-card__link"/g)).toBe(
-      count(pagesOnly, /class="result-card"/g),
+    expect(
+      count(pagesOnly, /class="result-card linked-card"/g),
+    ).toBeGreaterThan(0);
+    expect(count(pagesOnly, /class="linked-card__link"/g)).toBe(
+      count(pagesOnly, /class="result-card linked-card"/g),
     );
     expect(count(pagesOnly, />Page<\/span>/g)).toBe(
-      count(pagesOnly, /class="result-card"/g),
+      count(pagesOnly, /class="result-card linked-card"/g),
     );
     expect(pagesOnly).toContain("Test page for the About template.");
   });
 
   test("show an article with its label and excerpt", async () => {
     const html = await get(url("q=test&type=article"));
-    expect(html).toMatch(/class="result-card"[\s\S]*>Article<\/span>/);
+    expect(html).toMatch(
+      /class="result-card linked-card"[\s\S]*>Article<\/span>/,
+    );
     expect(html).toContain("Test article for the search results.");
   });
 
@@ -170,9 +176,9 @@ describe("results", () => {
     expect(nav).toContain("page=2");
     expect(nav).toContain("q=test");
     expect(nav).toContain("type=article%2Cpage%2Cproduct");
-    expect(count(secondPage, /class="(product|result)-card"/g)).toBeGreaterThan(
-      0,
-    );
+    expect(
+      count(secondPage, /class="(product|result)-card linked-card"/g),
+    ).toBeGreaterThan(0);
   });
 });
 
