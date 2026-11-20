@@ -10,7 +10,7 @@ An industry-agnostic Shopify theme for stores that sell one product. Every headi
 
 ## Development
 
-Requires Node 22.22.2+ (or 24.15+, or 26+), [pnpm](https://pnpm.io/) 11+ and [Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli).
+Requires Node 22.22.2+ (or 24.15+, or 26+), [pnpm](https://pnpm.io/) 11+ (the project pins pnpm 12, and pnpm switches to it by itself) and [Shopify CLI](https://shopify.dev/docs/storefronts/themes/tools/cli).
 
 ```sh
 pnpm install
