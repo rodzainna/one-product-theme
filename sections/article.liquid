@@ -8,6 +8,8 @@
 
 {%- liquid
   assign date = article.published_at | time_tag: format: 'date'
+  # An _html key doesn't escape its values, so the author is escaped here.
+  assign author = article.author | escape
   assign back_label = 'blog.back_to' | t: blog: blog.title
 -%}
 
@@ -17,7 +19,7 @@
 
     <header class="article__header">
       <h1 class="article__title h2">{{ article.title | escape }}</h1>
-      <p class="article__meta">{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
+      <p class="article__meta">{{ 'blog.article_metadata_html' | t: date: date, author: author }}</p>
       {%- if article.tags.size > 0 -%}
         <ul class="article__tags" aria-label="{{ 'blog.tags' | t | escape }}">
           {%- for tag in article.tags -%}

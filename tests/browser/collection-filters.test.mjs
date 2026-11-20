@@ -139,6 +139,7 @@ describe("bar", () => {
   test("the Update button stays hidden until the sort is browsed with the keyboard", async () => {
     await page.viewport(1366, 800);
     render();
+    const submitted = watchSubmits();
     expect(shown(".collection-filters__update")).toBe(false);
     document
       .getElementById("CollectionSort")
@@ -149,6 +150,7 @@ describe("bar", () => {
     select.value = "price-ascending";
     select.dispatchEvent(new Event("change", { bubbles: true }));
     expect(shown(".collection-filters__update")).toBe(true);
+    expect(submitted).toEqual([]);
   });
 });
 

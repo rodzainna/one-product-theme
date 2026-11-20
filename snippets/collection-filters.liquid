@@ -152,78 +152,78 @@
 
   {%- if source.filters.size > 0 -%}
     {%- capture drawer_body -%}
-        {%- for filter in source.filters -%}
-          {%- liquid
-            assign group_id = filters_id | append: '-' | append: forloop.index
-          -%}
-          <fieldset class="collection-filters__group">
-            <legend class="collection-filters__legend">{{ filter.label | escape }}</legend>
-            {%- if filter.type == 'price_range' -%}
+      {%- for filter in source.filters -%}
+        {%- liquid
+          assign group_id = filters_id | append: '-' | append: forloop.index
+        -%}
+        <fieldset class="collection-filters__group">
+          <legend class="collection-filters__legend">{{ filter.label | escape }}</legend>
+          {%- if filter.type == 'price_range' -%}
+            {%- liquid
+              assign range_max = filter.range_max | divided_by: 100.0 | round: 2
+              assign from_id = group_id | append: '-from'
+              assign to_id = group_id | append: '-to'
+              assign from_label = 'collection.price_from' | t
+              assign to_label = 'collection.price_to' | t
+              assign price_attributes = 'min="0" step="any" inputmode="decimal"'
+            -%}
+            <div class="collection-filters__price">
+              {%- render 'input',
+                id: from_id,
+                label: from_label,
+                type: 'number',
+                name: filter.min_value.param_name,
+                value: price_min,
+                placeholder: '0',
+                size: 'sm',
+                attributes: price_attributes
+              -%}
+              {%- render 'input',
+                id: to_id,
+                label: to_label,
+                type: 'number',
+                name: filter.max_value.param_name,
+                value: price_max,
+                placeholder: range_max,
+                size: 'sm',
+                attributes: price_attributes
+              -%}
+            </div>
+          {%- else -%}
+            <ul class="collection-filters__list">
+              {%- for value in filter.values -%}
                 {%- liquid
-                  assign range_max = filter.range_max | divided_by: 100.0 | round: 2
-                  assign from_id = group_id | append: '-from'
-                  assign to_id = group_id | append: '-to'
-                  assign from_label = 'collection.price_from' | t
-                  assign to_label = 'collection.price_to' | t
-                  assign price_attributes = 'min="0" step="any" inputmode="decimal"'
+                  assign value_id = group_id | append: '-' | append: forloop.index
+                  assign value_label = value.label | append: ' (' | append: value.count | append: ')'
+                  assign value_disabled = false
+                  if value.count == 0 and value.active == false
+                    assign value_disabled = true
+                  endif
                 -%}
-                <div class="collection-filters__price">
-                  {%- render 'input',
-                    id: from_id,
-                    label: from_label,
-                    type: 'number',
-                    name: filter.min_value.param_name,
-                    value: price_min,
-                    placeholder: '0',
-                    size: 'sm',
-                    attributes: price_attributes
+                <li>
+                  {%- render 'checkbox',
+                    id: value_id,
+                    name: value.param_name,
+                    value: value.value,
+                    label: value_label,
+                    checked: value.active,
+                    disabled: value_disabled
                   -%}
-                  {%- render 'input',
-                    id: to_id,
-                    label: to_label,
-                    type: 'number',
-                    name: filter.max_value.param_name,
-                    value: price_max,
-                    placeholder: range_max,
-                    size: 'sm',
-                    attributes: price_attributes
-                  -%}
-                </div>
-            {%- else -%}
-                <ul class="collection-filters__list">
-                  {%- for value in filter.values -%}
-                    {%- liquid
-                      assign value_id = group_id | append: '-' | append: forloop.index
-                      assign value_label = value.label | append: ' (' | append: value.count | append: ')'
-                      assign value_disabled = false
-                      if value.count == 0 and value.active == false
-                        assign value_disabled = true
-                      endif
-                    -%}
-                    <li>
-                      {%- render 'checkbox',
-                        id: value_id,
-                        name: value.param_name,
-                        value: value.value,
-                        label: value_label,
-                        checked: value.active,
-                        disabled: value_disabled
-                      -%}
-                    </li>
-                  {%- endfor -%}
-                </ul>
-            {%- endif -%}
-          </fieldset>
-        {%- endfor -%}
-      {%- endcapture -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </fieldset>
+      {%- endfor -%}
+    {%- endcapture -%}
 
     {%- capture drawer_footer -%}
-        <div class="collection-filters__actions">
-          {%- assign apply_label = 'collection.apply' | t -%}
-          {%- render 'button', label: apply_label, type: 'submit' -%}
-          <a class="collection-filters__clear" href="{{ clear_url | escape }}">{{ 'collection.clear_all' | t }}</a>
-        </div>
-      {%- endcapture -%}
+      <div class="collection-filters__actions">
+        {%- assign apply_label = 'collection.apply' | t -%}
+        {%- render 'button', label: apply_label, type: 'submit' -%}
+        <a class="collection-filters__clear" href="{{ clear_url | escape }}">{{ 'collection.clear_all' | t }}</a>
+      </div>
+    {%- endcapture -%}
 
     {%- assign drawer_title = 'collection.filter_title' | t -%}
     {%- assign drawer_id = filters_id | append: 'Drawer' -%}

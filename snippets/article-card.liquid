@@ -14,6 +14,8 @@
 {%- liquid
   assign card_loading = loading | default: 'lazy'
   assign date = article.published_at | time_tag: format: 'date'
+  # An _html key doesn't escape its values, so the author is escaped here.
+  assign author = article.author | escape
   assign excerpt = article.excerpt_or_content | strip_html | newline_to_br | replace: '<br />', ' ' | truncatewords: 20
 -%}
 
@@ -24,7 +26,7 @@
     </div>
   {%- endif -%}
   <div class="article-card__body">
-    <p class="article-card__meta">{{ 'blog.article_metadata_html' | t: date: date, author: article.author }}</p>
+    <p class="article-card__meta">{{ 'blog.article_metadata_html' | t: date: date, author: author }}</p>
     <h2 class="article-card__title">
       <a class="article-card__link" href="{{ article.url }}">{{ article.title | escape }}</a>
     </h2>
