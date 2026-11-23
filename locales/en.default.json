@@ -135,6 +135,7 @@
     "expires_on_html": "Expires on {{ expires_on }}",
     "message_from_sender": "A message for you",
     "qr_code": "QR code for this gift card",
+    "title": "Gift card",
     "use_at_checkout": "Use this gift card at checkout"
   },
   "header": {

@@ -2,19 +2,120 @@
   display: grid;
   align-content: center;
   justify-items: center;
-  padding: var(--space-xl) var(--page-margin);
+  padding: var(--space-m) var(--page-margin);
+  background: color-mix(
+    in srgb,
+    var(--color-foreground) 6%,
+    var(--color-background)
+  );
   text-align: center;
 }
 
+/* A voucher in two parts. The notches at the tear line are cut out of both parts with a mask, so
+   the shadow follows the cut. */
 .gift-card__card {
   /* The logo max width slider stops at the QR box: 160px code plus 16px padding each side. */
   --qr-size: 160px;
   --qr-pad: 16px;
+  --notch: 14px;
+  --card-pad: clamp(1rem, 0.5rem + 2.5vw, 2rem);
   display: grid;
-  gap: var(--space-m);
-  justify-items: center;
+  grid-template-columns: minmax(0, 1fr);
   inline-size: 100%;
   max-inline-size: 28rem;
+  filter: drop-shadow(
+      0 1px 2px color-mix(in srgb, var(--color-foreground) 12%, transparent)
+    )
+    drop-shadow(
+      0 16px 24px color-mix(in srgb, var(--color-foreground) 10%, transparent)
+    );
+}
+
+.gift-card__top,
+.gift-card__bottom {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-s);
+  justify-items: center;
+  padding: var(--card-pad);
+  background: var(--color-background);
+}
+
+.gift-card__top {
+  border-block-start: var(--space-2xs) solid var(--color-accent);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  mask:
+    radial-gradient(
+      circle var(--notch) at 0 100%,
+      transparent calc(var(--notch) - 0.5px),
+      CanvasText var(--notch)
+    ),
+    radial-gradient(
+      circle var(--notch) at 100% 100%,
+      transparent calc(var(--notch) - 0.5px),
+      CanvasText var(--notch)
+    );
+  mask-composite: intersect;
+}
+
+.gift-card__bottom {
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  mask:
+    radial-gradient(
+      circle var(--notch) at 0 0,
+      transparent calc(var(--notch) - 0.5px),
+      CanvasText var(--notch)
+    ),
+    radial-gradient(
+      circle var(--notch) at 100% 0,
+      transparent calc(var(--notch) - 0.5px),
+      CanvasText var(--notch)
+    );
+  mask-composite: intersect;
+}
+
+.gift-card__bottom::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: var(--notch);
+  border-block-start: 2px dashed var(--color-border);
+}
+
+/* Without the shadow the card needs an outline, but not across the tear line. */
+@media (forced-colors: active) {
+  .gift-card__card {
+    filter: none;
+  }
+
+  .gift-card__top,
+  .gift-card__bottom {
+    border: 1px solid CanvasText;
+  }
+
+  .gift-card__top {
+    border-block-end: 0;
+  }
+
+  .gift-card__bottom {
+    border-block-start: 0;
+  }
+
+  .gift-card__bottom::before {
+    border-color: CanvasText;
+  }
+
+  .gift-card__qr {
+    border: 1px solid CanvasText;
+  }
+}
+
+.gift-card__eyebrow {
+  margin: 0;
+  color: var(--color-foreground-muted);
+  font-size: var(--text-small);
+  text-transform: uppercase;
 }
 
 .gift-card__logo {
@@ -88,10 +189,15 @@
   flex: none;
 }
 
+/* As tall as the gap above the QR code, so the text sits in the middle of it. */
 .gift-card__copy-status {
   position: absolute;
   inset-block-start: 100%;
   inset-inline: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: var(--space-s);
   color: var(--color-foreground-muted);
   font-size: var(--text-small);
   line-height: var(--leading-none);
@@ -107,9 +213,19 @@
   overflow-wrap: anywhere;
 }
 
+/* A little smaller and tighter on the narrowest phones so the code stays on one line. */
+@media (max-width: 24rem) {
+  .gift-card__code {
+    font-size: var(--text-body);
+    letter-spacing: 0.04em;
+  }
+}
+
 .gift-card__qr {
   padding: var(--qr-pad);
   background: var(--color-qr-background);
+  border-radius: var(--radius-input);
+  box-shadow: 0 0 0 1px var(--color-border);
 }
 
 .gift-card__qr :is(canvas, img) {

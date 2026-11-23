@@ -20,8 +20,9 @@ const logoMarkup = (width, height) => `<div class="gift-card__logo"
 
 const tokens = `:root { --space-2xs: 4px; --space-s: 12px; --space-m: 16px; --space-xl: 48px; --page-margin: 20px;
   --color-background: #fff; --color-foreground: #000; --color-foreground-muted: #666; --color-qr-background: #fff;
-  --text-small: 14px; --text-lg: 18px; --text-h1: 64px; --text-h4: 20px; --weight-ui: 500; --font-heading: "Times New Roman", "Liberation Serif", serif;
+  --text-small: 14px; --text-body: 1rem; --text-lg: 18px; --text-h1: 64px; --text-h4: 20px; --weight-ui: 500; --font-heading: "Times New Roman", "Liberation Serif", serif;
   --font-body: Arial, "Liberation Sans", sans-serif;
+  --color-accent: #b03a0a; --color-border: #ddd; --radius-card: 12px; --radius-input: 8px;
   --control-h: 44px; --control-h-sm: 36px; --radius-full: 999px; --duration: 0.2s; --ease: ease; --color-hover: #eee; }
   body { margin: 0; }`;
 const badge =
@@ -31,6 +32,11 @@ const decoded = () =>
   Promise.all([...document.images].map((image) => image.decode()));
 const box = (selector) =>
   document.querySelector(selector).getBoundingClientRect();
+// An empty QR box is hidden, so tests that measure it draw something in it first.
+const drawQr = () => {
+  document.querySelector(".gift-card__qr").innerHTML =
+    '<canvas width="160" height="160"></canvas>';
+};
 
 const RAW = "RRGB8H89RR8GHJX9";
 const render = ({
@@ -40,11 +46,13 @@ const render = ({
   code = "RRGB 8H89 RR8G HJX9",
 } = {}) => {
   document.body.innerHTML = `<style>${tokens} ${criticalCss} ${imageCss} ${iconCss} ${giftCardCss}</style>
-    <main class="gift-card section-full"><div class="gift-card__card">
+    <main class="gift-card section-full"><div class="gift-card__card"><div class="gift-card__top">
       ${logo || '<p class="gift-card__name">one-product-test</p>'}
+      <p class="gift-card__eyebrow">Gift card</p>
       <h1 class="gift-card__balance">$100.00</h1>
       <p class="gift-card__notice">Expires on 1 Jan 2030</p>
       ${message ? `<figure class="gift-card__message"><figcaption>A message for you</figcaption><blockquote>${message}</blockquote></figure>` : ""}
+      </div><div class="gift-card__bottom">
       <p class="gift-card__hint">Use this gift card at checkout</p>
       <div class="gift-card__code-row">
         <p class="gift-card__code" data-code>${code}</p>
@@ -56,7 +64,7 @@ const render = ({
       <div class="gift-card__qr" data-qr="shopify-giftcard-v1-ABC"></div>
       ${wallet ? `<a class="gift-card__wallet" href="#"><img src="${badge}" alt="Add to Apple Wallet" width="180" height="60"></a>` : ""}
       <a class="button" href="#">Visit the shop</a>
-    </div></main>`;
+    </div></div></main>`;
 };
 
 // A module only runs on its first import, so each load gets its own address.
@@ -78,6 +86,107 @@ describe("gift card page", () => {
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     expect(card.width).toBe(28 * rem);
     expect(Math.abs(card.left + card.width / 2 - 1366 / 2)).toBeLessThan(2);
+  });
+
+  test("pads the page above and below the card with the medium space token", async () => {
+    await page.viewport(1366, 768);
+    render();
+    const section = getComputedStyle(document.querySelector(".gift-card"));
+    expect(section.paddingTop).toBe("16px");
+    expect(section.paddingBottom).toBe("16px");
+  });
+
+  test("edges the top part with the accent colour and tints the page behind the card", async () => {
+    await page.viewport(1366, 800);
+    render();
+    const top = getComputedStyle(document.querySelector(".gift-card__top"));
+    expect(top.borderTopWidth).toBe("4px");
+    expect(top.borderTopColor).toBe("rgb(176, 58, 10)");
+    const behind = getComputedStyle(document.querySelector(".gift-card"));
+    expect(behind.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+    expect(behind.backgroundColor).not.toBe(top.backgroundColor);
+  });
+
+  test("frames the QR code with a rounded border", async () => {
+    await page.viewport(1366, 800);
+    render();
+    drawQr();
+    const qr = getComputedStyle(document.querySelector(".gift-card__qr"));
+    expect(qr.borderRadius).toBe("8px");
+    expect(qr.boxShadow).toContain("rgb(221, 221, 221)");
+    expect(qr.boxShadow).toContain("0px 0px 0px 1px");
+  });
+
+  test("is two parts, the amount above the code and the QR code, joined at a tear line", async () => {
+    await page.viewport(1366, 800);
+    render();
+    const top = box(".gift-card__top");
+    const bottom = box(".gift-card__bottom");
+    const card = box(".gift-card__card");
+    expect([top.width, bottom.width]).toEqual([card.width, card.width]);
+    expect(bottom.top).toBeCloseTo(top.bottom, 1);
+    expect(top.top).toBeLessThan(box(".gift-card__balance").top);
+    expect(top.bottom).toBeLessThan(box(".gift-card__code").top);
+    expect(box(".gift-card__code").bottom).toBeLessThan(bottom.bottom);
+    const line = getComputedStyle(
+      document.querySelector(".gift-card__bottom"),
+      "::before",
+    );
+    expect(line.borderTopStyle).toBe("dashed");
+    expect(line.borderTopWidth).toBe("2px");
+  });
+
+  test("cuts a notch at each end of the tear line and draws it 2px thick", async () => {
+    await page.viewport(600, 800);
+    render();
+    const card = document.querySelector(".gift-card__card");
+    const shot = await page.screenshot({ element: card, save: false });
+    const image = new Image();
+    image.src = `data:image/png;base64,${shot}`;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0);
+    const pixel = (x, y) => context.getImageData(x, y, 1, 1).data.join();
+    const tear = Math.round(
+      box(".gift-card__bottom").top - box(".gift-card__card").top,
+    );
+    const paper = pixel(6, tear - 40);
+    const right = image.width - 4;
+    // The notch is the page showing through; a little further up and down is still the card.
+    expect(pixel(3, tear)).not.toBe(paper);
+    expect(pixel(right, tear)).not.toBe(paper);
+    expect(pixel(3, tear - 24)).toBe(paper);
+    expect(pixel(3, tear + 24)).toBe(paper);
+    // The line is 2px of dashes. A mask that clipped its upper row would leave one.
+    const dashed = [];
+    for (let y = tear - 3; y <= tear + 5; y++) {
+      const row = Array.from({ length: image.width - 60 }, (_, x) =>
+        pixel(x + 30, y),
+      );
+      if (new Set(row).size > 1) dashed.push(y);
+    }
+    expect(dashed).toHaveLength(2);
+  });
+
+  test("lifts the card off a page that is tinted differently", async () => {
+    render();
+    // color-mix() and rgb() serialise differently, so compare the painted pixel.
+    const pixel = (selector) => {
+      const context = document.createElement("canvas").getContext("2d");
+      context.fillStyle = getComputedStyle(
+        document.querySelector(selector),
+      ).backgroundColor;
+      context.fillRect(0, 0, 1, 1);
+      return context.getImageData(0, 0, 1, 1).data.join();
+    };
+    expect(pixel(".gift-card")).not.toBe(pixel(".gift-card__top"));
+    expect(pixel(".gift-card__top")).toBe(pixel(".gift-card__bottom"));
+    expect(
+      getComputedStyle(document.querySelector(".gift-card__card")).filter,
+    ).toContain("drop-shadow");
   });
 
   test("fills the screen and centres the card up and down", async () => {
@@ -189,20 +298,33 @@ describe("gift card copy button", () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(width);
   });
 
-  test("keeps the real code on one line at 320px by shrinking the spacer first", async () => {
+  test.each([320, 360, 375, 390])(
+    "keeps the real code on one line at %ipx by shrinking the spacer first",
+    async (width) => {
+      await page.viewport(width, 700);
+      render();
+      const code = box(".gift-card__code");
+      const size = parseFloat(
+        getComputedStyle(document.querySelector(".gift-card__code")).fontSize,
+      );
+      expect(code.height).toBeLessThan(size * 2);
+      expect(box("[data-copy]").right).toBeLessThanOrEqual(width);
+    },
+  );
+
+  test("wraps the code at its space rather than overflowing at 320px", async () => {
     await page.viewport(320, 700);
     render();
-    const code = box(".gift-card__code");
-    const size = parseFloat(
-      getComputedStyle(document.querySelector(".gift-card__code")).fontSize,
+    expect(box(".gift-card__code").right).toBeLessThanOrEqual(
+      box("[data-copy]").left,
     );
-    expect(code.height).toBeLessThan(size * 2);
-    expect(box("[data-copy]").right).toBeLessThanOrEqual(320);
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(320);
   });
 
   test("puts the Copied message under the code without moving the layout", async () => {
     await page.viewport(1366, 800);
     render();
+    drawQr();
     const before = box(".gift-card__qr").top;
     const status = document.querySelector("[data-copy-status]");
     status.textContent = "Copied";
@@ -210,6 +332,22 @@ describe("gift card copy button", () => {
     expect(box("[data-copy-status]").top).toBeGreaterThanOrEqual(
       box(".gift-card__code-row").bottom - 1,
     );
+  });
+
+  test("centres the Copied message between the code and the QR code", async () => {
+    await page.viewport(1366, 800);
+    render();
+    drawQr();
+    const status = document.querySelector("[data-copy-status]");
+    status.textContent = "Copied";
+    const range = document.createRange();
+    range.selectNodeContents(status);
+    const text = range.getBoundingClientRect();
+    const above = box(".gift-card__code-row").bottom;
+    const below = box(".gift-card__qr").top;
+    expect(
+      Math.abs(text.top + text.height / 2 - (above + below) / 2),
+    ).toBeLessThan(1);
   });
 });
 

@@ -36,6 +36,35 @@ describe("gift card template", () => {
     expect(body).toContain("add-to-apple-wallet.svg");
   });
 
+  test("puts the amount in the top part and the code, QR code and way back in the bottom part", () => {
+    const top = body.indexOf('class="gift-card__top"');
+    const bottom = body.indexOf('class="gift-card__bottom"');
+    const at = (text) => body.indexOf(text);
+    expect(top).toBeGreaterThan(-1);
+    expect(bottom).toBeGreaterThan(top);
+    for (const text of [
+      "gift_card.balance | money",
+      "gift_card.expires_on_html",
+    ]) {
+      expect(at(text), text).toBeGreaterThan(top);
+      expect(at(text), text).toBeLessThan(bottom);
+    }
+    for (const text of [
+      "gift_card.code | format_code",
+      "data-qr=",
+      "routes.root_url",
+    ]) {
+      expect(at(text), text).toBeGreaterThan(bottom);
+    }
+  });
+
+  test("labels the page as a gift card above the amount", () => {
+    expect(body).toContain("'gift_card.title' | t");
+    expect(body.indexOf("gift_card.title")).toBeLessThan(
+      body.indexOf("gift-card__balance"),
+    );
+  });
+
   test("keeps the QR code, the wallet link and the scripts for an unusable card", () => {
     expect(body).not.toMatch(/is_usable -%}\s*<div\s+class="gift-card__qr"/);
     expect(body).not.toMatch(/is_usable -%}\s*{%- if gift_card.pass_url/);
