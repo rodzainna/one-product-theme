@@ -1,1 +1,6 @@
-pnpm check && pnpm test && pnpm format:check
+if [ "$(node scripts/docs-only.mjs --pre-push)" = "true" ]; then
+  echo "Only Markdown changed: running the format check alone."
+  pnpm format:check
+else
+  pnpm check && pnpm test && pnpm format:check
+fi
