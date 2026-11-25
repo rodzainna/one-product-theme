@@ -23,9 +23,36 @@ env:
   SHOPIFY_CLI_NO_ANALYTICS: "1"
 
 jobs:
+  # A Markdown-only pull request into main skips everything but Prettier and the PR title;
+  # pushes always run in full. paths-ignore would leave the required "CI passed" check pending.
+  changes:
+    name: Changes
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    outputs:
+      docs_only: ${{ steps.diff.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - id: diff
+        env:
+          # Empty, so everything runs, unless this is a pull request into main.
+          BASE: ${{ github.base_ref == 'main' && github.event.pull_request.base.sha || '' }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        # main's copy of the script decides, so a pull request can't change the rule that judges it.
+        run: |
+          docs_only=false
+          if [ -n "$BASE" ] && git show "$BASE:scripts/docs-only.mjs" > "$RUNNER_TEMP/docs-only.mjs"; then
+            docs_only=$(node "$RUNNER_TEMP/docs-only.mjs" "$BASE" "$HEAD")
+          fi
+          echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
+
   # Stage 1: cheap checks, in parallel.
   lint:
     name: Lint
+    needs: [changes]
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
@@ -34,14 +61,18 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup
       - name: Install Shopify CLI
+        if: needs.changes.outputs.docs_only != 'true'
         run: npm install --global "@shopify/cli@${SHOPIFY_CLI_VERSION}"
       - name: Prettier
         run: pnpm format:check
       - name: Theme Check and the CSS guard
+        if: needs.changes.outputs.docs_only != 'true'
         run: pnpm check
 
   unit:
     name: Node tests
+    needs: [changes]
+    if: needs.changes.outputs.docs_only != 'true'
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
@@ -70,9 +101,9 @@ jobs:
   # Stage 2: the three browsers, only when stage 1 passed. One failing engine doesn't stop the others.
   browsers:
     name: ${{ matrix.browser }}
-    needs: [lint, unit, pr-title]
+    needs: [changes, lint, unit, pr-title]
     # pr-title is skipped on pushes, so only a failure there stops the browsers.
-    if: ${{ !cancelled() && needs.lint.result == 'success' && needs.unit.result == 'success' && needs.pr-title.result != 'failure' }}
+    if: ${{ !cancelled() && needs.changes.outputs.docs_only != 'true' && needs.lint.result == 'success' && needs.unit.result == 'success' && needs.pr-title.result != 'failure' }}
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     strategy:
@@ -104,19 +135,30 @@ jobs:
   # breaks the branch rule.
   ci-pass:
     name: CI passed
-    needs: [lint, unit, pr-title, browsers]
-    if: ${{ !cancelled() }}
+    needs: [changes, lint, unit, pr-title, browsers]
+    # Runs even when cancelled: a skipped required check counts as passed.
+    if: ${{ always() }}
     runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
       - name: Fail unless every job passed
         env:
           RESULTS: ${{ join(needs.*.result, ' ') }}
+          DOCS_ONLY: ${{ needs.changes.outputs.docs_only }}
+          CHANGES: ${{ needs.changes.result }}
+          LINT: ${{ needs.lint.result }}
+          UNIT: ${{ needs.unit.result }}
           BROWSERS: ${{ needs.browsers.result }}
         run: |
           echo "Results: $RESULTS"
           case " $RESULTS " in
             *" failure "* | *" cancelled "*) exit 1 ;;
           esac
-          # A skipped pr-title job (a push to main) is fine; skipped browsers means stage 1 failed.
-          [ "$BROWSERS" = "success" ]
+          # A skipped pr-title job (a push to main) is fine. Node tests and browsers may be
+          # skipped only for a Markdown-only change.
+          [ "$CHANGES" = "success" ]
+          [ "$LINT" = "success" ]
+          if [ "$DOCS_ONLY" != "true" ]; then
+            [ "$UNIT" = "success" ]
+            [ "$BROWSERS" = "success" ]
+          fi

@@ -61,7 +61,7 @@ The tests that need a Shopify store are covered under [Testing](#testing).
 | `config/`    | Theme settings and their saved values                                                              |
 | `locales/`   | Translation strings (English)                                                                      |
 | `tests/`     | `tests/*.test.mjs` run in Node, `tests/browser/` in three browsers, `tests/store/` against a store |
-| `scripts/`   | The CSS guard and the test store setup                                                             |
+| `scripts/`   | The CSS guard, the test store setup and the Markdown-only check                                    |
 | `.github/`   | CI workflow and Dependabot config                                                                  |
 
 ## Testing
@@ -74,7 +74,7 @@ pnpm format:check # Prettier
 
 The browser tests include WebKit, which drops mouse clicks while the Mac's screen is locked or asleep. If `pnpm test` fails in WebKit only, wake the screen and run it again.
 
-Git hooks: commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (commitlint), staged files are formatted on commit, and `pnpm check`, `pnpm test` and a format check run before each push. The CSS guard (Stylelint, `stylelint.config.mjs`) checks `assets/*.css` and every `{% stylesheet %}` block, and fails on colours, font sizes, weights, radii, z-index, padding or timings that bypass the design tokens.
+Git hooks: commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (commitlint), staged files are formatted on commit, and `pnpm check`, `pnpm test` and a format check run before each push. When a branch differs from `origin/main` only in Markdown files, a push runs the format check alone. The CSS guard (Stylelint, `stylelint.config.mjs`) checks `assets/*.css` and every `{% stylesheet %}` block, and fails on colours, font sizes, weights, radii, z-index, padding or timings that bypass the design tokens.
 
 JSON templates, section groups and `config/settings_data.json` are left unformatted because the theme editor rewrites them.
 
@@ -109,7 +109,7 @@ pnpm dev --store <test-store> --port 9293
 
 ## Continuous integration
 
-GitHub Actions runs the same checks as the pre-push hook on every pull request and on pushes to `main`. It only checks: nothing is deployed.
+GitHub Actions runs the same checks as the pre-push hook on every pull request and on pushes to `main`. It only checks: nothing is deployed. A pull request into `main` that changes only Markdown skips the heavy jobs and checks just Prettier and the title; pushes to `main` always run in full.
 
 1. **Lint, Node tests and the PR title** run side by side: Prettier, Theme Check and the CSS guard; the Node tests; and a Conventional Commits check of the title (pull requests only), because the squash merge puts it on `main`.
 2. **Chromium, Firefox and WebKit** run side by side, but only when step 1 passed.
